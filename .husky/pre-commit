@@ -1,0 +1,12 @@
+# husky v9+ pre-commit hook
+echo "🧹 Running pre-commit checks..."
+npx lint-staged
+RESULT=$?
+
+if [ $RESULT -ne 0 ]; then
+  echo "❌ Lint-staged failed. Commit aborted."
+  exit 1
+fi
+
+echo "✅ All checks passed. Proceeding with commit."
+exit 0
