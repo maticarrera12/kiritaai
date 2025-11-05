@@ -1,0 +1,12 @@
+node_modules
+.next
+build
+out
+dist
+.cursor
+.react-email
+.next
+.husky
+.env
+.env.production.local
+.env.example
