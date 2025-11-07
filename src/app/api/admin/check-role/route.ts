@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { auth, prisma } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
@@ -15,8 +16,7 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ isAdmin: user?.role === "ADMIN" });
-  } catch (error) {
-    console.error("Error checking admin role:", error);
+  } catch {
     return NextResponse.json({ isAdmin: false }, { status: 200 });
   }
 }

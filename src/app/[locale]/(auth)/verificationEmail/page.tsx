@@ -1,9 +1,10 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import BetterAuthActionButton from "@/app/[locale]/(auth)/_components/better-auth-action-button";
-import { authClient } from "@/lib/auth-client";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import React, { useEffect, useRef, useState } from "react";
+
+import BetterAuthActionButton from "@/app/[locale]/(auth)/_components/better-auth-action-button";
+import { authClient } from "@/lib/auth-client";
 
 function EmailVerification({ email }: { email: string }) {
   const [timeToNextResend, setTimeToNextResend] = useState(5);

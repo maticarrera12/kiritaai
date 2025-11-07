@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Copy, Check, Share2, Users, Sparkles, RefreshCw } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useLocale } from "next-intl";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
-import { waitlistSchema } from "@/lib/schemas/waitlist.schema";
+
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -15,16 +19,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { LoadingSwap } from "@/components/ui/loading-swap";
-import { toast } from "sonner";
-import { Copy, Check, Share2, Users, Sparkles, RefreshCw } from "lucide-react";
+import { waitlistSchema } from "@/lib/schemas/waitlist.schema";
 
 type WaitlistForm = z.infer<typeof waitlistSchema>;
 
 export default function WaitlistPage() {
   const searchParams = useSearchParams();
   const referralParam = searchParams.get("ref");
+  const locale = useLocale();
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [referralCode, setReferralCode] = useState("");
@@ -67,18 +70,19 @@ export default function WaitlistPage() {
       setIsSubmitted(true);
 
       // Guardar en localStorage para recuperación futura
-      localStorage.setItem("waitlist_referral_code", result.referralCode);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("waitlist_referral_code", result.referralCode);
+      }
 
       toast.success(result.message || "Successfully joined!");
     } catch (error) {
-      console.error(error);
       toast.error(error instanceof Error ? error.message : "Failed to join waitlist");
     }
   }
 
   const handleCopyReferralLink = () => {
     const baseURL = window.location.origin;
-    const referralUrl = `${baseURL}/waitlist?ref=${referralCode}`;
+    const referralUrl = `${baseURL}/${locale}/waitlist?ref=${referralCode}`;
     navigator.clipboard.writeText(referralUrl);
     setCopied(true);
     toast.success("Referral link copied!");
@@ -87,7 +91,7 @@ export default function WaitlistPage() {
 
   const handleShare = async () => {
     const baseURL = window.location.origin;
-    const referralUrl = `${baseURL}/waitlist?ref=${referralCode}`;
+    const referralUrl = `${baseURL}/${locale}/waitlist?ref=${referralCode}`;
 
     if (navigator.share) {
       try {
@@ -96,8 +100,12 @@ export default function WaitlistPage() {
           text: "Join me on the waitlist for this amazing app!",
           url: referralUrl,
         });
-      } catch (err) {
-        console.error("Share failed:", err);
+      } catch (error) {
+        const message =
+          error instanceof Error && error.message
+            ? error.message
+            : "Share failed. Please try copying the link instead.";
+        toast.error(message);
       }
     } else {
       handleCopyReferralLink();
@@ -115,7 +123,9 @@ export default function WaitlistPage() {
         setReferralCount(data.referralCount);
       }
     } catch (error) {
-      console.error("Failed to refresh stats:", error);
+      const message =
+        error instanceof Error && error.message ? error.message : "Failed to refresh stats.";
+      toast.error(message);
     }
   };
 
@@ -149,12 +159,13 @@ export default function WaitlistPage() {
       setIsSubmitted(true);
 
       // Guardar en localStorage
-      localStorage.setItem("waitlist_referral_code", data.referralCode || lookupValue);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("waitlist_referral_code", data.referralCode || lookupValue);
+      }
 
       setShowLookup(false);
       toast.success("Welcome back!");
     } catch (error) {
-      console.error(error);
       toast.error(error instanceof Error ? error.message : "Failed to find your waitlist entry");
     } finally {
       setIsLookingUp(false);
@@ -163,7 +174,11 @@ export default function WaitlistPage() {
 
   // Cargar desde localStorage al montar
   useEffect(() => {
-    const savedCode = localStorage.getItem("waitlist_referral_code");
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const savedCode = window.localStorage.getItem("waitlist_referral_code");
     // Solo cargar si NO hay un referralParam nuevo (para permitir usar otro link)
     if (savedCode && !referralParam) {
       setReferralCode(savedCode);

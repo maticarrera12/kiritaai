@@ -1,11 +1,13 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
 import { ArrowRightIcon } from "lucide-react";
-import AnimatedButton from "@/components/AnimatedButton/AnimatedButton";
-// import Image from "next/image";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
+import React from "react";
+
+import AnimatedButton from "@/components/AnimatedButton/AnimatedButton";
+
+// import Image from "next/image";
 
 const Hero = () => {
   const t = useTranslations("hero");

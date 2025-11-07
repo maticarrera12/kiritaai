@@ -1,10 +1,11 @@
 "use client";
 
-import { PLANS, CREDIT_PACKS } from "@/lib/credits/constants";
-import { useState, useEffect } from "react";
+import { Check } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { Modal } from "@/components/ui/modal";
+import { useState, useEffect } from "react";
+
 import { PaymentMethodSelector } from "./payment-method-selector";
+import { PricingSkeleton } from "./pricing-skeleton";
 import {
   Card,
   CardContent,
@@ -13,9 +14,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check } from "lucide-react";
+import { Modal } from "@/components/ui/modal";
 import { authClient } from "@/lib/auth-client";
-import { PricingSkeleton } from "./pricing-skeleton";
+import { PLANS, CREDIT_PACKS } from "@/lib/credits/constants";
 
 interface PlanCardProps {
   plan: (typeof PLANS)[keyof typeof PLANS];
@@ -120,7 +121,6 @@ export function PricingCards() {
         throw new Error("No checkout URL returned");
       }
     } catch (error) {
-      console.error("Checkout error:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Failed to create checkout session";
 

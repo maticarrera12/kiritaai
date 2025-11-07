@@ -1,10 +1,11 @@
 import { CheckCircle2 } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
 import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import type { PaymentMetadata } from "@/types/payment";
 
 function formatCurrency(amount: number, currency = "USD") {
@@ -152,7 +153,7 @@ const page = async ({
 
         <div className="flex justify-center pt-4">
           <Button asChild>
-            <Link href="/app/settings/billing">Go to Billing</Link>
+            <Link href="/settings/billing">Go to Billing</Link>
           </Button>
         </div>
       </div>

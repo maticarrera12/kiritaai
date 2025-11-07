@@ -1,5 +1,6 @@
-import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
   try {
@@ -51,7 +52,8 @@ export async function GET(req: Request) {
       createdAt: user.createdAt,
     });
   } catch (error) {
-    console.error("Error fetching waitlist stats:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    const message =
+      error instanceof Error && error.message ? error.message : "Something went wrong";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

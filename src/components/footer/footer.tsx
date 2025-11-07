@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import Logo from "@/components/navbar/logo";
 import { useTranslations } from "next-intl";
+
+import Logo from "@/components/navbar/logo";
 
 export default function Footer() {
   const t = useTranslations("footer");

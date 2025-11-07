@@ -1,6 +1,7 @@
-import Navbar from "@/components/navbar/comp-582";
-import Footer from "@/components/footer/footer";
 import React from "react";
+
+import Footer from "@/components/footer/footer";
+import Navbar from "@/components/navbar/comp-582";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   return (

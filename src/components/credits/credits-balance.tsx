@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+import { useSession } from "@/lib/auth-client";
 
 interface CreditInfo {
   balance: number;
@@ -16,6 +17,7 @@ export function CreditBalance() {
   const { data: session } = useSession();
   const [credits, setCredits] = useState<CreditInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (session?.user) {
@@ -25,21 +27,43 @@ export function CreditBalance() {
 
   async function fetchCredits() {
     try {
+      setError(null);
       const res = await fetch("/api/credits/balance");
+      if (!res.ok) {
+        const message =
+          res.status === 404
+            ? "Credits information not found."
+            : "Unable to fetch credits at this time.";
+        throw new Error(message);
+      }
       const data = await res.json();
       setCredits(data);
     } catch (error) {
-      console.error("Failed to fetch credits:", error);
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "Unexpected error while fetching credits.";
+      setCredits(null);
+      setError(message);
     } finally {
       setLoading(false);
     }
   }
 
-  if (loading || !credits) {
+  if (loading) {
     return <div className="h-24 rounded-md bg-muted animate-pulse" />;
   }
 
-  const percentage = (credits.balance / credits.monthlyAllocation) * 100;
+  if (!credits || error) {
+    return (
+      <div className="rounded-md border border-border bg-card p-3">
+        <p className="text-sm text-destructive">{error ?? "Unable to load credit information."}</p>
+      </div>
+    );
+  }
+
+  const monthlyAllocation = credits.monthlyAllocation || 1;
+  const percentage = (credits.balance / monthlyAllocation) * 100;
   const isLow = percentage < 20;
 
   return (

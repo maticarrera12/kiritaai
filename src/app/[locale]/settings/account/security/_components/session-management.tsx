@@ -1,13 +1,14 @@
 "use client";
+import { Session } from "better-auth";
+import { Monitor, Smartphone, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { UAParser } from "ua-parser-js";
+
 import BetterAuthActionButton from "@/app/[locale]/(auth)/_components/better-auth-action-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
-import { Session } from "better-auth";
-import { Monitor, Smartphone, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { UAParser } from "ua-parser-js";
-import { useTranslations } from "next-intl";
 
 export function SessionManagement({
   sessions,

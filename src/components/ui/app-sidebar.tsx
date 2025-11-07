@@ -1,13 +1,14 @@
 "use client";
-import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { LogOutIcon, ArrowLeftIcon, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { authClient } from "@/lib/auth-client";
-import { LogOutIcon, ArrowLeftIcon, type LucideIcon } from "lucide-react";
-import ThemeToggle from "@/components/navbar/theme-toggle";
+import React, { useState } from "react";
+
 import { LanguageSwitcher } from "@/components/navbar/languaje-switcher";
+import ThemeToggle from "@/components/navbar/theme-toggle";
+import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 
 export interface SidebarItem {
   name: string;

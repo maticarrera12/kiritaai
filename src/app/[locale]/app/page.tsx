@@ -1,4 +1,3 @@
-import { CreditBalance } from "@/components/credits/credits-balance";
 import React from "react";
 
 const page = () => {

@@ -1,12 +1,13 @@
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { ProfileHeader } from "./_components/profile-header";
-import { ProfilePictureSection } from "./_components/profile-picture-section";
+
+import { AccountLinking } from "./_components/account-linking";
+import { DangerZone } from "./_components/danger-zone";
 import { PersonalInfoForm } from "./_components/personal-info-form";
 import { PlanSection } from "./_components/plan-section";
-import { DangerZone } from "./_components/danger-zone";
-import { AccountLinking } from "./_components/account-linking";
+import { ProfileHeader } from "./_components/profile-header";
+import { ProfilePictureSection } from "./_components/profile-picture-section";
 import { Card, CardContent } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
 
 const page = async () => {
   const session = await auth.api.getSession({ headers: await headers() });

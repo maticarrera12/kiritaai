@@ -1,8 +1,15 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -11,17 +18,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ProfileUpdatePasswordInput, profileUpdatePasswordSchema } from "@/lib/schemas";
-import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { PasswordStrength } from "@/components/ui/password-strength";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { LoadingSwap } from "@/components/ui/loading-swap";
+import { PasswordStrength } from "@/components/ui/password-strength";
 import { authClient } from "@/lib/auth-client";
-import { toast } from "sonner";
-import { useTranslations } from "next-intl";
+import { ProfileUpdatePasswordInput, profileUpdatePasswordSchema } from "@/lib/schemas";
 
 export function PasswordForm() {
   const t = useTranslations("settings.security.password");

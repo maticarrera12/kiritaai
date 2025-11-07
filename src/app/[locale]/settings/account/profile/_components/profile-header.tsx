@@ -1,7 +1,8 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
 import { useTranslations } from "next-intl";
+
+import { Separator } from "@/components/ui/separator";
 
 export function ProfileHeader() {
   const t = useTranslations("settings.profile");

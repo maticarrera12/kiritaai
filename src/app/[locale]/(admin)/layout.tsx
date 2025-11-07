@@ -1,9 +1,10 @@
-import React from "react";
-import Link from "next/link";
 import { headers } from "next/headers";
-import { auth, prisma } from "@/lib/auth";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import React from "react";
+
 import AdminSidebar from "./_components/admin-dashboard";
+import { auth, prisma } from "@/lib/auth";
 
 const layout = async ({ children }: { children: React.ReactNode }) => {
   const session = await auth.api.getSession({ headers: await headers() });

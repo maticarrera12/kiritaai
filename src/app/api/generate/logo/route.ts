@@ -1,12 +1,13 @@
 // app/api/generate/logo/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
+
 import { auth } from "@/lib/auth";
 import { CreditService } from "@/lib/credits";
 import { CREDIT_COSTS, PLAN_FEATURES } from "@/lib/credits/constants";
+import { openai } from "@/lib/openai";
 import { prisma } from "@/lib/prisma";
 import { uploadImage } from "@/lib/storage";
-import { openai } from "@/lib/openai";
 
 export async function POST(req: NextRequest) {
   try {
@@ -130,8 +131,6 @@ export async function POST(req: NextRequest) {
         remainingCredits: deductResult.newBalance,
       });
     } catch (error) {
-      console.error("Logo generation failed:", error);
-
       // Refund credits on failure
       await CreditService.refund({
         userId,
@@ -159,8 +158,9 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error) {
-    console.error("Request error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    const message =
+      error instanceof Error && error.message ? error.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

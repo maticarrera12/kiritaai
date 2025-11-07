@@ -1,9 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import BetterAuthActionButton from "@/app/[locale]/(auth)/_components/better-auth-action-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
-import { useTranslations } from "next-intl";
 
 export function DangerZone() {
   const t = useTranslations("settings.profile.dangerZone");

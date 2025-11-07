@@ -1,4 +1,8 @@
 "use client";
+import { Plus, Shield, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+
 import BetterAuthActionButton from "@/app/[locale]/(auth)/_components/better-auth-action-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
@@ -8,9 +12,6 @@ import {
   SUPPORTED_OAUTH_PROVIDERS_DETAILS,
   type SupportedOAuthProviders,
 } from "@/lib/o-auth-providers";
-import { Plus, Shield, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
 
 type Account = Awaited<ReturnType<typeof auth.api.listUserAccounts>>[number];
 

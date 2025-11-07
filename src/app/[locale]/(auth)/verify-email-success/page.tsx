@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { authClient } from "@/lib/auth-client";
 
 export default function VerifyEmailSuccessPage() {
@@ -40,8 +41,7 @@ export default function VerifyEmailSuccessPage() {
         } else {
           setStatus("error");
         }
-      } catch (error) {
-        console.error("Error updating email verification:", error);
+      } catch {
         setStatus("error");
       }
     };

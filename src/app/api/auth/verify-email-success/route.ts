@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { prisma } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
@@ -16,8 +17,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error updating emailVerified:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to update email verification status" },
       { status: 500 }

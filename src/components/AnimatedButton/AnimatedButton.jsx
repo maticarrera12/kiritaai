@@ -1,13 +1,12 @@
 "use client";
 import "./AnimatedButton.css";
-import React, { useRef } from "react";
-
+import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { useViewTransition } from "../../hooks/useViewTransition";
-
+import React, { useRef } from "react";
 import { IoMdArrowForward } from "react-icons/io";
+
+import { useViewTransition } from "../../hooks/useViewTransition";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -28,7 +27,7 @@ const AnimatedButton = ({ label, route, animate = true, animateOnScroll = true, 
       await Promise.all(fontCheckPromises);
       await new Promise((resolve) => setTimeout(resolve, 100));
       return true;
-    } catch (error) {
+    } catch {
       await new Promise((resolve) => setTimeout(resolve, 200));
       return true;
     }

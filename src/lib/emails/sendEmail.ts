@@ -1,6 +1,6 @@
-import { Resend } from "resend";
 import { render } from "@react-email/render";
 import { ReactElement } from "react";
+import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 

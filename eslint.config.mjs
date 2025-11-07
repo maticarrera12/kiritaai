@@ -5,6 +5,7 @@ import next from "@next/eslint-plugin-next";
 import prettier from "eslint-plugin-prettier";
 import importPlugin from "eslint-plugin-import";
 import unusedImports from "eslint-plugin-unused-imports";
+import reactHooks from "eslint-plugin-react-hooks";
 
 export default [
   js.configs.recommended,
@@ -48,6 +49,7 @@ export default [
       prettier,
       import: importPlugin,
       "unused-imports": unusedImports,
+      "react-hooks": reactHooks,
       next,
     },
     rules: {
@@ -69,6 +71,8 @@ export default [
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
       "react/no-unescaped-entities": "off",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
       "no-console": "warn",
     },
   },

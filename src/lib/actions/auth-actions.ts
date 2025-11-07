@@ -1,6 +1,7 @@
 "use server";
-import { auth, prisma, assignAdminRole } from "../auth";
 import { headers } from "next/headers";
+
+import { auth, assignAdminRole } from "../auth";
 import { signInSchema, signUpSchema } from "../schemas";
 
 export const signUp = async (email: string, password: string, name: string) => {
@@ -28,7 +29,17 @@ export const signUp = async (email: string, password: string, name: string) => {
     };
   }
   // Asignar rol ADMIN si el email está en ADMIN_EMAILS
-  await assignAdminRole(result.user.id, result.user.email);
+  try {
+    await assignAdminRole(result.user.id, result.user.email);
+  } catch (error) {
+    const message =
+      error instanceof Error && error.message ? error.message : "Failed to assign admin role.";
+
+    return {
+      error: { message },
+      user: result.user,
+    };
+  }
 
   return { error: null, user: result.user };
 };
@@ -55,7 +66,17 @@ export const signIn = async (email: string, password: string) => {
 
   // Asignar rol ADMIN si el email está en ADMIN_EMAILS (útil si se agrega después)
   if (result.user) {
-    await assignAdminRole(result.user.id, result.user.email);
+    try {
+      await assignAdminRole(result.user.id, result.user.email);
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message ? error.message : "Failed to assign admin role.";
+
+      return {
+        ...result,
+        error: { message },
+      };
+    }
   }
 
   return result;

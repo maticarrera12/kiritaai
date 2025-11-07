@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+
 import { prisma } from "@/lib/prisma";
 
 /**
  * Test endpoint to verify cron setup
  * Only works in development mode
  */
-export async function GET(req: NextRequest) {
+export async function GET() {
   // Only allow in development
   if (process.env.NODE_ENV === "production") {
     return NextResponse.json({ error: "Not available in production" }, { status: 403 });
@@ -43,7 +44,7 @@ export async function GET(req: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error("Cron test failed:", error);
-    return NextResponse.json({ error: "Test failed" }, { status: 500 });
+    const message = error instanceof Error && error.message ? error.message : "Test failed";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

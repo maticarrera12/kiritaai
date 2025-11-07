@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
-import { Toaster } from "sonner";
-import { headers } from "next/headers";
-import { ThemeProvider } from "@/components/navbar/theme-provider";
-import { NextIntlClientProvider } from "next-intl";
-import { auth } from "@/lib/auth";
+
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import type { Metadata } from "next";
 import dynamic from "next/dynamic";
+import { Geist, Geist_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { Toaster } from "sonner";
+
+import { ThemeProvider } from "@/components/navbar/theme-provider";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -33,10 +33,6 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
   const messages = (await import(`@/messages/${locale}.json`)).default;
-
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
 
   const CrispWithNoSSR = dynamic(() => import("../../components/crisp"));
 

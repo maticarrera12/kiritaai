@@ -1,6 +1,9 @@
-# husky v9+ pre-commit hook
+#!/usr/bin/env bash
+
 echo "🧹 Running pre-commit checks..."
-npx lint-staged
+
+# Ejecutar lint-staged con el entorno correcto
+npx --no-install lint-staged
 RESULT=$?
 
 if [ $RESULT -ne 0 ]; then

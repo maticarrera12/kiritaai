@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+
 import { CreditService } from "@/lib/credits";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   // Verify cron secret (Vercel Cron or similar)
@@ -22,8 +23,6 @@ export async function GET(req: NextRequest) {
       select: { id: true, email: true, plan: true },
     });
 
-    console.log(`Found ${usersToReset.length} users to reset`);
-
     for (const user of usersToReset) {
       try {
         await CreditService.monthlyReset(user.id);
@@ -36,10 +35,10 @@ export async function GET(req: NextRequest) {
           where: { id: user.id },
           data: { currentPeriodEnd: nextPeriod },
         });
-
-        console.log(`Reset credits for user ${user.email}`);
       } catch (error) {
-        console.error(`Failed to reset credits for ${user.email}:`, error);
+        const message =
+          error instanceof Error && error.message ? error.message : "Failed to reset credits";
+        process.stderr.write(`[cron/monthly-reset] ${message} (user: ${user.email})\n`);
       }
     }
 
@@ -48,7 +47,7 @@ export async function GET(req: NextRequest) {
       usersReset: usersToReset.length,
     });
   } catch (error) {
-    console.error("Monthly reset cron failed:", error);
-    return NextResponse.json({ error: "Cron job failed" }, { status: 500 });
+    const message = error instanceof Error && error.message ? error.message : "Cron job failed";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

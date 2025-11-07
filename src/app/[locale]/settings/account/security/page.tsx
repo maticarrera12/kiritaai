@@ -1,9 +1,10 @@
+import { headers } from "next/headers";
+
+import { PasswordForm } from "./_components/password-form";
+import { SessionManagement } from "./_components/session-management";
+import { SetPasswordButton } from "./_components/set-password-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { auth, prisma } from "@/lib/auth";
-import { headers } from "next/headers";
-import { SessionManagement } from "./_components/session-management";
-import { PasswordForm } from "./_components/password-form";
-import { SetPasswordButton } from "./_components/set-password-button";
 
 const page = async () => {
   const sessions = await auth.api.listSessions({ headers: await headers() });

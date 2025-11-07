@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, X } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 interface PasswordRequirement {

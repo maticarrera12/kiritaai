@@ -1,5 +1,6 @@
-import AppMainSidebar from "./(app)/_components/app-main-sidebar";
 import React from "react";
+
+import AppMainSidebar from "./(app)/_components/app-main-sidebar";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   return (

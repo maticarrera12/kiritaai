@@ -1,6 +1,7 @@
-import { auth, assignAdminRole, prisma } from "@/lib/auth";
 import { toNextJsHandler } from "better-auth/next-js";
 import { NextRequest } from "next/server";
+
+import { auth, assignAdminRole, prisma } from "@/lib/auth";
 
 const handler = toNextJsHandler(auth);
 
@@ -63,7 +64,11 @@ async function handleOAuthCallback(request: NextRequest, method: "GET" | "POST")
         } catch (error) {
           // Si no podemos obtener la sesión, no hacer nada
           // El usuario aún se autenticará correctamente
-          console.error("Error assigning admin role after OAuth:", error);
+          const message =
+            error instanceof Error && error.message
+              ? error.message
+              : "Failed to assign admin role after OAuth";
+          process.stderr.write(`[auth] ${message}\n`);
         }
       });
     }

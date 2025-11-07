@@ -1,9 +1,10 @@
+import { customAlphabet } from "nanoid";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+
+import { sendWaitlistWelcomeEmail } from "@/lib/emails/sendWaitlistWelcomeEmail";
 import { prisma } from "@/lib/prisma";
 import { waitlistSchema } from "@/lib/schemas/waitlist.schema";
-import { customAlphabet } from "nanoid";
-import { z } from "zod";
-import { NextResponse } from "next/server";
-import { sendWaitlistWelcomeEmail } from "@/lib/emails/sendWaitlistWelcomeEmail";
 
 const generateReferralCode = customAlphabet("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", 8);
 
@@ -54,6 +55,9 @@ export async function POST(req: Request) {
     });
 
     // Enviar email de bienvenida
+    let emailStatus: "sent" | "failed" = "sent";
+    let emailErrorMessage: string | null = null;
+
     try {
       await sendWaitlistWelcomeEmail({
         user: { email: newUser.email, name: newUser.name },
@@ -61,20 +65,26 @@ export async function POST(req: Request) {
         position,
       });
     } catch (emailError) {
-      console.error("Failed to send welcome email:", emailError);
-      // No fallar la request si el email falla
+      emailStatus = "failed";
+      emailErrorMessage =
+        emailError instanceof Error && emailError.message
+          ? emailError.message
+          : "Failed to send welcome email";
     }
 
     return NextResponse.json({
       message: "Successfully joined the waitlist! 🎉",
       referralCode: newUser.referralCode,
       position,
+      emailStatus,
+      ...(emailErrorMessage ? { emailError: emailErrorMessage } : {}),
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
-    console.error(error);
-    return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
+    const message =
+      error instanceof Error && error.message ? error.message : "Something went wrong.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

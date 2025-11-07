@@ -1,18 +1,19 @@
 "use client";
-import { useState } from "react";
-import { FileTextIcon, GlobeIcon, HomeIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FileTextIcon, GlobeIcon, HomeIcon } from "lucide-react";
+import { useState } from "react";
 
+import { LanguageSwitcher } from "@/components/navbar/languaje-switcher";
 import Logo from "@/components/navbar/logo";
 import ThemeToggle from "@/components/navbar/theme-toggle";
 import UserMenu from "@/components/navbar/user-menu";
-import { LanguageSwitcher } from "@/components/navbar/languaje-switcher";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
+import { useLocaleRouting } from "@/hooks/useLocaleRouting";
 import { authClient } from "@/lib/auth-client";
 
 // Navigation links
@@ -25,6 +26,19 @@ const navigationLinks = [
 export default function Navbar() {
   const { data: session, isPending: loading } = authClient.useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { locale, push } = useLocaleRouting();
+
+  const getLocalizedPath = (path: string) => {
+    if (!path.startsWith("/")) {
+      return path;
+    }
+
+    if (path === "/") {
+      return `/${locale}`;
+    }
+
+    return `/${locale}${path}`;
+  };
 
   const handleNavigation = (
     e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>,
@@ -55,8 +69,14 @@ export default function Navbar() {
           });
         }
       }
+
+      return;
     }
-    // Si no tiene scrollTo, dejar que el navegador maneje la navegación normal
+    // Si no tiene scrollTo, navegar respetando el locale actual
+    if (link.href.startsWith("/")) {
+      e.preventDefault();
+      push(link.href);
+    }
   };
 
   return (
@@ -121,7 +141,7 @@ export default function Navbar() {
                     {navigationLinks.map((link) => (
                       <NavigationMenuItem key={link.label}>
                         <a
-                          href={link.href}
+                          href={getLocalizedPath(link.href)}
                           onClick={(e) => handleNavigation(e, link)}
                           className="px-4 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
                         >
@@ -141,7 +161,7 @@ export default function Navbar() {
               <LanguageSwitcher />
 
               <Button
-                onClick={() => (window.location.href = "/waitlist")}
+                onClick={() => push("/waitlist")}
                 className="text-sm  cursor-pointer border-2 bg-transparent border-indigo-700 hover:bg-indigo-700 text-foreground"
               >
                 Waitlist
@@ -152,7 +172,7 @@ export default function Navbar() {
                   <UserMenu />
                 ) : (
                   <Button
-                    onClick={() => (window.location.href = "/signin")}
+                    onClick={() => push("/signin")}
                     className="text-sm bg-indigo-600 text-white hover:bg-indigo- cursor-pointer"
                   >
                     Sign In

@@ -1,6 +1,6 @@
-import { Layout, Navbar, Footer } from "nextra-theme-docs";
 import { Head } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
+import { Layout, Navbar, Footer } from "nextra-theme-docs";
 import "nextra-theme-docs/style.css";
 import "./legal.css";
 

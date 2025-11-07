@@ -1,13 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useTranslations } from "next-intl";
 
 const Faq = () => {
   const t = useTranslations("faq");

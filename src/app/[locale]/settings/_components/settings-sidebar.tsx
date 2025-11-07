@@ -1,6 +1,4 @@
 "use client";
-import AppSidebar from "@/components/ui/app-sidebar";
-import { useRouter } from "next/navigation";
 import {
   UserIcon,
   LockIcon,
@@ -10,7 +8,10 @@ import {
   KeyIcon,
   UsersIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+
+import AppSidebar from "@/components/ui/app-sidebar";
 
 export default function SettingsSidebar() {
   const t = useTranslations("settings");

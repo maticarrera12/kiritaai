@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { Home } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
 import ThemeToggle from "@/components/navbar/theme-toggle";
+import { Button } from "@/components/ui/button";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (

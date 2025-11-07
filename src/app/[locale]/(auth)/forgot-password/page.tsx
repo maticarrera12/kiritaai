@@ -1,7 +1,12 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -11,13 +16,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { LoadingSwap } from "@/components/ui/loading-swap";
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { forgotPasswordSchema, ForgotPasswordInput } from "@/lib/schemas/auth.schema";
-import { useRouter } from "next/navigation";
 
 function ForgotPassword() {
   const router = useRouter();

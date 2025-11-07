@@ -1,7 +1,9 @@
 "use client";
 
-import React from "react";
+import { GlobeIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import React from "react";
+
 import {
   Select,
   SelectTrigger,
@@ -9,7 +11,6 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { GlobeIcon } from "lucide-react";
 
 const languages = [
   { value: "en", label: "English" },
@@ -23,7 +24,7 @@ export function LanguageSwitcher() {
 
   const handleChange = (locale: string) => {
     // Cambiar de idioma reemplazando el prefijo [locale]
-    const newPathname = pathname.replace(/^\/[^\/]+/, `/${locale}`);
+    const newPathname = pathname.replace(/^\/[^/]+/, `/${locale}`);
     router.replace(newPathname);
   };
 
