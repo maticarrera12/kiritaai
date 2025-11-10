@@ -22,7 +22,7 @@ export function UnsavedChangesNotice({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="flex flex-col gap-3 rounded-xl border border-amber-300/80 bg-amber-50 p-4 text-amber-900 md:flex-row md:items-center md:justify-between"
+      className="flex flex-col gap-3 rounded-xl border  bg-card/10 p-4 md:flex-row md:items-center md:justify-between"
     >
       <div className="flex items-start gap-3">
         <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
@@ -38,7 +38,7 @@ export function UnsavedChangesNotice({
         <Button variant="ghost" onClick={onCancel} disabled={isSaving}>
           Cancel
         </Button>
-        <Button onClick={onSave} disabled={isSaving}>
+        <Button className="text-white" onClick={onSave} disabled={isSaving}>
           {isSaving ? "Saving..." : "Save changes"}
         </Button>
       </div>

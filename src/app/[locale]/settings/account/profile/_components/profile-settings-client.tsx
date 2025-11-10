@@ -11,6 +11,7 @@ import { PreferencesSection, type PreferencesSectionHandle } from "./preferences
 import { ProfileHeader } from "./profile-header";
 import { ProfilePictureSection } from "./profile-picture-section";
 import { UnsavedChangesNotice } from "./unsaved-changes-notice";
+import { Separator } from "@/components/ui/separator";
 
 type Account = {
   id: string;
@@ -90,6 +91,7 @@ export function ProfileSettingsClient({ user, plan, accounts }: ProfileSettingsC
       </AnimatePresence>
       <AccountLinking currentAccounts={accounts} />
       <PlanSection plan={plan} />
+      <Separator />
       <DangerZone />
     </div>
   );

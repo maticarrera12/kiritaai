@@ -23,17 +23,17 @@ export default function SettingsSidebar() {
       items: [
         {
           name: t("menu.profile"),
-          href: "/app/settings/account/profile",
+          href: "/settings/account/profile",
           icon: UserIcon,
         },
         {
           name: t("menu.security"),
-          href: "/app/settings/account/security",
+          href: "/settings/account/security",
           icon: LockIcon,
         },
         {
           name: t("menu.notifications"),
-          href: "/app/settings/account/notifications",
+          href: "/settings/account/notifications",
           icon: BellIcon,
         },
       ],
@@ -43,7 +43,7 @@ export default function SettingsSidebar() {
       items: [
         {
           name: t("menu.appearance"),
-          href: "/app/settings/preferences/appearance",
+          href: "/settings/preferences/appearance",
           icon: PaletteIcon,
         },
       ],
@@ -53,7 +53,7 @@ export default function SettingsSidebar() {
       items: [
         {
           name: t("menu.planPayments"),
-          href: "/app/settings/billing",
+          href: "/settings/billing",
           icon: CreditCardIcon,
         },
       ],
@@ -67,12 +67,12 @@ export default function SettingsSidebar() {
       items: [
         {
           name: t("menu.members"),
-          href: "/app/settings/organization/members",
+          href: "/settings/organization/members",
           icon: UsersIcon,
         },
         {
           name: t("menu.invitations"),
-          href: "/app/settings/organization/invites",
+          href: "/settings/organization/invites",
           icon: UsersIcon,
         },
       ],

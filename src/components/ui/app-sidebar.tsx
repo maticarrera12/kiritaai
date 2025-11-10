@@ -3,8 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { LogOutIcon, ArrowLeftIcon, type LucideIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import { LanguageSwitcher } from "@/components/navbar/languaje-switcher";
 import ThemeToggle from "@/components/navbar/theme-toggle";
@@ -16,6 +15,7 @@ export interface SidebarItem {
   name: string;
   href: string;
   icon: LucideIcon;
+  localeAware?: boolean;
 }
 
 export interface SidebarSection {
@@ -42,11 +42,25 @@ export default function AppSidebar({
   backHref,
   onBack,
 }: AppSidebarProps) {
-  const pathname = usePathname();
+  const { locale, pathname, push, router } = useLocaleRouting();
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const queryClient = useQueryClient();
-  const { push } = useLocaleRouting();
+
+  const withLocale = useMemo(() => {
+    return (href: string, localeAware = true) => {
+      if (!localeAware) {
+        return href;
+      }
+      if (!href.startsWith("/")) {
+        return href;
+      }
+      if (href === `/${locale}` || href.startsWith(`/${locale}/`)) {
+        return href;
+      }
+      return `/${locale}${href}`;
+    };
+  }, [locale]);
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -118,7 +132,7 @@ export default function AppSidebar({
               <div className="mb-3">
                 {backHref ? (
                   <Link
-                    href={backHref}
+                    href={withLocale(backHref)}
                     className={cn(
                       "grid h-9 place-items-center rounded-md text-sm transition-colors",
                       "hover:bg-accent/50 hover:text-foreground"
@@ -134,7 +148,7 @@ export default function AppSidebar({
                   </Link>
                 ) : (
                   <button
-                    onClick={onBack}
+                    onClick={onBack ?? (() => router.back())}
                     className={cn(
                       "grid h-9 w-full place-items-center rounded-md text-sm transition-colors",
                       "hover:bg-accent/50 hover:text-foreground"
@@ -196,12 +210,14 @@ export default function AppSidebar({
 
                 <nav className="flex flex-col">
                   {section.items.map((item) => {
-                    const isActive = pathname.endsWith(item.href);
+                    const targetHref = withLocale(item.href, item.localeAware ?? true);
+                    const isActive =
+                      pathname === targetHref || pathname.startsWith(`${targetHref}/`);
                     const Icon = item.icon;
                     return (
                       <Link
                         key={item.name}
-                        href={item.href}
+                        href={targetHref}
                         onClick={() => setIsOpen(false)}
                         className={cn(
                           "grid h-9 place-items-center rounded-md text-sm transition-colors",
