@@ -16,6 +16,7 @@ export interface SidebarItem {
   href: string;
   icon: LucideIcon;
   localeAware?: boolean;
+  matchPrefixes?: string[];
 }
 
 export interface SidebarSection {
@@ -31,6 +32,7 @@ interface AppSidebarProps {
   bottomContent?: React.ReactNode;
   backHref?: string;
   onBack?: () => void;
+  variant?: "card" | "flush";
 }
 
 export default function AppSidebar({
@@ -41,6 +43,7 @@ export default function AppSidebar({
   bottomContent,
   backHref,
   onBack,
+  variant = "card",
 }: AppSidebarProps) {
   const { locale, pathname, push, router } = useLocaleRouting();
   const [isOpen, setIsOpen] = useState(false);
@@ -76,10 +79,15 @@ export default function AppSidebar({
   return (
     <>
       {/* Navbar mobile */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center border-b border-border bg-background px-4 shadow-sm md:hidden">
+      <div
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50 flex h-14 items-center  md:hidden text-white",
+          variant === "flush" ? "bg-background border-border/80" : "bg-primary border-border/60"
+        )}
+      >
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="group rounded-lg p-2 hover:bg-accent transition-colors"
+          className="group rounded-lg p-2 text-white transition-colors hover:bg-white/10"
           aria-expanded={isOpen}
         >
           <svg
@@ -107,7 +115,7 @@ export default function AppSidebar({
             />
           </svg>
         </button>
-        <span className="ml-3 text-lg font-semibold">{title}</span>
+        <span className="ml-3 text-lg font-semibold text-white">{title}</span>
       </div>
 
       {/* Sidebar */}
@@ -118,81 +126,84 @@ export default function AppSidebar({
         animate={{ width: isHovered || isOpen ? 240 : 80 }}
         transition={{ duration: 0.12, ease: "easeInOut" }}
         className={cn(
-          "z-40 h-screen border-r bg-card shadow-lg shrink-0",
+          "z-40 h-screen shrink-0 text-white",
           "fixed left-0 top-14 md:sticky md:top-0",
           "md:translate-x-0",
-          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+          variant === "flush"
+            ? "bg-background border-r border-border/80 shadow-none"
+            : "bg-primary shadow-lg"
         )}
       >
-        <div className="flex h-full flex-col">
+        <div className="flex h-full w-full flex-col">
           {/* -------- TOP AREA (scrollable) -------- */}
-          <div className="flex-1 overflow-y-auto px-3 py-4 scrollbar-hide">
+          <div className="flex-1 overflow-y-auto pl-4 pr-0 py-4 scrollbar-hide">
             {/* Back button */}
             {(backHref || onBack) && (
-              <div className="mb-3">
+              <div className="mb-3 text-white pr-0">
                 {backHref ? (
                   <Link
                     href={withLocale(backHref)}
                     className={cn(
                       "grid h-9 place-items-center rounded-md text-sm transition-colors",
-                      "hover:bg-accent/50 hover:text-foreground"
+                      "hover:bg-white/10 hover:text-white"
                     )}
                     style={{
                       display: "grid",
                       gridTemplateColumns: "24px 1fr",
                       gap: "12px",
-                      paddingInline: "8px",
+                      paddingInlineStart: "8px",
+                      paddingInlineEnd: "0px",
                     }}
                   >
-                    <ArrowLeftIcon size={18} className="justify-self-start" />
+                    <ArrowLeftIcon size={18} className="justify-self-start text-white" />
                   </Link>
                 ) : (
                   <button
                     onClick={onBack ?? (() => router.back())}
                     className={cn(
-                      "grid h-9 w-full place-items-center rounded-md text-sm transition-colors",
-                      "hover:bg-accent/50 hover:text-foreground"
+                      "grid h-9 w-full place-items-center rounded-md text-sm transition-colors text-white",
+                      "hover:bg-white/10 hover:text-white"
                     )}
                     style={{
                       display: "grid",
                       gridTemplateColumns: "24px 1fr",
                       gap: "12px",
-                      paddingInline: "8px",
+                      paddingInlineStart: "8px",
+                      paddingInlineEnd: "0px",
                     }}
                   >
-                    <ArrowLeftIcon size={18} className="justify-self-start" />
+                    <ArrowLeftIcon size={18} className="justify-self-start text-white" />
                   </button>
                 )}
               </div>
             )}
 
             {/* Título */}
-            <div className="mb-4 h-6">
-              <span
-                className={cn(
-                  "block text-lg font-semibold text-foreground whitespace-nowrap transition-all duration-75",
-                  isHovered || isOpen ? "opacity-100 w-auto" : "opacity-0 w-0"
-                )}
-              >
+            <div
+              className={cn(
+                "mb-4 h-6 transition-all duration-75",
+                isHovered || isOpen ? "opacity-100" : "opacity-0"
+              )}
+            >
+              <span className="block text-lg font-semibold text-white whitespace-nowrap">
                 {title}
               </span>
             </div>
 
             {/* Contenido adicional superior */}
-            {topContent && (
-              <div className={cn("mb-4", isHovered || isOpen ? "h-auto" : "h-28 overflow-hidden")}>
-                <div
-                  className={cn(
-                    isHovered || isOpen
-                      ? "opacity-100 pointer-events-auto"
-                      : "opacity-0 pointer-events-none",
-                    "transition-opacity duration-75"
-                  )}
-                >
-                  {topContent}
-                </div>
+            <div className="mb-4 h-44 pr-4">
+              <div
+                className={cn(
+                  isHovered || isOpen
+                    ? "opacity-100 visible pointer-events-auto"
+                    : "opacity-0 invisible pointer-events-none",
+                  "transition-opacity duration-75 h-full"
+                )}
+              >
+                {topContent}
               </div>
-            )}
+            </div>
 
             {/* Secciones */}
             {sections.map((section) => (
@@ -200,19 +211,28 @@ export default function AppSidebar({
                 <div className="h-5 mb-1">
                   <span
                     className={cn(
-                      "block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap transition-all duration-75",
-                      isHovered || isOpen ? "opacity-100 w-auto" : "opacity-0 w-0"
+                      "block text-[11px] font-semibold uppercase tracking-wider text-white/70 whitespace-nowrap transition-all duration-75",
+                      isHovered || isOpen ? "opacity-100" : "opacity-0"
                     )}
                   >
                     {section.label}
                   </span>
                 </div>
 
-                <nav className="flex flex-col">
+                <nav className="flex flex-col w-full">
                   {section.items.map((item) => {
                     const targetHref = withLocale(item.href, item.localeAware ?? true);
-                    const isActive =
-                      pathname === targetHref || pathname.startsWith(`${targetHref}/`);
+                    const matchTargets = item.matchPrefixes?.map((prefix) =>
+                      withLocale(prefix, item.localeAware ?? true)
+                    );
+                    const normalize = (path: string) => path.replace(/^\/(es|en)\//, "/");
+                    const isActive = matchTargets?.length
+                      ? matchTargets.some(
+                          (target) =>
+                            normalize(pathname) === normalize(target) ||
+                            normalize(pathname).startsWith(`${normalize(target)}/`)
+                        )
+                      : normalize(pathname) === normalize(targetHref);
                     const Icon = item.icon;
                     return (
                       <Link
@@ -220,22 +240,18 @@ export default function AppSidebar({
                         href={targetHref}
                         onClick={() => setIsOpen(false)}
                         className={cn(
-                          "grid h-9 place-items-center rounded-md text-sm transition-colors",
-                          "hover:bg-accent/50 hover:text-foreground",
+                          "group grid h-10 w-full grid-cols-[24px_1fr] items-center gap-3 pl-4 pr-0 text-sm transition-colors duration-150",
                           isActive
-                            ? "bg-accent text-foreground font-medium"
-                            : "text-muted-foreground"
+                            ? "bg-background text-primary rounded-l-xl"
+                            : "text-white hover:bg-white/10 hover:text-white"
                         )}
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "24px 1fr",
-                          gap: "12px",
-                          paddingInline: "8px",
-                        }}
                       >
                         <Icon
                           size={18}
-                          className="justify-self-start text-muted-foreground group-hover:text-foreground"
+                          className={cn(
+                            "justify-self-start transition-colors",
+                            isActive ? "text-primary" : "text-white"
+                          )}
                         />
                         <span
                           className={cn(
@@ -254,21 +270,21 @@ export default function AppSidebar({
           </div>
 
           {/* -------- BOTTOM AREA -------- */}
-          <div className="border-t">
+          <div className="border-t border-white/10 pr-0">
             {/* Theme toggle y language switcher (siempre visibles) */}
-            <div className="px-3 py-2">
+            <div className="pl-4 pr-0 py-2">
               <div
                 className={cn(
-                  "flex items-center justify-center gap-2 w-full",
+                  "flex items-center justify-center gap-2 w-full text-white",
                   isHovered || isOpen
                     ? "opacity-100 pointer-events-auto"
                     : "opacity-0 pointer-events-none",
                   "transition-opacity duration-75"
                 )}
               >
-                <ThemeToggle />
-                <div className="h-6 w-px bg-border shrink-0" />
-                <LanguageSwitcher />
+                <ThemeToggle variant="sidebar" />
+                <div className="h-6 w-px bg-white/20 shrink-0" />
+                <LanguageSwitcher variant="sidebar" />
               </div>
             </div>
 
@@ -276,7 +292,7 @@ export default function AppSidebar({
             {bottomContent && (
               <div
                 className={cn(
-                  "px-3 py-2",
+                  "pl-4 pr-0 py-2",
                   isHovered || isOpen
                     ? "opacity-100 pointer-events-auto"
                     : "opacity-0 pointer-events-none",
@@ -288,30 +304,28 @@ export default function AppSidebar({
             )}
 
             {/* Logout */}
-            <div className="px-3 py-1.5">
+            <div className="pl-4 pr-4 py-1.5 text-white">
               <button
                 onClick={() => {
                   setIsOpen(false);
                   handleSignOut();
                 }}
                 className={cn(
-                  "grid h-9 w-full place-items-center rounded-md text-sm transition-colors",
-                  "hover:bg-destructive/10 hover:text-destructive"
+                  "grid h-9 w-full place-items-center rounded-md text-sm transition-colors text-white",
+                  "hover:bg-white/10 hover:text-white"
                 )}
                 style={{
                   display: "grid",
                   gridTemplateColumns: "24px 1fr",
                   gap: "12px",
-                  paddingInline: "8px",
+                  paddingInlineStart: "8px",
+                  paddingInlineEnd: "0px",
                 }}
               >
-                <LogOutIcon
-                  size={18}
-                  className="justify-self-start text-muted-foreground hover:text-destructive"
-                />
+                <LogOutIcon size={18} className="justify-self-start text-white" />
                 <span
                   className={cn(
-                    "justify-self-start whitespace-nowrap overflow-hidden transition-all duration-75",
+                    "justify-self-start whitespace-nowrap overflow-hidden transition-all duration-75 text-white",
                     isHovered || isOpen ? "opacity-100 w-auto" : "opacity-0 w-0"
                   )}
                 >

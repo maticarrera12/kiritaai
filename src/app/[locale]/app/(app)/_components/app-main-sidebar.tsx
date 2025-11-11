@@ -6,15 +6,15 @@ import {
   StarIcon,
   SettingsIcon,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { CreditBalance } from "@/components/credits/credits-balance";
 import AppSidebar from "@/components/ui/app-sidebar";
+import { useLocaleRouting } from "@/hooks/useLocaleRouting";
 
 export default function AppMainSidebar() {
   const t = useTranslations("app");
-  const router = useRouter();
+  const { router } = useLocaleRouting();
 
   const sidebarSections = [
     {
@@ -34,6 +34,7 @@ export default function AppMainSidebar() {
           name: t("menu.myBrands"),
           href: "/app/brands",
           icon: FolderIcon,
+          matchPrefixes: ["/app/brands"],
         },
         {
           name: t("menu.favorites"),
@@ -49,6 +50,7 @@ export default function AppMainSidebar() {
           name: t("menu.settings"),
           href: "/app/settings/account/profile",
           icon: SettingsIcon,
+          matchPrefixes: ["/app/settings"],
         },
       ],
     },
