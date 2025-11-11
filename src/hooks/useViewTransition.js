@@ -1,8 +1,40 @@
 "use client";
 import { useTransitionRouter } from "next-view-transitions";
 
+import { useLocaleRouting } from "./useLocaleRouting";
+import { routing } from "@/i18n/routing";
+
+const isExternalHref = (href) => /^(?:[a-z][a-z0-9+\-.]*:|\/\/)/i.test(href);
+
+const prependLocale = (href, locale) => {
+  if (typeof href !== "string" || href.length === 0) return href;
+  if (!href.startsWith("/")) return href;
+
+  const normalizedHref = href === "/" ? "/" : href.replace(/\/+$/, "");
+  const localePrefix = `/${locale}`;
+
+  const firstSegment = normalizedHref.split("/")[1] || "";
+  if (
+    firstSegment === locale ||
+    routing.locales.includes(firstSegment) ||
+    normalizedHref === "/docs" ||
+    normalizedHref.startsWith("/docs/") ||
+    normalizedHref === "/legal" ||
+    normalizedHref.startsWith("/legal/")
+  ) {
+    return href;
+  }
+
+  if (normalizedHref === "/") {
+    return localePrefix;
+  }
+
+  return `${localePrefix}${normalizedHref}`;
+};
+
 export const useViewTransition = () => {
   const router = useTransitionRouter();
+  const { locale } = useLocaleRouting();
 
   function slideInOut() {
     document.documentElement.animate(
@@ -43,14 +75,25 @@ export const useViewTransition = () => {
   }
 
   const navigateWithTransition = (href, options = {}) => {
-    const currentPath = window.location.pathname;
-    if (currentPath === href) {
+    if (typeof window === "undefined" || typeof href !== "string" || href.length === 0) {
       return;
     }
 
-    router.push(href, {
+    if (isExternalHref(href)) {
+      window.location.href = href;
+      return;
+    }
+
+    const { skipLocale, ...routerOptions } = options;
+    const targetHref = skipLocale ? href : prependLocale(href, locale);
+
+    if (window.location.pathname === targetHref) {
+      return;
+    }
+
+    router.push(targetHref, {
       onTransitionReady: slideInOut,
-      ...options,
+      ...routerOptions,
     });
   };
 
