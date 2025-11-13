@@ -1,18 +1,11 @@
 import { headers } from "next/headers";
-import type { ReactNode } from "react";
 
 import AppMainSidebar from "./(app)/_components/app-main-sidebar";
 import Header from "@/components/header/header";
 import { redirect } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
 
-const layout = async ({
-  children,
-  params,
-}: {
-  children: ReactNode;
-  params: { locale: string };
-}) => {
+const layout = async ({ children, params }: any) => {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session?.user) {

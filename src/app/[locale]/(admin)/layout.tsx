@@ -1,17 +1,10 @@
 import { headers } from "next/headers";
-import type { ReactNode } from "react";
 
 import AdminSidebar from "./_components/admin-sidebar";
 import { Link, redirect } from "@/i18n/routing";
 import { auth, prisma } from "@/lib/auth";
 
-const layout = async ({
-  children,
-  params,
-}: {
-  children: ReactNode;
-  params: { locale: string };
-}) => {
+const layout = async ({ children, params }: any) => {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session?.user) {
