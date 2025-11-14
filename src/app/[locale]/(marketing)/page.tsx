@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 
+import FeatureStepper from "./_components/feature-stepper";
 import { FeatureTabs } from "./_components/feature-tabs";
 import LogoMarquee from "./_components/logo-marquee";
 import BentoShowcase from "@/app/[locale]/(marketing)/_components/bento-showcase";
@@ -15,6 +16,7 @@ const page = () => {
       <LogoMarquee />
       <BentoShowcase />
       <FeatureTabs />
+      <FeatureStepper />
       <PricingCards />
       <Faq />
     </div>

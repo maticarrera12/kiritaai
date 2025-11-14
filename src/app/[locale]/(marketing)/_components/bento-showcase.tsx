@@ -1,111 +1,142 @@
-import React from "react";
+"use client";
 
-const BentoShowcase = () => {
+import { motion } from "framer-motion";
+import { Save, Bell, Plug, Calendar } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+
+const items = [
+  {
+    title: "Save your files",
+    desc: "We automatically save your files as you type.",
+    img: "https://picsum.photos/800/600?random=1",
+    icon: Save,
+  },
+  {
+    title: "Notifications",
+    desc: "Get notified when something happens.",
+    img: "https://picsum.photos/800/600?random=2",
+    icon: Bell,
+  },
+  {
+    title: "Integrations",
+    desc: "Supports 100+ integrations and counting.",
+    img: "https://picsum.photos/800/600?random=3",
+    icon: Plug,
+  },
+  {
+    title: "Calendar",
+    desc: "Use the calendar to filter your files by date.",
+    img: "https://picsum.photos/800/600?random=4",
+    icon: Calendar,
+  },
+];
+
+export default function BentoShowcase() {
   return (
-    <section className="w-full py-10 px-4 bg-background">
-      <div className="max-w-5xl mx-auto">
-        {/* Bento Grid Container - Responsive */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 auto-rows-[100px] md:auto-rows-[110px] gap-2 md:gap-3 p-3 md:p-4 bg-muted/50 rounded-2xl md:rounded-3xl border border-border">
-          {/* Hero Card */}
-          <div className="col-span-2 row-span-2 md:col-span-2 md:row-span-2 lg:col-span-2 lg:row-span-2 rounded-xl overflow-hidden relative bg-card border border-border flex items-center justify-center">
-            <div className="text-3xl md:text-4xl lg:text-5xl">✨</div>
-          </div>
-
-          {/* Logo/Brand */}
-          <div className="col-span-2 row-span-1 md:col-span-2 md:row-span-1 lg:col-span-3 lg:row-span-1 bg-card border border-border rounded-xl flex items-center justify-center">
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
-              Your Brand
-            </h1>
-          </div>
-
-          {/* Features Grid */}
-          <div className="col-span-1 row-span-1 md:col-span-1 md:row-span-1 lg:col-span-1 lg:row-span-1 bg-card border border-border rounded-xl grid grid-cols-2 gap-1 p-1.5 md:p-2">
-            <div className="flex items-center justify-center text-base md:text-lg lg:text-xl">
-              ⚡
-            </div>
-            <div className="flex items-center justify-center text-base md:text-lg lg:text-xl">
-              🎯
-            </div>
-            <div className="flex items-center justify-center text-base md:text-lg lg:text-xl">
-              🚀
-            </div>
-            <div className="flex items-center justify-center text-base md:text-lg lg:text-xl">
-              💡
-            </div>
-          </div>
-
-          {/* Feature Title */}
-          <div className="col-span-1 row-span-1 md:col-span-2 md:row-span-1 lg:col-span-2 lg:row-span-1 bg-card border border-border rounded-xl p-3 md:p-4 flex flex-col justify-end">
-            <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-foreground leading-tight">
-              Feature
-              <br className="hidden md:block" />
-              Showcase
-            </h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Discover amazing capabilities</p>
-          </div>
-
-          {/* Date Card */}
-          <div className="col-span-1 row-span-1 md:col-span-1 md:row-span-1 lg:col-span-1 lg:row-span-1 bg-card border border-border rounded-xl flex flex-col items-center justify-center gap-0.5 p-2 md:p-3">
-            <div className="text-xs md:text-sm font-semibold text-muted-foreground">Mon</div>
-            <div className="text-2xl md:text-3xl font-bold text-foreground">24</div>
-          </div>
-
-          {/* Icon Card */}
-          <div className="col-span-1 row-span-1 md:col-span-1 md:row-span-1 lg:col-span-1 lg:row-span-1 bg-card border border-border rounded-xl flex items-center justify-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <div className="text-primary text-lg md:text-xl">🎨</div>
-            </div>
-          </div>
-
-          {/* Stats Card */}
-          <div className="col-span-2 row-span-2 md:col-span-2 md:row-span-2 lg:col-span-2 lg:row-span-2 bg-card border border-border rounded-xl p-3 md:p-4 flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-muted-foreground">Metrics</span>
-              <button className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm hover:bg-primary/90 transition">
-                +
-              </button>
-            </div>
-            <div className="text-2xl md:text-3xl font-bold text-foreground mb-2">2.4K</div>
-            <div className="h-12 md:h-14 relative">
-              <svg className="w-full h-full" viewBox="0 0 200 60">
-                <polyline
-                  points="0,45 20,40 40,35 60,50 80,30 100,25 120,45 140,20 160,35 180,15 200,25"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-primary"
-                />
-                <circle cx="100" cy="25" r="4" fill="currentColor" className="text-primary" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Timer Card */}
-          <div className="col-span-2 row-span-1 md:col-span-2 md:row-span-1 lg:col-span-2 lg:row-span-1 bg-card border border-border rounded-xl flex items-center justify-center">
-            <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">24:00</div>
-          </div>
-
-          {/* Device Preview */}
-          <div className="col-span-2 row-span-1 md:col-span-2 md:row-span-1 lg:col-span-2 lg:row-span-1 bg-card border border-border rounded-xl flex items-center justify-center p-2 md:p-3 overflow-hidden relative">
-            <span className="text-xs md:text-sm text-muted-foreground">Cool feature</span>
-          </div>
-
-          {/* CTA Card */}
-          <div className="col-span-2 row-span-1 md:col-span-4 md:row-span-1 lg:col-span-4 lg:row-span-1 bg-card border border-border rounded-xl flex items-center justify-between px-4 md:px-6 py-3 overflow-hidden relative">
-            <div className="z-10">
-              <h3 className="text-xl md:text-2xl font-bold text-foreground leading-tight">
-                Get Started
-                <br />
-                Today
-              </h3>
-              <div className="text-xs text-muted-foreground mt-0.5">Build something amazing</div>
-            </div>
-            <div className="text-3xl md:text-4xl lg:text-5xl opacity-20">🚀</div>
-          </div>
+    <div className="w-full max-w-6xl mx-auto grid gap-6 py-16">
+      {/* ROW 1 → 70 / 30 */}
+      <div className="grid grid-cols-10 gap-6">
+        <div className="col-span-7">
+          <BentoCard {...items[0]} />
+        </div>
+        <div className="col-span-3">
+          <BentoCard {...items[1]} />
         </div>
       </div>
-    </section>
-  );
-};
 
-export default BentoShowcase;
+      {/* ROW 2 → 30 / 70 */}
+      <div className="grid grid-cols-10 gap-6">
+        <div className="col-span-3">
+          <BentoCard {...items[2]} />
+        </div>
+        <div className="col-span-7">
+          <BentoCard {...items[3]} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BentoCard({ title, desc, img, icon: Icon }: any) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.01 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="relative group h-[260px] md:h-[300px] rounded-2xl overflow-hidden border border-white/10 bg-black"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Background image */}
+      <Image
+        src={img}
+        fill
+        alt=""
+        className="object-cover absolute inset-0 opacity-[0.25] group-hover:opacity-[0.45] transition-all duration-500"
+      />
+
+      {/* Light translucent overlay on hover */}
+      <motion.div className="absolute inset-0 bg-white/0 group-hover:bg-white/[0.08] transition-all duration-500" />
+
+      {/* Animated glow */}
+      <motion.div
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none"
+        animate={{ opacity: [0, 0.2, 0.1, 0.2, 0] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <div className="absolute inset-0 bg-white/20 blur-3xl" />
+      </motion.div>
+
+      {/* Content (bottom aligned) */}
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 p-6 z-20 flex flex-col gap-2"
+        animate={{
+          y: isHovered ? -24 : 0,
+        }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
+        {/* Icon */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="mb-1"
+        >
+          <Icon className="w-6 h-6 text-white/90" />
+        </motion.div>
+
+        {/* Title and Description Container */}
+        <div className="flex flex-col gap-2">
+          <h3 className="text-lg md:text-xl font-semibold text-white">{title}</h3>
+          <p className="text-neutral-300 text-sm leading-tight">{desc}</p>
+        </div>
+
+        {/* Learn More */}
+        <motion.div
+          animate={{
+            opacity: isHovered ? 1 : 0,
+            height: isHovered ? "auto" : 0,
+          }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="overflow-hidden"
+        >
+          <motion.div
+            className="text-white text-sm flex items-center gap-1 mt-2"
+            animate={{
+              opacity: isHovered ? 1 : 0,
+              y: isHovered ? 0 : -10,
+            }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          >
+            Learn more →
+          </motion.div>
+        </motion.div>
+      </motion.div>
+
+      {/* Border glow */}
+      <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-white/20 group-hover:shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500" />
+    </motion.div>
+  );
+}
