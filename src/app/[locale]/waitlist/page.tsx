@@ -69,7 +69,6 @@ export default function WaitlistPage() {
       setPosition(result.position || null);
       setIsSubmitted(true);
 
-      // Guardar en localStorage para recuperación futura
       if (typeof window !== "undefined") {
         window.localStorage.setItem("waitlist_referral_code", result.referralCode);
       }
@@ -138,10 +137,8 @@ export default function WaitlistPage() {
     setIsLookingUp(true);
 
     try {
-      // Intentar buscar por código primero
       let response = await fetch(`/api/waitlist/stats?code=${lookupValue}`);
 
-      // Si falla, intentar buscar por email
       if (!response.ok) {
         response = await fetch(`/api/waitlist/lookup?email=${encodeURIComponent(lookupValue)}`);
       }
@@ -152,13 +149,11 @@ export default function WaitlistPage() {
 
       const data = await response.json();
 
-      // Recuperar información
       setReferralCode(data.referralCode || lookupValue);
       setPosition(data.position);
       setReferralCount(data.referralCount);
       setIsSubmitted(true);
 
-      // Guardar en localStorage
       if (typeof window !== "undefined") {
         window.localStorage.setItem("waitlist_referral_code", data.referralCode || lookupValue);
       }
@@ -172,21 +167,18 @@ export default function WaitlistPage() {
     }
   };
 
-  // Cargar desde localStorage al montar
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
 
     const savedCode = window.localStorage.getItem("waitlist_referral_code");
-    // Solo cargar si NO hay un referralParam nuevo (para permitir usar otro link)
     if (savedCode && !referralParam) {
       setReferralCode(savedCode);
       setIsSubmitted(true);
     }
   }, [referralParam]);
 
-  // Cargar estadísticas iniciales cuando el componente monta con un referralCode
   useEffect(() => {
     if (isSubmitted && referralCode) {
       refreshStats();

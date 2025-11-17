@@ -13,49 +13,141 @@ async function main() {
   console.log("🌱 Starting full brandkit seed...");
 
   // ----------------------------
-  // 1️⃣ PLAN LIMITS
+  // 1️⃣ PLAN LIMITS — FINAL VERSION
   // ----------------------------
-  const plans = [
+
+  const planLimits = [
+    // ----------------------------
+    // FREE
+    // ----------------------------
     {
       plan: PlanType.FREE,
       interval: PlanInterval.MONTHLY,
       monthlyCredits: 20,
       maxProjectsPerMonth: 3,
       maxAssetsPerProject: 10,
-      features: { storage: "1GB", support: "community" },
+      features: [
+        { name: "Logo generator", enabled: true, variations: 4 },
+        { name: "Avatar generator", enabled: true },
+        { name: "Basic brand names", enabled: true },
+        { name: "Watermarked downloads", enabled: true },
+        { name: "Standard quality", enabled: true },
+        { name: "Vector export (SVG)", enabled: false },
+        { name: "Brand style guide PDF", enabled: false },
+        { name: "Priority queue", enabled: false },
+        { name: "API access", enabled: false },
+      ],
     },
+
+    // ----------------------------
+    // PRO — MONTHLY
+    // ----------------------------
     {
       plan: PlanType.PRO,
       interval: PlanInterval.MONTHLY,
       monthlyCredits: 200,
-      maxProjectsPerMonth: 50,
-      maxAssetsPerProject: 100,
-      features: { storage: "20GB", support: "email" },
+      maxProjectsPerMonth: null,
+      maxAssetsPerProject: null,
+      features: [
+        { name: "Everything in Free", enabled: true },
+        { name: "HD quality generations", enabled: true },
+        { name: "No watermarks", enabled: true },
+        { name: "Vector logo exports (SVG)", enabled: true },
+        { name: "Brand style guide PDF", enabled: true },
+        { name: "Priority queue", enabled: true },
+        { name: "API access", enabled: false },
+        { name: "Team seats", enabled: true, limit: 1 },
+      ],
     },
+
+    // ----------------------------
+    // PRO — YEARLY
+    // ----------------------------
+    {
+      plan: PlanType.PRO,
+      interval: PlanInterval.YEARLY,
+      monthlyCredits: 200,
+      maxProjectsPerMonth: null,
+      maxAssetsPerProject: null,
+      features: [
+        { name: "Everything in Free", enabled: true },
+        { name: "HD quality generations", enabled: true },
+        { name: "No watermarks", enabled: true },
+        { name: "Vector logo exports (SVG)", enabled: true },
+        { name: "Brand style guide PDF", enabled: true },
+        { name: "Priority queue", enabled: true },
+        { name: "API access", enabled: false },
+        { name: "Team seats", enabled: true, limit: 1 },
+      ],
+    },
+
+    // ----------------------------
+    // BUSINESS — MONTHLY
+    // ----------------------------
     {
       plan: PlanType.BUSINESS,
       interval: PlanInterval.MONTHLY,
-      monthlyCredits: 1000,
-      maxProjectsPerMonth: 9999,
-      maxAssetsPerProject: 9999,
-      features: { storage: "unlimited", support: "priority" },
+      monthlyCredits: 600,
+      maxProjectsPerMonth: null,
+      maxAssetsPerProject: null,
+      features: [
+        { name: "Everything in Pro", enabled: true },
+        { name: "HD quality generations", enabled: true },
+        { name: "No watermarks", enabled: true },
+        { name: "Vector logo exports (SVG)", enabled: true },
+        { name: "Brand style guide PDF", enabled: true },
+        { name: "Priority queue", enabled: true },
+        { name: "API access", enabled: true },
+        { name: "Team seats", enabled: true, limit: 5 },
+        { name: "White label", enabled: true },
+      ],
+    },
+
+    // ----------------------------
+    // BUSINESS — YEARLY
+    // ----------------------------
+    {
+      plan: PlanType.BUSINESS,
+      interval: PlanInterval.YEARLY,
+      monthlyCredits: 600,
+      maxProjectsPerMonth: null,
+      maxAssetsPerProject: null,
+      features: [
+        { name: "Everything in Pro", enabled: true },
+        { name: "HD quality generations", enabled: true },
+        { name: "No watermarks", enabled: true },
+        { name: "Vector logo exports (SVG)", enabled: true },
+        { name: "Brand style guide PDF", enabled: true },
+        { name: "Priority queue", enabled: true },
+        { name: "API access", enabled: true },
+        { name: "Team seats", enabled: true, limit: 5 },
+        { name: "White label", enabled: true },
+      ],
     },
   ];
 
-  for (const plan of plans) {
+  for (const plan of planLimits) {
     await prisma.planLimit.upsert({
-      where: { plan_interval: { plan: plan.plan, interval: plan.interval } },
+      where: {
+        plan_interval: {
+          plan: plan.plan,
+          interval: plan.interval,
+        },
+      },
       update: plan,
       create: plan,
     });
   }
-  console.log("✅ Plan limits ensured.");
+
+  console.log("✅ Plan limits created.");
 
   // ----------------------------
   // 2️⃣ USERS
   // ----------------------------
+
   const adminEmails = process.env.ADMIN_EMAILS?.split(",").map((e) => e.trim().toLowerCase()) || [];
-  const adminEmail = adminEmails[0] || "admin@brandkit.dev";
+
+  const adminEmail = adminEmails[0] ?? "admin@brandkit.dev";
 
   const admin = await prisma.user.upsert({
     where: { email: adminEmail },
@@ -94,6 +186,7 @@ async function main() {
       language: "es",
     },
   });
+
   console.log("✅ Users ensured.");
 
   // ----------------------------
@@ -143,13 +236,18 @@ async function main() {
       },
       {
         type: AssetType.COLOR_PALETTE,
-        data: { colors: ["#1E1E2F", "#FF6B6B", "#FFD93D", "#6BCB77", "#4D96FF"] },
+        data: {
+          colors: ["#1E1E2F", "#FF6B6B", "#FFD93D", "#6BCB77", "#4D96FF"],
+        },
         creditsUsed: 1,
         model: "AI-ColorGen",
       },
       {
         type: AssetType.BRAND_VOICE,
-        data: { tone: "friendly", keywords: ["authentic", "confident", "playful"] },
+        data: {
+          tone: "friendly",
+          keywords: ["authentic", "confident", "playful"],
+        },
         creditsUsed: 1,
         model: "AI-VoiceGen",
       },
@@ -173,14 +271,13 @@ async function main() {
       })
     );
 
-    // Crear transacciones de deducción por cada asset
     for (const asset of assets) {
       await prisma.creditTransaction.create({
         data: {
           userId,
           type: CreditTransactionType.DEDUCTION,
           amount: asset.creditsUsed,
-          balance: 0, // se recalcula en tu sistema
+          balance: 0,
           reason: `Generated ${asset.type}`,
           description: `Credits used for ${asset.type} generation.`,
           assetId: asset.id,
@@ -194,13 +291,12 @@ async function main() {
   const adminProject = await createProjectWithAssets(admin.id, "Admin Creative Kit");
   const userProject = await createProjectWithAssets(user.id, "Demo Brand Project");
 
-  console.log(
-    `✅ Projects created: ${adminProject.name} & ${userProject.name}, with related assets + transactions`
-  );
+  console.log("✅ Projects created with assets & transactions.");
 
   // ----------------------------
-  // 4️⃣ CREDIT TRANSACTIONS - BONUSES
+  // 4️⃣ CREDIT TRANSACTIONS — BONUSES
   // ----------------------------
+
   await prisma.creditTransaction.createMany({
     data: [
       {

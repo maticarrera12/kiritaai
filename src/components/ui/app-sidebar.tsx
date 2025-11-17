@@ -1,10 +1,8 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ArrowLeftDoubleIcon } from "hugeicons-react";
 import { LogOutIcon, type LucideIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 import { LanguageSwitcher } from "@/components/navbar/languaje-switcher";
@@ -12,7 +10,6 @@ import ThemeToggle from "@/components/navbar/theme-toggle";
 import { useLocaleRouting } from "@/hooks/useLocaleRouting";
 import { Link } from "@/i18n/routing";
 import { signOut } from "@/lib/actions/auth-actions";
-import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 export interface SidebarItem {
@@ -50,14 +47,6 @@ export default function AppSidebar({
   const { pathname } = useLocaleRouting();
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const queryClient = useQueryClient();
-  const router = useRouter();
-
-  const handleSignOut = async () => {
-    await authClient.signOut();
-    queryClient.clear();
-    router.refresh();
-  };
 
   return (
     <>
@@ -67,7 +56,7 @@ export default function AppSidebar({
         aria-expanded={isOpen}
         className={cn(
           "group fixed top-3 left-3 z-50 flex h-9 w-9 items-center justify-center rounded-lg bg-transparent transition-colors md:hidden",
-          isOpen ? "text-foreground" : "text-black"
+          isOpen ? "text-foreground" : "text-black dark:text-white"
         )}
         aria-label="Toggle sidebar"
       >
@@ -121,7 +110,7 @@ export default function AppSidebar({
           {/* -------- TOP AREA -------- */}
           <div className="flex-1 overflow-y-auto px-4 py-4 scrollbar-hide">
             {/* Go back button */}
-            <div className="mb-3 text-foreground">
+            <div className="mb-3 flex justify-end md:justify-start text-foreground">
               <Link
                 href="/"
                 className={cn(
@@ -180,13 +169,12 @@ export default function AppSidebar({
                   {section.items.map((item) => {
                     const Icon = item.icon;
 
-                    // Active route detection (simple, reliable)
                     const isActive = pathname.startsWith(item.href);
 
                     return (
                       <Link
                         key={item.name}
-                        href={item.href} // ← ¡YA AGREGA EL LOCALE SOLO!
+                        href={item.href}
                         onClick={() => setIsOpen(false)}
                         className={cn(
                           "group grid h-10 grid-cols-[24px_1fr] items-center gap-3 px-4 text-sm",

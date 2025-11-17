@@ -15,7 +15,7 @@ export default async function SettingsLayout({ children, params }: any) {
   return (
     <div className="flex min-h-screen bg-card">
       <SettingsSidebar />
-      <main className="flex-1 mr-6 my-6 rounded-lg overflow-y-auto bg-background pt-14 md:pt-0">
+      <main className="flex-1 ml-6 mr-6 my-6 md:ml-0 rounded-lg overflow-y-auto bg-background pt-14 md:pt-0">
         <div className="mx-auto max-w-3xl p-6 md:p-10">{children}</div>
       </main>
     </div>
