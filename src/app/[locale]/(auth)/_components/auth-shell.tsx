@@ -51,7 +51,7 @@ export function AuthShell({
                     <h3 className="font-semibold text-4xl mb-3 text-foreground max-w-3/4 break-words">
                       {cardTitle}
                     </h3>
-                    <p className="text-2xl text-muted-foreground max-w-3/4 break-words">
+                    <p className="text-lg text-muted-foreground max-w-3/4 break-words">
                       {cardSubtitle}
                     </p>
                   </div>

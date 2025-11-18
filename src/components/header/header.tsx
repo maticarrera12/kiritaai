@@ -22,7 +22,7 @@ const Header = () => {
 
   return (
     <header className="mx-auto mt-10 w-full max-w-6xl px-4 md:px-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-2">
         <div className="hidden md:flex flex-1 items-center justify-between">
           <div className="flex items-center gap-2 rounded-full border p-1">
             <div>
@@ -65,11 +65,11 @@ const Header = () => {
         <div className="flex items-center gap-3 rounded-full border border-gray-300 dark:border-neutral-700 px-1 py-1 shadow-sm">
           {/* Icon circle */}
           <div className="flex items-center justify-center w-9 h-9 rounded-full  dark:bg-neutral-800">
-            <Notification01Icon className="w-4 h-4 text-neutral-700 dark:text-neutral-200" />
+            <Notification01Icon className="w-4 h-4 text-muted-foreground" />
           </div>
 
           {/* Date */}
-          <span className="font-semibold text-sm md:text-base">{formatted}</span>
+          <span className="font-medium text-sm md:text-base">{formatted}</span>
 
           {/* Badge count */}
           <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-black text-white text-xs font-semibold">

@@ -21,7 +21,7 @@ const SocialAuthButtons = () => {
         }}
       >
         <Icon />
-        Continue with {SUPPORTED_OAUTH_PROVIDERS_DETAILS[provider].name}
+        {SUPPORTED_OAUTH_PROVIDERS_DETAILS[provider].name}
       </BetterAuthActionButton>
     );
   });

@@ -105,28 +105,36 @@ export default function Navbar() {
                 aria-expanded={isMobileMenuOpen}
               >
                 <svg
-                  className="pointer-events-none"
-                  width={16}
-                  height={16}
+                  className="pointer-events-none stroke-current"
+                  width={24}
+                  height={24}
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  xmlns="http://www.w3.org/2000/svg"
                 >
+                  {/* Top line */}
                   <path
-                    d="M4 12L20 12"
-                    className="origin-center -translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-x-0 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[315deg]"
+                    d="M6 12H18"
+                    className="origin-center -translate-y-[6px] transition-all duration-300 
+      group-aria-expanded:translate-y-0 
+      group-aria-expanded:rotate-45"
                   />
+
+                  {/* Middle line */}
                   <path
                     d="M4 12H20"
-                    className="origin-center transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.8)] group-aria-expanded:rotate-45"
+                    className="origin-center transition-all duration-300 
+      group-aria-expanded:opacity-0"
                   />
+
+                  {/* Bottom line */}
                   <path
-                    d="M4 12H20"
-                    className="origin-center translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[135deg]"
+                    d="M6 12H18"
+                    className="origin-center translate-y-[6px] transition-all duration-300 
+      group-aria-expanded:translate-y-0 
+      group-aria-expanded:-rotate-45"
                   />
                 </svg>
               </Button>

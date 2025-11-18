@@ -62,25 +62,35 @@ export default function AppSidebar({
       >
         <svg
           className="pointer-events-none stroke-current"
-          width={20}
-          height={20}
+          width={24}
+          height={24}
           viewBox="0 0 24 24"
           fill="none"
-          strokeWidth="2"
+          strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
+          {/* Top line */}
           <path
-            d="M4 12L20 12"
-            className="origin-center -translate-y-[7px] transition-all duration-300 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[315deg]"
+            d="M6 12H18"
+            className="origin-center -translate-y-[6px] transition-all duration-300 
+      group-aria-expanded:translate-y-0 
+      group-aria-expanded:rotate-45"
           />
+
+          {/* Middle line */}
           <path
             d="M4 12H20"
-            className="origin-center transition-all duration-300 group-aria-expanded:rotate-45"
+            className="origin-center transition-all duration-300 
+      group-aria-expanded:opacity-0"
           />
+
+          {/* Bottom line */}
           <path
-            d="M4 12H20"
-            className="origin-center translate-y-[7px] transition-all duration-300 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[135deg]"
+            d="M6 12H18"
+            className="origin-center translate-y-[6px] transition-all duration-300 
+      group-aria-expanded:translate-y-0 
+      group-aria-expanded:-rotate-45"
           />
         </svg>
       </button>

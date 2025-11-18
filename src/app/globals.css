@@ -117,6 +117,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-instrument: var(--font-instrument-serif);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -248,15 +249,15 @@
   .auth-cta-container .auth-cta-card {
     position: relative;
     width: 100%;
-    height: 200px;
+    height: auto;
     background: var(--primary);
     border-radius: 50px;
     border-top-right-radius: 70px;
   }
 
   .auth-cta-container .auth-cta-card .auth-cta-box {
-    position: absolute;
-    inset: 10px;
+    position: relative;
+    padding: 10px;
     background: var(--background);
     border-radius: 10px;
   }
@@ -264,6 +265,7 @@
   .auth-cta-container .auth-cta-card .auth-cta-box .auth-cta-badge {
     right: 0;
     position: absolute;
+    top: -15px;
     width: 100px;
     height: 100px;
     background: var(--primary);
@@ -285,7 +287,7 @@
   .auth-cta-container .auth-cta-card .auth-cta-box .auth-cta-badge::after {
     content: "";
     position: absolute;
-    top: 0;
+    top: 15px;
     left: -30px;
     width: 30px;
     height: 30px;
