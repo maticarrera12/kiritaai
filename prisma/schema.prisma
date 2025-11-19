@@ -23,7 +23,7 @@ model User {
   image         String?
   theme          String?   @default("system")
   language       String?   @default("en")
-
+  banned        Boolean  @default(false)
   
   // Better Auth relations
   sessions      Session[]

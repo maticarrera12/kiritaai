@@ -93,7 +93,7 @@ export default function SignUpPage() {
                 <Separator />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-transparent text-muted-foreground">
+                <span className="px-2 bg-background text-muted-foreground">
                   {t("orContinueWith")}
                 </span>
               </div>

@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
+import { admin } from "better-auth/plugins";
 
 import { sendEmailVerificationEmail } from "./emails/emailVerification";
 import { sendChangeEmailVerification } from "./emails/sendChangeEmailVerification";
@@ -72,6 +73,12 @@ export const auth = betterAuth({
         type: "string",
         required: false,
       },
+      role: {
+        type: "string",
+        required: false,
+        defaultValue: "USER",
+        input: false,
+      },
     },
   },
   database: prismaAdapter(prisma, { provider: "postgresql" }),
@@ -100,8 +107,12 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
-
-  plugins: [nextCookies()],
+  plugins: [
+    nextCookies(),
+    admin({
+      adminRoles: ["ADMIN"],
+    }),
+  ],
 });
 
 // Exportar prisma y helper para uso manual

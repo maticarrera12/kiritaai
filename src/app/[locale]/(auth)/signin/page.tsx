@@ -98,7 +98,9 @@ export default function SignInPage() {
                 <Separator />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-card text-muted-foreground">{t("orContinueWith")}</span>
+                <span className="px-2 bg-background text-muted-foreground">
+                  {t("orContinueWith")}
+                </span>
               </div>
             </div>
 

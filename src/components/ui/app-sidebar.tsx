@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowLeftDoubleIcon } from "hugeicons-react";
 import { LogOutIcon, type LucideIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 import { LanguageSwitcher } from "@/components/navbar/languaje-switcher";
@@ -47,6 +48,13 @@ export default function AppSidebar({
   const { pathname } = useLocaleRouting();
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    setIsOpen(false);
+    await signOut();
+    router.refresh();
+  };
 
   return (
     <>
@@ -246,10 +254,7 @@ export default function AppSidebar({
             {/* Logout */}
             <div className="px-4 py-1.5">
               <button
-                onClick={() => {
-                  setIsOpen(false);
-                  signOut();
-                }}
+                onClick={handleSignOut}
                 className={cn(
                   "grid h-9 w-full grid-cols-[24px_1fr] items-center rounded-md text-sm text-foreground",
                   "hover:bg-white/10"
