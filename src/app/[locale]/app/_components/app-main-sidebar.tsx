@@ -1,7 +1,12 @@
 "use client";
 
-import { Archive02Icon, Configuration01Icon, SparklesIcon, StarIcon } from "hugeicons-react";
-import { LayoutDashboardIcon } from "lucide-react";
+import {
+  Archive02Icon,
+  Configuration01Icon,
+  Search02Icon,
+  SparklesIcon,
+  StarIcon,
+} from "hugeicons-react";
 import { useTranslations } from "next-intl";
 
 import { CreditBalance } from "@/components/credits/credits-balance";
@@ -15,9 +20,9 @@ export default function AppMainSidebar() {
       label: t("sections.main"),
       items: [
         {
-          name: t("menu.dashboard"),
+          name: t("menu.search"),
           href: "/app",
-          icon: LayoutDashboardIcon,
+          icon: Search02Icon,
         },
         {
           name: t("menu.createBrand"),

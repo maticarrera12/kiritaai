@@ -19,7 +19,7 @@ const layout = async ({ children, params }: any) => {
     select: { role: true },
   });
 
-  if (user?.role !== "ADMIN") {
+  if (user?.role !== "admin") {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">

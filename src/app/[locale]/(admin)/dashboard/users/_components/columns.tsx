@@ -22,7 +22,7 @@ export type UserColumn = {
   id: string;
   name: string;
   email: string;
-  role: "USER" | "ADMIN";
+  role: "user" | "admin";
   plan: "FREE" | "PRO" | "BUSINESS";
   status: "ACTIVE" | "PAST_DUE" | "CANCELED" | "TRIALING" | "PAUSED";
   credits: number;
@@ -109,7 +109,7 @@ export const columns: ColumnDef<UserColumn>[] = [
     header: "Rol",
     cell: ({ row }) => {
       const role = row.original.role;
-      return <Badge variant={role === "ADMIN" ? "default" : "secondary"}>{role}</Badge>;
+      return <Badge variant={role === "admin" ? "default" : "secondary"}>{role}</Badge>;
     },
   },
   {

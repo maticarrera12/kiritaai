@@ -16,8 +16,8 @@ datasource db {
 // ============================================
 
 enum Role {
-  USER
-  ADMIN
+  user
+  admin
 }
 
 // Actualizado a tus nuevos planes
@@ -100,7 +100,7 @@ model User {
   banned       Boolean   @default(false)
   banReason    String?
   banExpires   DateTime?
-  role         Role       @default(USER)
+  role         Role       @default(user)
 
   // Better Auth Relations
   sessions      Session[]

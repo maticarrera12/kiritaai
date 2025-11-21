@@ -48,7 +48,7 @@ async function handleOAuthCallback(request: NextRequest, method: "GET" | "POST")
                   gte: new Date(Date.now() - 5000), // Últimos 5 segundos
                 },
                 role: {
-                  not: "ADMIN", // Solo verificar usuarios que no son admin
+                  not: "admin", // Solo verificar usuarios que no son admin
                 },
               },
               orderBy: {

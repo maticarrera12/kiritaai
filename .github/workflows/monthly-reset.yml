@@ -2,9 +2,8 @@ name: Monthly Credit Reset
 
 on:
   schedule:
-    # Runs at 00:00 on the first day of every month (UTC)
     - cron: "0 0 1 * *"
-  workflow_dispatch: # Allows manual trigger
+  workflow_dispatch: 
 
 jobs:
   reset-credits:

@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       select: { role: true },
     });
 
-    return NextResponse.json({ isAdmin: user?.role === "ADMIN" });
+    return NextResponse.json({ isAdmin: user?.role === "admin" });
   } catch {
     return NextResponse.json({ isAdmin: false }, { status: 200 });
   }
