@@ -1,5 +1,5 @@
 // ============================================
-// PRISMA SCHEMA - AI Brand Kit + Better Auth
+// PRISMA SCHEMA - App Analyzer (Hybrid Pricing)
 // ============================================
 
 generator client {
@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "postgresql" // O mysql/sqlite según tu caso
   url      = env("DATABASE_URL")
 }
 
@@ -20,9 +20,11 @@ enum Role {
   ADMIN
 }
 
+// Actualizado a tus nuevos planes
 enum PlanType {
   FREE
-  PRO
+  PRO_INDIE
+  POWER_BUSINESS
 }
 
 enum PlanStatus {
@@ -39,17 +41,17 @@ enum SubscriptionProvider {
 }
 
 enum CreditTransactionType {
-  DEDUCTION
-  REFUND
-  PURCHASE
-  SUBSCRIPTION
-  BONUS
+  DEDUCTION       // Gasto de IA
+  REFUND          // Error en GPT
+  PURCHASE        // Pack extra
+  SUBSCRIPTION    // Recarga mensual
+  BONUS           // Regalo manual
   ADMIN_ADJUSTMENT
 }
 
 enum PurchaseType {
   SUBSCRIPTION
-  UPGRADE
+  PACK_ONE_TIME   // Para packs de créditos extra
 }
 
 enum PurchaseStatus {
@@ -58,11 +60,6 @@ enum PurchaseStatus {
   FAILED
   REFUNDED
   CANCELED
-}
-
-enum PlanInterval {
-  MONTHLY
-  YEARLY
 }
 
 enum Platform {
@@ -84,9 +81,8 @@ enum ChatRole {
   SYSTEM
 }
 
-
 // ============================================
-// BETTER AUTH MODELS
+// BETTER AUTH MODELS (User & Session)
 // ============================================
 
 model User {
@@ -95,55 +91,55 @@ model User {
   email         String    @unique
   emailVerified Boolean   @default(false)
   image         String?
+  
+  // Settings
   theme          String?   @default("system")
   language       String?   @default("en")
+  
+  // Access Control
   banned       Boolean   @default(false)
   banReason    String?
   banExpires   DateTime?
+  role         Role       @default(USER)
 
-  // Better Auth
+  // Better Auth Relations
   sessions      Session[]
   accounts      Account[]      
 
-  // Roles & Access
-  role          Role       @default(USER)
-
-  // Current Plan
+  // --- SAAS & BILLING ---
+  
   plan          PlanType    @default(FREE)
   planStatus    PlanStatus  @default(ACTIVE)
 
-  // Credits
-  credits         Int   @default(20)
+  // 1. MONEDA REAL (IA): Créditos acumulables/mensuales
+  credits         Int   @default(0)
   lifetimeCredits Int   @default(0)
 
-  // Subscriptions
+  // 2. LÍMITE DIARIO (Scraping): Se resetea cada 24h
+  dailyUsage      DailyUsage?
+
+  // Subscription Details
   subscriptionProvider   SubscriptionProvider?
   subscriptionId         String?   @unique
-  subscriptionStatus     String?
   currentPeriodStart     DateTime?
   currentPeriodEnd       DateTime?
   cancelAtPeriodEnd      Boolean   @default(false)
 
   stripeCustomerId       String?   @unique
-  stripePriceId          String?
-
   lemonSqueezyCustomerId String?   @unique
-  lemonSqueezyVariantId  String?
 
+  // Relations
   creditHistory CreditTransaction[]
   purchases     Purchase[]
-
   trackedApps   TrackedApp[]
   analyses      Analysis[]
   chatMessages  ChatMessage[]   
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  updatedAt DateTime @updatedAt
 
   @@index([email])
   @@index([plan])
-  @@index([stripeCustomerId])
-  @@index([lemonSqueezyCustomerId])
   @@map("user")
 }
 
@@ -186,15 +182,29 @@ model Verification {
   value      String
   expiresAt  DateTime
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
+  updatedAt  DateTime @updatedAt
 
   @@map("verification")
 }
 
+// ============================================
+// TRACKING DE USO (NUEVO)
+// ============================================
 
+// Controla el límite de búsquedas diarias (Scraping)
+model DailyUsage {
+  id        String   @id @default(cuid())
+  userId    String   @unique // Una entrada por usuario
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  date      String   // Formato "YYYY-MM-DD" para fácil reseteo
+  searches  Int      @default(0)
+  
+  updatedAt DateTime @updatedAt
+}
 
 // ============================================
-// CREDITS SYSTEM
+// SISTEMA DE CRÉDITOS (IA)
 // ============================================
 
 model CreditTransaction {
@@ -202,29 +212,27 @@ model CreditTransaction {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  transactionGroupId String?
-
   type    CreditTransactionType
-  amount  Int
-  balance Int
+  amount  Int     // Puede ser negativo (gasto) o positivo (compra)
+  balance Int     // Saldo después de la transacción
 
-  reason      String
+  reason      String  // "ai_analysis", "monthly_reset"
   description String?
 
+  // Opcional: Vincular a una compra real de dinero
   purchaseId String?
   purchase   Purchase? @relation(fields: [purchaseId], references: [id])
 
+  // Metadata útil: { "appId": "com.whatsapp", "tokensUsed": 450 }
   metadata Json?
 
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
-  @@index([type])
 }
 
-
 // ============================================
-// PURCHASES
+// COMPRAS (Stripe / LemonSqueezy)
 // ============================================
 
 model Purchase {
@@ -235,59 +243,137 @@ model Purchase {
   type     PurchaseType
   provider SubscriptionProvider
 
+  // Qué compró
   plan    PlanType?
-  credits Int?
+  credits Int?      // Si compró un pack de créditos extra
 
-  amount   Int
-  currency String @default("usd")
+  amount   Int      // En centavos
+  currency String   @default("usd")
 
-  providerCustomerId     String
-  providerPaymentId      String
-  providerSubscriptionId String?
+  // IDs externos
+  providerPaymentId      String   @unique // ID de Stripe Charge / Invoice
   providerProductId      String?
 
   status PurchaseStatus
-
-  metadata Json?
 
   creditTransactions CreditTransaction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([provider, providerPaymentId])
   @@index([userId])
-  @@index([provider])
-  @@index([status])
 }
 
-
-
 // ============================================
-// PLAN LIMITS & FEATURES
+// CORE APP: SCRAPING & ANALYSIS
 // ============================================
 
-model PlanLimit {
-  id       String       @id @default(cuid())
-  plan     PlanType
-  interval PlanInterval @default(MONTHLY)
+model TrackedApp {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  monthlyCredits      Int
-  maxProjectsPerMonth Int?
-  maxAssetsPerProject Int?
+  appId    String   // com.example.app
+  platform Platform @default(ANDROID)
 
-  features Json
+  name      String?
+  iconUrl   String?
+  developer String?
+
+  // Historial de análisis de esta app para este usuario
+  analyses Analysis[] @relation("AppAnalyses")
+
+  lastAnalysisId String? @unique
+  lastAnalysis   Analysis? @relation("LastAppAnalysis", fields: [lastAnalysisId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([plan, interval])
+  @@unique([userId, appId]) // Un usuario solo trackea una app una vez
 }
 
+model Analysis {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Relación con la app trackeada
+  trackedAppId String?
+  trackedApp   TrackedApp? @relation("AppAnalyses", fields: [trackedAppId], references: [id])
+
+  // Relación inversa para saber si fue el último
+  lastAnalysisOf TrackedApp? @relation("LastAppAnalysis")
+
+  // Datos crudos del momento (Snapshot)
+  appId       String
+  appName     String? 
+  appIcon     String?
+  platform    Platform @default(ANDROID)
+  
+  // Scraping Result
+  rawReviews  Json     // Array de reviews scrapeadas
+  reviewCount Int
+
+  // AI Result
+  insights    Json     // El análisis de oportunidades de negocio
+  sentiment   Json?    // Resumen de sentimiento
+  
+  // Costo
+  creditsUsed Int      @default(1)
+
+  // Features detectadas
+  featureRequests FeatureRequest[]
+
+  // Chat context
+  chatMessages ChatMessage[]
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([appId])
+}
+
+model FeatureRequest {
+  id         String   @id @default(cuid())
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+  sentiment   String? // "negative" (queja) o "suggestion"
+  frequency   Int     // Cuántas personas mencionaron esto
+  priority    FeaturePriority @default(MEDIUM)
+
+  createdAt DateTime @default(now())
+}
 
 // ============================================
-// Waitlist
+// CHATBOT CONTEXT
+// ============================================
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // El chat siempre es sobre un análisis específico
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  role       ChatRole // USER, ASSISTANT
+  content    String   @db.Text
+
+  // Costo (opcional, si cobras por mensaje)
+  creditsUsed Int     @default(0)
+
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([analysisId])
+}
+
+// ============================================
+// WAITLIST (Opcional, si aún la usas)
 // ============================================
 
 model WaitlistUser {
@@ -300,110 +386,4 @@ model WaitlistUser {
   referrals    WaitlistUser[] @relation("Referrals")
   invited      Boolean        @default(false)
   createdAt    DateTime       @default(now())
-}
-
-// ============================================
-// TRACKED ANDROID / IOS / WEB APPS
-// ============================================
-
-model TrackedApp {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  appId    String
-  platform Platform @default(ANDROID)
-
-  name      String?
-  iconUrl   String?
-  developer String?
-
-  analyses Analysis[] @relation("TrackedAppAnalyses")
-
-  lastAnalysisId String? @unique
-  lastAnalysis   Analysis? @relation("TrackedAppLastAnalysis", fields: [lastAnalysisId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, appId])
-}
-
-// ============================================
-// ANALYSIS HISTORY
-// ============================================
-model Analysis {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-
-  // Relación A → historial
-  trackedAppId String?
-  trackedApp   TrackedApp? @relation("TrackedAppAnalyses", fields: [trackedAppId], references: [id])
-
-  // Relación B → último análisis
-  lastAnalysisOf TrackedApp? @relation("TrackedAppLastAnalysis")
-
-  appId       String
-  platform    Platform @default(ANDROID)
-
-  rawReviews  Json
-  reviewCount Int
-
-  insights    Json
-  sentiment   Json?
-
-  featureRequests FeatureRequest[]
-
-  creditsUsed Int @default(0)
-
-  chatMessages ChatMessage[] @relation("AnalysisChatMessages")
-
-  createdAt   DateTime @default(now())
-
-  @@index([userId])
-  @@index([appId])
-}
-
-
-
-
-
-// ============================================
-// FEATURE REQUESTS
-// ============================================
-
-model FeatureRequest {
-  id         String   @id @default(cuid())
-  analysisId String
-  analysis   Analysis @relation(fields: [analysisId], references: [id])
-
-  title       String
-  description String?
-  frequency   Int
-  priority    FeaturePriority @default(MEDIUM)
-
-  createdAt DateTime @default(now())
-}
-
-
-// ============================================
-// CHATBOT MEMORY
-// ============================================
-
-model ChatMessage {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  analysisId String?
-  analysis   Analysis? @relation("AnalysisChatMessages", fields: [analysisId], references: [id])
-
-  role       ChatRole
-  content    String
-
-  createdAt  DateTime @default(now())
-
-  @@index([userId])
-  @@index([analysisId])
 }

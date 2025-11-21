@@ -1,164 +1,178 @@
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, XCircle, ArrowRight, Receipt } from "lucide-react";
 import { headers } from "next/headers";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Link } from "@/i18n/routing";
-import { auth } from "@/lib/auth";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "@/i18n/routing"; // O tu import de next/link estándar
+import { auth } from "@/lib/auth"; // Better Auth
 import { prisma } from "@/lib/prisma";
-import type { PaymentMetadata } from "@/types/payment";
 
+// Helper para formatear moneda
 function formatCurrency(amount: number, currency = "USD") {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount);
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 0,
+  }).format(amount);
 }
 
-// Helper seguro para fechas (sin hydration mismatch)
+// Helper para formatear fecha
 function formatDateSafe(date?: Date | string | null) {
-  if (!date) return "-";
+  if (!date) return "N/A";
   try {
-    const d = new Date(date);
-    return d.toISOString().split("T")[0];
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   } catch {
-    return "-";
+    return "N/A";
   }
 }
 
-const page = async ({
+// Helper para limpiar nombres de planes (PRO_INDIE -> Pro Indie)
+function formatPlanName(plan: string) {
+  return plan
+    .toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (l) => l.toUpperCase());
+}
+
+export default async function PaymentPage({
   searchParams,
 }: {
   searchParams?: Promise<{ success?: string; error?: string }>;
-}) => {
+}) {
+  // 1. Resolver params y sesión
+  const params = await searchParams;
+  const isSuccess = params?.success === "true";
+  const isError = params?.success === "false"; // Lemon suele mandar success=false
+
   const session = await auth.api.getSession({ headers: await headers() });
+
   if (!session?.user) {
     return (
-      <div className="mx-auto max-w-4xl px-6 py-20 text-center">
-        <p className="text-sm text-muted-foreground">You must be signed in to view this page.</p>
+      <div className="flex h-[50vh] items-center justify-center">
+        <p className="text-muted-foreground">Please sign in to view this page.</p>
       </div>
     );
   }
 
-  const userId = session.user.id;
-
-  // Buscar la última compra
-  const purchase = await prisma.purchase.findFirst({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-    select: {
-      type: true,
-      amount: true,
-      currency: true,
-      createdAt: true,
-      metadata: true,
-      provider: true,
-    },
-  });
-
+  // 2. Obtener datos frescos
   const user = await prisma.user.findUnique({
-    where: { id: userId },
+    where: { id: session.user.id },
     select: {
       plan: true,
       planStatus: true,
       currentPeriodEnd: true,
+      email: true,
     },
   });
 
-  const md = purchase?.metadata as PaymentMetadata | null;
-  const cardLabel =
-    md?.cardBrand && md?.cardLast4
-      ? `${md.cardBrand.charAt(0).toUpperCase() + md.cardBrand.slice(1)} •••• ${md.cardLast4}`
-      : "—";
+  // Intentamos buscar la compra, pero no dependemos de ella al 100% por si el webhook tarda
+  const latestPurchase = await prisma.purchase.findFirst({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: "desc" },
+  });
 
-  const planName = user?.plan || "—";
-  const planStatus = user?.planStatus || "ACTIVE";
-  const renewal = formatDateSafe(user?.currentPeriodEnd);
-
-  const resolvedSearchParams = await searchParams;
-  const success = resolvedSearchParams?.success;
-  const errorMsg = resolvedSearchParams?.error;
-
-  return (
-    <div className="mx-auto max-w-2xl px-6 py-20 text-center">
-      <div className="flex flex-col items-center justify-center space-y-6">
-        {success === "true" && (
-          <div className="w-full rounded-lg border border-green-200 bg-green-50 p-4 text-left">
-            <p className="text-sm font-medium text-green-800">Payment Successful</p>
-            <p className="text-xs text-green-700">Your subscription has been activated.</p>
+  // --- CASO DE ERROR ---
+  if (isError) {
+    return (
+      <div className="mx-auto max-w-md px-6 py-20 text-center">
+        <div className="mb-6 flex justify-center">
+          <div className="rounded-full bg-red-100 p-3">
+            <XCircle className="h-10 w-10 text-red-600" />
           </div>
-        )}
-        {success === "false" && (
-          <div className="w-full rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-left">
-            <p className="text-sm font-medium text-destructive">Payment Failed</p>
-            <p className="text-xs text-muted-foreground">
-              {errorMsg || "We couldn't process your payment."}
-            </p>
-          </div>
-        )}
-        <CheckCircle2 className="h-16 w-16 text-green-500" />
-        <h1 className="text-3xl font-bold text-foreground">Payment Successful</h1>
-        <p className="text-muted-foreground">
-          Your payment has been processed successfully. Your plan is now active.
-        </p>
-
-        <div className="w-full space-y-4">
-          <Card className="p-6 text-left">
-            <h2 className="text-lg font-semibold text-foreground mb-3">Subscription Details</h2>
-            <div className="grid grid-cols-1 gap-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Plan</span>
-                <span className="font-medium">{planName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Status</span>
-                <span className="font-medium">{planStatus}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Next Renewal</span>
-                <span className="font-medium">{renewal}</span>
-              </div>
-              {purchase && (
-                <>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Amount</span>
-                    <span className="font-medium">
-                      {formatCurrency(
-                        (purchase.amount || 0) / 100,
-                        purchase.currency?.toUpperCase() || "USD"
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Provider</span>
-                    <span className="font-medium">{purchase.provider}</span>
-                  </div>
-                </>
-              )}
-            </div>
-          </Card>
-
-          <Card className="p-6 text-left">
-            <h2 className="text-lg font-semibold text-foreground mb-3">Payment Method</h2>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground">{cardLabel}</p>
-                <p className="text-xs text-muted-foreground">
-                  {purchase ? `Paid on ${formatDateSafe(purchase.createdAt)}` : "—"}
-                </p>
-              </div>
-              <Button variant="outline" className="text-xs">
-                Update
-              </Button>
-            </div>
-          </Card>
         </div>
-
-        <div className="flex justify-center pt-4">
-          <Button asChild>
-            <Link href="/settings/billing">Go to Billing</Link>
+        <h1 className="mb-2 text-2xl font-bold text-gray-900">Payment Failed</h1>
+        <p className="mb-8 text-muted-foreground">
+          {params?.error || "We couldn't process your payment. Please try again."}
+        </p>
+        <div className="flex justify-center gap-4">
+          <Button variant="outline" asChild>
+            <Link href="/pricing">Try Again</Link>
+          </Button>
+          <Button variant="ghost" asChild>
+            <Link href="/dashboard">Go to Dashboard</Link>
           </Button>
         </div>
       </div>
+    );
+  }
+
+  // --- CASO DE ÉXITO ---
+  return (
+    <div className="mx-auto max-w-xl px-6 py-20">
+      <div className="mb-8 text-center">
+        <div className="mb-6 flex justify-center">
+          <div className="rounded-full bg-green-100 p-3">
+            <CheckCircle2 className="h-12 w-12 text-green-600" />
+          </div>
+        </div>
+        <h1 className="mb-2 text-3xl font-bold text-gray-900">Thank you for your purchase!</h1>
+        <p className="text-muted-foreground">
+          Your subscription to <strong>{formatPlanName(user?.plan || "Pro")}</strong> is now active.
+        </p>
+      </div>
+
+      <Card className="overflow-hidden border-gray-200 shadow-sm">
+        <CardHeader className="bg-gray-50/50 border-b border-gray-100 pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Receipt className="h-5 w-5 text-gray-500" />
+            Order Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6 space-y-4">
+          {/* Detalles del Plan */}
+          <div className="flex justify-between items-center border-b border-gray-100 pb-4">
+            <div>
+              <p className="font-medium text-gray-900">Plan</p>
+              <p className="text-xs text-muted-foreground capitalize">
+                {user?.planStatus?.toLowerCase()}
+              </p>
+            </div>
+            <p className="font-bold text-gray-900 text-lg">{formatPlanName(user?.plan || "")}</p>
+          </div>
+
+          {/* Detalles de Pago (Si el webhook ya llegó) */}
+          {latestPurchase ? (
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Amount Paid</span>
+              <span className="font-medium">
+                {formatCurrency(latestPurchase.amount / 100, latestPurchase.currency)}
+              </span>
+            </div>
+          ) : (
+            <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-700">
+              Processing your receipt... Details will appear in your billing settings shortly.
+            </div>
+          )}
+
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">Next Renewal</span>
+            <span className="font-medium">{formatDateSafe(user?.currentPeriodEnd)}</span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">Customer Email</span>
+            <span className="font-medium text-sm">{user?.email}</span>
+          </div>
+        </CardContent>
+
+        <CardFooter className="bg-gray-50/50 border-t border-gray-100 p-6 flex flex-col sm:flex-row gap-3">
+          {/* Botón Principal: Ir a usar la app */}
+          <Button className="w-full sm:w-auto flex-1" size="lg" asChild>
+            <Link href="/app">
+              Go to App <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+
+          {/* Botón Secundario: Ver factura */}
+          <Button variant="outline" className="w-full sm:w-auto" asChild>
+            <Link href="/settings/billing">Billing Settings</Link>
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
-};
-
-export default page;
+}

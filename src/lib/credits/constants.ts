@@ -1,100 +1,67 @@
 // lib/credits/constants.ts
 
-// ============================================
-// PLANES (Solo FREE, PRO, BUSINESS)
-// ============================================
 export const PLANS = {
   FREE: {
     id: "free",
     name: "Free",
-    description: "Essential tools to get started.",
-    featuresHeading: "WHAT'S INCLUDED",
+    description: "To try the tool.",
+    featuresHeading: "INCLUDES",
     price: { monthly: 0 },
-    credits: {
-      monthly: 20,
-      rollover: false,
-    },
     limits: {
-      maxProjects: 3,
-      maxAssetsPerProject: 10,
+      dailySearches: Number(process.env.FREE_DAILY_SEARCH_LIMIT) || 5,
+      aiCredits: 1,
     },
-    features: [
-      "Logo generator (4 variations)",
-      "Avatar generator",
-      "Basic brand names",
-      "Watermarked downloads",
-      "Standard quality",
-    ],
-    stripe: { monthly: null, annual: null },
+    features: ["5 daily searches", "View basic app cards", "1 AI analysis", "No data export"],
+    // AGREGADO: Necesario para que TS no se queje
     lemonSqueezy: { monthly: null, annual: null },
   },
 
-  PRO: {
-    id: "pro",
-    name: "Pro",
-    description: "Advanced features for growing needs.",
+  PRO_INDIE: {
+    id: "pro_indie",
+    name: "Pro Indie",
+    description: "For entrepreneurs and analysts.",
     featuresHeading: "EVERYTHING IN FREE, PLUS:",
     price: {
       monthly: Number(process.env.PRO_PRICE_MONTHLY) || 19,
       annual: Number(process.env.PRO_PRICE_ANNUAL) || 190,
     },
-    credits: {
-      monthly: Number(process.env.PRO_CREDITS_MONTHLY) || 200,
-      rollover: true,
-      maxRollover: Number(process.env.PRO_CREDITS_MAX_ROLLOVER) || 400,
-    },
     limits: {
-      maxProjects: null, // unlimited
-      maxAssetsPerProject: null,
+      dailySearches: Number(process.env.PRO_DAILY_SEARCH_LIMIT) || 150,
+      aiCredits: Number(process.env.PRO_AI_CREDITS_MONTHLY) || 30,
     },
     features: [
-      "Everything in Free",
-      "200 credits/month (rollover to 400)",
-      "HD quality generations",
-      "No watermarks",
-      "Vector logo exports (SVG)",
-      "Brand style guide PDF",
-      "Priority generation queue",
+      "150 daily searches",
+      "30 AI analyses per month",
+      "Opportunity detection",
+      "Unlimited history",
     ],
-    stripe: {
-      monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY || "",
-      annual: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_ANNUAL || "",
-    },
+    // AGREGADO: Configuración de LS
     lemonSqueezy: {
       monthly: process.env.NEXT_PUBLIC_LS_VARIANT_ID_PRO_MONTHLY || "",
       annual: process.env.NEXT_PUBLIC_LS_VARIANT_ID_PRO_ANNUAL || "",
     },
   },
 
-  BUSINESS: {
-    id: "business",
-    name: "Business",
-    description: "Full power and support for teams.",
+  POWER_BUSINESS: {
+    id: "power_business",
+    name: "Power Business",
+    description: "For agencies and high volume.",
     featuresHeading: "EVERYTHING IN PRO, PLUS:",
     price: {
       monthly: Number(process.env.BUSINESS_PRICE_MONTHLY) || 49,
       annual: Number(process.env.BUSINESS_PRICE_ANNUAL) || 490,
     },
-    credits: {
-      monthly: Number(process.env.BUSINESS_CREDITS_MONTHLY) || 600,
-      rollover: true,
-      maxRollover: Number(process.env.BUSINESS_CREDITS_MAX_ROLLOVER) || 1200,
-    },
     limits: {
-      maxProjects: null,
-      maxAssetsPerProject: null,
+      dailySearches: Number(process.env.BUSINESS_DAILY_SEARCH_LIMIT) || 500,
+      aiCredits: Number(process.env.BUSINESS_AI_CREDITS_MONTHLY) || 100,
     },
     features: [
-      "Everything in Pro",
-      "600 credits/month (rollover to 1,200)",
-      "API access",
-      "Custom brand guidelines",
+      "500 daily searches",
+      "100 AI analyses per month",
       "Priority support",
+      "White-label reports",
     ],
-    stripe: {
-      monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_BUSINESS_MONTHLY || "",
-      annual: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_BUSINESS_ANNUAL || "",
-    },
+    // AGREGADO: Configuración de LS
     lemonSqueezy: {
       monthly: process.env.NEXT_PUBLIC_LS_VARIANT_ID_BUSINESS_MONTHLY || "",
       annual: process.env.NEXT_PUBLIC_LS_VARIANT_ID_BUSINESS_ANNUAL || "",
@@ -102,73 +69,56 @@ export const PLANS = {
   },
 } as const;
 
-// ============================================
-// PACKS DE CRÉDITOS (One-time purchases)
-// ============================================
 export const CREDIT_PACKS = {
-  // Pack único simple
-  BASIC: {
-    id: "basic",
-    name: process.env.PACK_NAME || "Credit Pack",
-    credits: Number(process.env.PACK_CREDITS) || 30,
-    price: Number(process.env.PACK_PRICE) || 5,
-    savings: 0,
-    description: "One-time credit purchase",
-    stripe: {
-      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PACK || "",
-    },
+  SMALL: {
+    id: "pack_small",
+    name: process.env.PACK_SMALL_NAME || "AI Starter Pack",
+    credits: Number(process.env.PACK_SMALL_CREDITS) || 10,
+    price: Number(process.env.PACK_SMALL_PRICE) || 5,
+    description: "10 extra AI analyses",
+    // AGREGADO: Configuración de LS para packs
     lemonSqueezy: {
-      variantId: process.env.NEXT_PUBLIC_LS_VARIANT_ID_PACK || "",
+      variantId: process.env.NEXT_PUBLIC_LS_VARIANT_ID_PACK_SMALL || "",
     },
   },
-
-  // Opcional: si quieres más opciones
-  // MEDIUM: { ... 100 créditos por $15 ... }
-  // LARGE: { ... 250 créditos por $35 ... }
+  LARGE: {
+    id: "pack_large",
+    name: process.env.PACK_LARGE_NAME || "AI Pro Pack",
+    credits: Number(process.env.PACK_LARGE_CREDITS) || 50,
+    price: Number(process.env.PACK_LARGE_PRICE) || 20,
+    description: "50 extra AI analyses",
+    // AGREGADO: Configuración de LS para packs
+    lemonSqueezy: {
+      variantId: process.env.NEXT_PUBLIC_LS_VARIANT_ID_PACK_LARGE || "",
+    },
+  },
 } as const;
 
-// ============================================
-// COSTOS DE CRÉDITOS (sin cambios)
-// ============================================
-export const CREDIT_COSTS = {
-  LOGO_GENERATION: Number(process.env.CREDIT_COST_LOGO) || 5,
-  AVATAR_GENERATION: Number(process.env.CREDIT_COST_AVATAR) || 3,
-  BRAND_NAME: Number(process.env.CREDIT_COST_BRAND_NAME) || 1,
-  TAGLINE: Number(process.env.CREDIT_COST_TAGLINE) || 1,
-  COLOR_PALETTE: Number(process.env.CREDIT_COST_COLOR_PALETTE) || 1,
-  BRAND_VOICE: Number(process.env.CREDIT_COST_BRAND_VOICE) || 2,
+export const AI_COSTS = {
+  OPPORTUNITY_ANALYSIS: Number(process.env.COST_ANALYSIS) || 1,
+  CHATBOT_MESSAGE: 0,
 } as const;
 
-// ============================================
-// FEATURES POR PLAN (sin cambios)
-// ============================================
 export const PLAN_FEATURES = {
   FREE: {
-    logoQuality: "standard",
-    watermark: true,
-    vectorExport: false,
-    pdfExport: false,
-    apiAccess: false,
-    priorityQueue: false,
-    teamSeats: 1,
+    canExportData: false,
+    hasAiAccess: false,
+    hasApiAccess: false,
+    supportLevel: "community",
   },
-  PRO: {
-    logoQuality: "hd",
-    watermark: false,
-    vectorExport: true,
-    pdfExport: true,
-    apiAccess: false,
-    priorityQueue: true,
-    teamSeats: 1,
+  PRO_INDIE: {
+    canExportData: true,
+    hasAiAccess: true,
+    hasApiAccess: false,
+    supportLevel: "standard",
   },
-  BUSINESS: {
-    logoQuality: "hd",
-    watermark: false,
-    vectorExport: true,
-    pdfExport: true,
-    apiAccess: true,
-    priorityQueue: true,
-    teamSeats: 5,
-    whiteLabel: true,
+  POWER_BUSINESS: {
+    canExportData: true,
+    hasAiAccess: true,
+    hasApiAccess: true,
+    supportLevel: "priority",
   },
 } as const;
+
+export type PlanId = keyof typeof PLANS;
+export type FeatureKey = keyof typeof PLAN_FEATURES.PRO_INDIE;

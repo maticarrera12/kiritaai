@@ -13,8 +13,6 @@ import Link from "next/link";
 import ReviewsList from "../_components/reviews-list";
 import { cn } from "@/lib/utils";
 
-// --- HELPER FUNCTIONS ---
-
 const formatCompactNumber = (num: string | number | undefined | null) => {
   if (!num) return "No Ratings";
   const value = typeof num === "string" ? parseInt(num.replace(/,/g, "")) : num;
@@ -61,12 +59,8 @@ export default async function AppDetailPage({ params }: { params: { appId: strin
 
   const { info, reviews } = data;
 
-  // --- LÓGICA DE FECHAS ---
-  // 1. Obtenemos el string crudo tal cual viene del backend
   const rawUpdatedString = info.lastUpdatedOn || info.updated || "Unknown";
 
-  // 2. Creamos un objeto Date SOLO para el cálculo matemático (abandoned check)
-  //    No usamos esto para mostrar el texto en pantalla.
   const lastUpdatedDate = new Date(rawUpdatedString);
   const today = new Date();
   const diffTime = Math.abs(today.getTime() - lastUpdatedDate.getTime());
@@ -217,7 +211,6 @@ export default async function AppDetailPage({ params }: { params: { appId: strin
               <div className="space-y-5">
                 <InfoRow label="Version" value={info.version || "Varies with device"} />
 
-                {/* CORRECCIÓN: Mostramos rawUpdatedString directamente */}
                 <InfoRow label="Updated" value={rawUpdatedString} highlight={isAbandoned} />
 
                 <InfoRow label="Released" value={info.released || "Unknown"} />

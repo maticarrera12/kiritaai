@@ -1,245 +1,189 @@
-// lib/credits/index.ts
-import type { CreditTransactionType, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
+import { PLANS, type PlanId } from "./constants";
 import { prisma } from "../prisma";
-import { PLANS } from "./constants";
 
+// ==========================================
+// 1. AI CREDITS SERVICE (ROBUST)
+// ==========================================
 export class CreditService {
-  // Check if user has enough credits
-  static async hasCredits(userId: string, amount: number): Promise<boolean> {
+  // Check balance
+  static async hasCredits(userId: string, amount: number = 1): Promise<boolean> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { credits: true },
     });
-
     return (user?.credits ?? 0) >= amount;
   }
 
-  // Get user's current balance
+  // Get balance
   static async getBalance(userId: string): Promise<number> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { credits: true },
     });
-
     return user?.credits ?? 0;
   }
 
-  // Deduct credits (for feature usage)
+  // DEDUCT CREDITS (For AI analysis)
+  // Usage: await CreditService.deduct({ userId, amount: 1, reason: 'ai_analysis', metadata: { appId: 'com.whatsapp' } })
   static async deduct(params: {
     userId: string;
     amount: number;
     reason: string;
     description?: string;
-    assetId?: string;
     metadata?: Prisma.InputJsonValue;
-  }): Promise<{ success: boolean; newBalance: number; error?: string }> {
-    const { userId, amount, reason, description, assetId, metadata } = params;
+  }) {
+    const { userId, amount, reason, description, metadata } = params;
 
     try {
-      // Use transaction to ensure consistency
-      const result = await prisma.$transaction(async (tx) => {
-        // 1. Get current balance with lock
-        const user = await tx.user.findUnique({
-          where: { id: userId },
-          select: { credits: true },
-        });
+      return await prisma.$transaction(async (tx) => {
+        const user = await tx.user.findUnique({ where: { id: userId } });
 
-        if (!user) {
-          throw new Error("User not found");
+        if (!user || user.credits < amount) {
+          throw new Error("Insufficient credits to perform this action.");
         }
 
-        if (user.credits < amount) {
-          throw new Error("Insufficient credits");
-        }
-
-        // 2. Update user credits
         const updatedUser = await tx.user.update({
           where: { id: userId },
           data: { credits: { decrement: amount } },
-          select: { credits: true },
         });
 
-        // 3. Create transaction record
         await tx.creditTransaction.create({
           data: {
             userId,
             type: "DEDUCTION",
-            amount: -amount, // Negative for deduction
+            amount: -amount,
             balance: updatedUser.credits,
             reason,
-            description: description || `Used ${amount} credits for ${reason}`,
-            assetId,
+            description: description || `AI consumption: ${reason}`,
             metadata,
           },
         });
 
-        return { newBalance: updatedUser.credits };
+        return { success: true, newBalance: updatedUser.credits };
       });
-
-      return { success: true, newBalance: result.newBalance };
     } catch (error) {
       return {
         success: false,
-        newBalance: await this.getBalance(userId),
         error: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
 
-  // Refund credits (for failed generations)
-  static async refund(params: {
-    userId: string;
-    amount: number;
-    reason: string;
-    assetId?: string;
-  }): Promise<void> {
-    const { userId, amount, reason, assetId } = params;
-
+  // REFUND (If GPT fails)
+  static async refund(userId: string, amount: number, reason: string) {
     await prisma.$transaction(async (tx) => {
-      // 1. Add credits back
-      const updatedUser = await tx.user.update({
+      const user = await tx.user.update({
         where: { id: userId },
         data: { credits: { increment: amount } },
-        select: { credits: true },
       });
 
-      // 2. Record refund
       await tx.creditTransaction.create({
         data: {
           userId,
           type: "REFUND",
-          amount, // Positive for addition
-          balance: updatedUser.credits,
+          amount: amount,
+          balance: user.credits,
           reason,
-          description: `Refunded ${amount} credits: ${reason}`,
-          assetId,
+          description: `Refund due to error: ${reason}`,
         },
       });
     });
   }
 
-  // Add credits (purchases, subscriptions, bonuses)
-  static async add(params: {
-    userId: string;
-    amount: number;
-    type: CreditTransactionType;
-    reason: string;
-    description?: string;
-    purchaseId?: string;
-  }): Promise<void> {
-    const { userId, amount, type, reason, description, purchaseId } = params;
+  // MONTHLY RESET (Call when Stripe webhook confirms renewal)
+  // In SaaS, it's normal NOT to accumulate (rollover), but to reset to the plan limit.
+  static async resetMonthlyCredits(userId: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || user.plan === "FREE") return;
 
-    await prisma.$transaction(async (tx) => {
-      const updatedUser = await tx.user.update({
-        where: { id: userId },
-        data: {
-          credits: { increment: amount },
-          lifetimeCredits: { increment: amount },
-        },
-        select: { credits: true },
-      });
+    const planLimit = PLANS[user.plan as PlanId].limits.aiCredits;
 
-      await tx.creditTransaction.create({
-        data: {
-          userId,
-          type,
-          amount,
-          balance: updatedUser.credits,
-          reason,
-          description: description || `Added ${amount} credits`,
-          purchaseId,
-        },
+    // If they have fewer credits than their plan, we replenish them.
+    // If they bought extra packs and have more, we DON'T take them away (we respect their purchase).
+    if (user.credits < planLimit) {
+      const diff = planLimit - user.credits;
+
+      await prisma.$transaction(async (tx) => {
+        const updatedUser = await tx.user.update({
+          where: { id: userId },
+          data: { credits: planLimit }, // Set directly to limit
+        });
+
+        await tx.creditTransaction.create({
+          data: {
+            userId,
+            type: "SUBSCRIPTION",
+            amount: diff,
+            balance: updatedUser.credits,
+            reason: "monthly_reset",
+            description: `Monthly reset of ${user.plan} plan`,
+          },
+        });
       });
-    });
+    }
   }
+}
 
-  // Monthly credit reset for subscriptions
-  static async monthlyReset(userId: string): Promise<void> {
+// ==========================================
+// 2. SEARCH SERVICE (LIGHTWEIGHT)
+// ==========================================
+export class DailyUsageService {
+  // Check and register a search
+  static async trackSearch(userId: string): Promise<{ allowed: boolean; error?: string }> {
+    const today = new Date().toISOString().split("T")[0]; // "2024-05-20"
+
+    // 1. Get current usage and plan
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { plan: true, credits: true },
+      include: { dailyUsage: true },
     });
 
-    if (!user || user.plan === "FREE") {
-      return; // Free users don't get monthly resets
+    if (!user) return { allowed: false, error: "User not found" };
+
+    // 2. Determine limit according to plan
+    const planLimit = PLANS[user.plan as PlanId].limits.dailySearches;
+
+    // 3. Check if we're on a new day or same day
+    let currentCount = 0;
+
+    if (user.dailyUsage && user.dailyUsage.date === today) {
+      currentCount = user.dailyUsage.searches;
     }
 
-    const planConfig = PLANS[user.plan];
-    const monthlyCredits = planConfig.credits.monthly;
-    const maxRollover = planConfig.credits.maxRollover || monthlyCredits;
-
-    // Calculate new balance (current + monthly, capped at maxRollover)
-    const newBalance = Math.min(user.credits + monthlyCredits, maxRollover);
-    const creditsAdded = newBalance - user.credits;
-
-    if (creditsAdded > 0) {
-      await this.add({
-        userId,
-        amount: creditsAdded,
-        type: "SUBSCRIPTION",
-        reason: "monthly_reset",
-        description: `Monthly ${user.plan} plan credits (${creditsAdded} credits)`,
-      });
+    // 4. Block if exceeds
+    if (currentCount >= planLimit) {
+      return {
+        allowed: false,
+        error: `You have reached your daily limit of ${planLimit} searches.`,
+      };
     }
-  }
 
-  // Get credit history
-  static async getHistory(userId: string, options?: { limit?: number; offset?: number }) {
-    return prisma.creditTransaction.findMany({
+    // 5. Increment (Upsert handles atomic creation or update)
+    await prisma.dailyUsage.upsert({
       where: { userId },
-      orderBy: { createdAt: "desc" },
-      take: options?.limit || 50,
-      skip: options?.offset || 0,
-      include: {
-        asset: {
-          select: {
-            type: true,
-            url: true,
-          },
-        },
-        purchase: {
-          select: {
-            type: true,
-            amount: true,
-          },
-        },
+      update: {
+        date: today, // If the date was old, update to today
+        searches: user.dailyUsage?.date === today ? { increment: 1 } : 1,
+      },
+      create: {
+        userId,
+        date: today,
+        searches: 1,
       },
     });
+
+    return { allowed: true };
   }
 
-  // Get usage statistics
-  static async getUsageStats(userId: string, days: number = 30) {
-    const since = new Date();
-    since.setDate(since.getDate() - days);
+  static async getUsage(userId: string) {
+    const today = new Date().toISOString().split("T")[0];
+    const usage = await prisma.dailyUsage.findUnique({ where: { userId } });
 
-    const transactions = await prisma.creditTransaction.findMany({
-      where: {
-        userId,
-        createdAt: { gte: since },
-        type: "DEDUCTION",
-      },
-      select: {
-        amount: true,
-        reason: true,
-        createdAt: true,
-      },
-    });
-
-    const totalUsed = transactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
-
-    const byFeature = transactions.reduce(
-      (acc, t) => {
-        acc[t.reason] = (acc[t.reason] || 0) + Math.abs(t.amount);
-        return acc;
-      },
-      {} as Record<string, number>
-    );
-
-    return {
-      totalUsed,
-      byFeature,
-      transactions: transactions.length,
-    };
+    if (usage && usage.date === today) {
+      return usage.searches;
+    }
+    return 0;
   }
 }
