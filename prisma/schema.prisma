@@ -12,6 +12,80 @@ datasource db {
 }
 
 // ============================================
+// ENUMS
+// ============================================
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PlanType {
+  FREE
+  PRO
+}
+
+enum PlanStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+  PAUSED
+}
+
+enum SubscriptionProvider {
+  STRIPE
+  LEMONSQUEEZY
+}
+
+enum CreditTransactionType {
+  DEDUCTION
+  REFUND
+  PURCHASE
+  SUBSCRIPTION
+  BONUS
+  ADMIN_ADJUSTMENT
+}
+
+enum PurchaseType {
+  SUBSCRIPTION
+  UPGRADE
+}
+
+enum PurchaseStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELED
+}
+
+enum PlanInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum Platform {
+  ANDROID
+  IOS
+  WEB
+}
+
+enum FeaturePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+
+// ============================================
 // BETTER AUTH MODELS
 // ============================================
 
@@ -23,16 +97,14 @@ model User {
   image         String?
   theme          String?   @default("system")
   language       String?   @default("en")
-  banned        Boolean  @default(false)
-  
-  // Better Auth relations
+  banned       Boolean   @default(false)
+  banReason    String?
+  banExpires   DateTime?
+
+  // Better Auth
   sessions      Session[]
   accounts      Account[]      
-  
-  // ============================================
-  // AI BRAND KIT - User Extensions
-  // ============================================
-  
+
   // Roles & Access
   role          Role       @default(USER)
 
@@ -44,7 +116,7 @@ model User {
   credits         Int   @default(20)
   lifetimeCredits Int   @default(0)
 
-  // Subscription tracking
+  // Subscriptions
   subscriptionProvider   SubscriptionProvider?
   subscriptionId         String?   @unique
   subscriptionStatus     String?
@@ -52,19 +124,18 @@ model User {
   currentPeriodEnd       DateTime?
   cancelAtPeriodEnd      Boolean   @default(false)
 
-  // Stripe
   stripeCustomerId       String?   @unique
   stripePriceId          String?
 
-  // Lemon Squeezy
   lemonSqueezyCustomerId String?   @unique
   lemonSqueezyVariantId  String?
 
-  // AI Brand Kit Relations
-  projects      BrandProject[]
-  assets        BrandAsset[]
   creditHistory CreditTransaction[]
   purchases     Purchase[]
+
+  trackedApps   TrackedApp[]
+  analyses      Analysis[]
+  chatMessages  ChatMessage[]   
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -120,106 +191,69 @@ model Verification {
   @@map("verification")
 }
 
-// ============================================
-// ENUMS
-// ============================================
 
-enum Role {
-  USER
-  ADMIN
-}
-
-enum PlanType {
-  FREE    
-  PRO     
-  BUSINESS 
-}
-
-enum PlanStatus {
-  ACTIVE
-  PAST_DUE
-  CANCELED
-  TRIALING
-  PAUSED
-}
-
-enum SubscriptionProvider {
-  STRIPE
-  LEMONSQUEEZY
-}
 
 // ============================================
 // CREDITS SYSTEM
 // ============================================
 
 model CreditTransaction {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   transactionGroupId String?
 
-  type        CreditTransactionType
-  amount      Int
-  balance     Int
+  type    CreditTransactionType
+  amount  Int
+  balance Int
 
   reason      String
   description String?
 
-  assetId     String?
-  asset       BrandAsset? @relation(fields: [assetId], references: [id])
+  purchaseId String?
+  purchase   Purchase? @relation(fields: [purchaseId], references: [id])
 
-  purchaseId  String?
-  purchase    Purchase? @relation(fields: [purchaseId], references: [id])
+  metadata Json?
 
-  metadata    Json?
-
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
   @@index([type])
 }
 
-enum CreditTransactionType {
-  DEDUCTION
-  REFUND
-  PURCHASE
-  SUBSCRIPTION
-  BONUS
-  ADMIN_ADJUSTMENT
-}
 
 // ============================================
 // PURCHASES
 // ============================================
 
 model Purchase {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  type        PurchaseType
-  provider    SubscriptionProvider
+  type     PurchaseType
+  provider SubscriptionProvider
 
-  plan        PlanType?
-  credits     Int?
+  plan    PlanType?
+  credits Int?
 
-  amount      Int
-  currency    String       @default("usd")
+  amount   Int
+  currency String @default("usd")
 
   providerCustomerId     String
   providerPaymentId      String
   providerSubscriptionId String?
   providerProductId      String?
 
-  status      PurchaseStatus
+  status PurchaseStatus
 
-  metadata    Json?
+  metadata Json?
 
   creditTransactions CreditTransaction[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([provider, providerPaymentId])
   @@index([userId])
@@ -227,130 +261,29 @@ model Purchase {
   @@index([status])
 }
 
-enum PurchaseType {
-  SUBSCRIPTION
-  CREDIT_PACK
-  UPGRADE
-}
 
-enum PurchaseStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
-  CANCELED
-}
-
-// ============================================
-// BRAND PROJECTS
-// ============================================
-
-model BrandProject {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  name             String
-  businessType     String
-  industry         String
-  targetAudience   String?
-  brandVibe        String[]
-  description      String?
-
-  assets      BrandAsset[]
-
-  isPublic    Boolean  @default(false)
-  isFavorite  Boolean  @default(false)
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([userId, createdAt])
-}
-
-// ============================================
-// GENERATED ASSETS
-// ============================================
-
-model BrandAsset {
-  id          String       @id @default(cuid())
-  projectId   String?
-  project     BrandProject? @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  type        AssetType
-  data        Json
-
-  url              String?
-  storageProvider  String   @default("vercel-blob")
-  storagePath      String?
-  fileSize         Int?
-  mimeType         String?
-
-  prompt           String?
-  creditsUsed      Int
-  generationTime   Int?
-  model            String?
-
-  status           AssetStatus @default(COMPLETED)
-  errorMessage     String?
-
-  isFavorite  Boolean @default(false)
-  downloads   Int     @default(0)
-
-  creditTransactions CreditTransaction[]
-
-  createdAt   DateTime @default(now())
-
-  @@index([projectId])
-  @@index([userId, createdAt])
-  @@index([type])
-  @@index([status])
-}
-
-enum AssetType {
-  LOGO
-  AVATAR
-  BRAND_NAME
-  TAGLINE
-  COLOR_PALETTE
-  BRAND_VOICE
-}
-
-enum AssetStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
-}
 
 // ============================================
 // PLAN LIMITS & FEATURES
 // ============================================
 
 model PlanLimit {
-  id          String   @id @default(cuid())
-  plan        PlanType
-  interval    PlanInterval @default(MONTHLY)
+  id       String       @id @default(cuid())
+  plan     PlanType
+  interval PlanInterval @default(MONTHLY)
 
-  monthlyCredits       Int
-  maxProjectsPerMonth  Int?
-  maxAssetsPerProject  Int?
+  monthlyCredits      Int
+  maxProjectsPerMonth Int?
+  maxAssetsPerProject Int?
 
-  features    Json
+  features Json
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([plan, interval])
 }
 
-enum PlanInterval {
-  MONTHLY
-  YEARLY
-}
 
 
 // ============================================
@@ -358,13 +291,119 @@ enum PlanInterval {
 // ============================================
 
 model WaitlistUser {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  name          String?
-  referralCode  String   @unique
-  referredById  String?
-  referredBy    WaitlistUser? @relation("Referrals", fields: [referredById], references: [id])
-  referrals     WaitlistUser[] @relation("Referrals")
-  invited       Boolean  @default(false)
-  createdAt     DateTime @default(now())
+  id           String         @id @default(cuid())
+  email        String         @unique
+  name         String?
+  referralCode String         @unique
+  referredById String?
+  referredBy   WaitlistUser?  @relation("Referrals", fields: [referredById], references: [id])
+  referrals    WaitlistUser[] @relation("Referrals")
+  invited      Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+}
+
+// ============================================
+// TRACKED ANDROID / IOS / WEB APPS
+// ============================================
+
+model TrackedApp {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  appId    String
+  platform Platform @default(ANDROID)
+
+  name      String?
+  iconUrl   String?
+  developer String?
+
+  analyses Analysis[] @relation("TrackedAppAnalyses")
+
+  lastAnalysisId String? @unique
+  lastAnalysis   Analysis? @relation("TrackedAppLastAnalysis", fields: [lastAnalysisId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, appId])
+}
+
+// ============================================
+// ANALYSIS HISTORY
+// ============================================
+model Analysis {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  // Relación A → historial
+  trackedAppId String?
+  trackedApp   TrackedApp? @relation("TrackedAppAnalyses", fields: [trackedAppId], references: [id])
+
+  // Relación B → último análisis
+  lastAnalysisOf TrackedApp? @relation("TrackedAppLastAnalysis")
+
+  appId       String
+  platform    Platform @default(ANDROID)
+
+  rawReviews  Json
+  reviewCount Int
+
+  insights    Json
+  sentiment   Json?
+
+  featureRequests FeatureRequest[]
+
+  creditsUsed Int @default(0)
+
+  chatMessages ChatMessage[] @relation("AnalysisChatMessages")
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([appId])
+}
+
+
+
+
+
+// ============================================
+// FEATURE REQUESTS
+// ============================================
+
+model FeatureRequest {
+  id         String   @id @default(cuid())
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id])
+
+  title       String
+  description String?
+  frequency   Int
+  priority    FeaturePriority @default(MEDIUM)
+
+  createdAt DateTime @default(now())
+}
+
+
+// ============================================
+// CHATBOT MEMORY
+// ============================================
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  analysisId String?
+  analysis   Analysis? @relation("AnalysisChatMessages", fields: [analysisId], references: [id])
+
+  role       ChatRole
+  content    String
+
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([analysisId])
 }

@@ -121,8 +121,8 @@ export default function AppSidebar({
         variants={!isMobile ? sidebarVariants : undefined}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className={cn(
-          "z-40 h-screen shrink-0 fixed left-0 top-0 md:sticky md:top-0 border-r",
-          "bg-background/95 backdrop-blur-xl border-border/60 shadow-2xl md:shadow-none",
+          "z-40 h-screen shrink-0 fixed left-0 top-0 md:sticky md:top-0 ",
+          "bg-card backdrop-blur-xl border-border/60 shadow-2xl md:shadow-none",
           isMobile ? "block" : "flex flex-col"
         )}
       >

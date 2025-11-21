@@ -50,31 +50,33 @@ const Header = () => {
             </div>
           </div>
         </div>
-        <div className="flex h-16 items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Logo />
+        <div className="flex items-center justify-between gap-8">
+          <div className="flex h-16 items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Logo />
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-medium text-foreground">
+                {t("greeting", { name: greetingName })}
+              </span>
+              <span className="text-xs text-muted-foreground">{t("subtitle")}</span>
+            </div>
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-medium text-foreground">
-              {t("greeting", { name: greetingName })}
+
+          <div className="flex items-center gap-3 rounded-full border border-gray-300 dark:border-neutral-700 px-1 py-1 shadow-sm">
+            {/* Icon circle */}
+            <div className="flex items-center justify-center w-9 h-9 rounded-full  dark:bg-neutral-800">
+              <Notification01Icon className="w-4 h-4 text-muted-foreground" />
+            </div>
+
+            {/* Date */}
+            <span className="font-medium text-sm md:text-base">{formatted}</span>
+
+            {/* Badge count */}
+            <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-black text-white text-xs font-semibold">
+              5
             </span>
-            <span className="text-xs text-muted-foreground">{t("subtitle")}</span>
           </div>
-        </div>
-
-        <div className="flex items-center gap-3 rounded-full border border-gray-300 dark:border-neutral-700 px-1 py-1 shadow-sm">
-          {/* Icon circle */}
-          <div className="flex items-center justify-center w-9 h-9 rounded-full  dark:bg-neutral-800">
-            <Notification01Icon className="w-4 h-4 text-muted-foreground" />
-          </div>
-
-          {/* Date */}
-          <span className="font-medium text-sm md:text-base">{formatted}</span>
-
-          {/* Badge count */}
-          <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-black text-white text-xs font-semibold">
-            5
-          </span>
         </div>
       </div>
     </header>
