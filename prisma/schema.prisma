@@ -15,10 +15,6 @@ datasource db {
 // ENUMS
 // ============================================
 
-enum Role {
-  user
-  admin
-}
 
 // Actualizado a tus nuevos planes
 enum PlanType {
@@ -100,7 +96,7 @@ model User {
   banned       Boolean   @default(false)
   banReason    String?
   banExpires   DateTime?
-  role         Role       @default(user)
+  role         String       @default("user")
 
   // Better Auth Relations
   sessions      Session[]
@@ -153,7 +149,8 @@ model Session {
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  impersonatedBy String?
+  
   @@map("session")
 }
 
@@ -317,6 +314,7 @@ model Analysis {
   // AI Result
   insights    Json     // El análisis de oportunidades de negocio
   sentiment   Json?    // Resumen de sentimiento
+  opportunityScore Int @default(0)
   
   // Costo
   creditsUsed Int      @default(1)

@@ -10,6 +10,7 @@ import {
 } from "hugeicons-react";
 import Link from "next/link";
 
+import { AppFloatingActions } from "../_components/app-floatings-actions";
 import ReviewsList from "../_components/reviews-list";
 import { cn } from "@/lib/utils";
 
@@ -39,7 +40,7 @@ const formatInstalls = (installs: string | number | undefined | null) => {
 // Fetch de datos al backend
 async function getAppData(appId: string) {
   try {
-    const res = await fetch(`http://127.0.0.1:8000/android/full?appId=${appId}&max=100`, {
+    const res = await fetch(`http://127.0.0.1:8000/android/full?appId=${appId}&max=200`, {
       cache: "no-store",
     });
     if (!res.ok) return null;
@@ -233,6 +234,7 @@ export default async function AppDetailPage({ params }: { params: { appId: strin
 
         <ReviewsList reviews={reviews} />
       </main>
+      <AppFloatingActions appId={appId} appName={info.title} />
     </div>
   );
 }
