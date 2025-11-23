@@ -8,10 +8,13 @@ import {
   Share01Icon,
   Alert01Icon,
 } from "hugeicons-react";
+import { headers } from "next/headers";
 import Link from "next/link";
 
 import { AppFloatingActions } from "../_components/app-floatings-actions";
 import ReviewsList from "../_components/reviews-list";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 
 const formatCompactNumber = (num: string | number | undefined | null) => {
@@ -37,10 +40,9 @@ const formatInstalls = (installs: string | number | undefined | null) => {
   }).format(num);
 };
 
-// Fetch de datos al backend
 async function getAppData(appId: string) {
   try {
-    const res = await fetch(`http://127.0.0.1:8000/android/full?appId=${appId}&max=200`, {
+    const res = await fetch(`http://127.0.0.1:8000/android/full?appId=${appId}&max=100`, {
       cache: "no-store",
     });
     if (!res.ok) return null;
@@ -50,18 +52,35 @@ async function getAppData(appId: string) {
   }
 }
 
-export default async function AppDetailPage({ params }: { params: { appId: string } }) {
+export default async function AppDetailPage({ params }: { params: Promise<{ appId: string }> }) {
   const { appId } = await params;
+
+  // 1. Obtener Datos de Scraping
   const data = await getAppData(appId);
 
   if (!data || !data.info) {
-    return <div>App not found</div>;
+    return <div className="p-10 text-center text-muted-foreground">App not found</div>;
   }
 
   const { info, reviews } = data;
 
-  const rawUpdatedString = info.lastUpdatedOn || info.updated || "Unknown";
+  // 2. Obtener Sesión y Análisis Existente
+  const session = await auth.api.getSession({ headers: await headers() });
+  let existingAnalysis = null;
 
+  if (session?.user?.id) {
+    // IMPORTANTE: Buscamos por appId exacto (el que viene del scraping) Y userId
+    existingAnalysis = await prisma.analysis.findFirst({
+      where: {
+        userId: session.user.id,
+        appId: info.appId,
+      },
+      orderBy: { createdAt: "desc" },
+      select: { insights: true },
+    });
+  }
+
+  const rawUpdatedString = info.lastUpdatedOn || info.updated || "Unknown";
   const lastUpdatedDate = new Date(rawUpdatedString);
   const today = new Date();
   const diffTime = Math.abs(today.getTime() - lastUpdatedDate.getTime());
@@ -69,7 +88,7 @@ export default async function AppDetailPage({ params }: { params: { appId: strin
   const isAbandoned = !isNaN(diffDays) && diffDays > 365;
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans pb-24">
+    <div className="min-h-screen bg-background text-foreground font-sans pb-32">
       <nav className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/40 transition-all">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -96,7 +115,6 @@ export default async function AppDetailPage({ params }: { params: { appId: strin
       </nav>
 
       <main className="max-w-5xl mx-auto px-4 md:px-6 pt-8 md:pt-12">
-        {/* --- HEADER PRINCIPAL --- */}
         <div className="flex flex-col md:flex-row gap-8 md:gap-12 mb-12">
           <div className="relative shrink-0 mx-auto md:mx-0">
             <div className="w-32 h-32 md:w-44 md:h-44 rounded-[2rem] shadow-2xl overflow-hidden border border-border/50 bg-white">
@@ -154,12 +172,11 @@ export default async function AppDetailPage({ params }: { params: { appId: strin
                 href={info.url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/25 hover:scale-105 active:scale-95"
+                className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/25 hover:scale-105 active:scale-95"
               >
                 <Download01Icon size={20} strokeWidth={2.5} />
                 Install
               </a>
-
               {isAbandoned && (
                 <div className="flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-orange-50 text-orange-700 font-medium text-sm border border-orange-100">
                   <Calendar01Icon size={18} />
@@ -170,13 +187,11 @@ export default async function AppDetailPage({ params }: { params: { appId: strin
           </div>
         </div>
 
-        {/* --- SCREENSHOTS --- */}
         <section className="mb-16">
           <div className="flex items-center gap-2 mb-6 px-1">
             <SmartPhone01Icon className="text-muted-foreground" size={20} />
             <h2 className="text-xl font-bold tracking-tight">Preview</h2>
           </div>
-
           <div className="relative -mx-4 md:mx-0">
             <div className="flex overflow-x-auto gap-5 pb-8 px-4 md:px-1 snap-x snap-mandatory scrollbar-hide">
               {info.screenshots?.map((src: string, idx: number) => (
@@ -193,7 +208,6 @@ export default async function AppDetailPage({ params }: { params: { appId: strin
           </div>
         </section>
 
-        {/* --- CONTENT GRID --- */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2 space-y-6">
             <h2 className="text-2xl font-bold tracking-tight">About this app</h2>
@@ -208,15 +222,11 @@ export default async function AppDetailPage({ params }: { params: { appId: strin
                 <Shield01Icon size={20} className="text-primary" />
                 App Information
               </h3>
-
               <div className="space-y-5">
                 <InfoRow label="Version" value={info.version || "Varies with device"} />
-
                 <InfoRow label="Updated" value={rawUpdatedString} highlight={isAbandoned} />
-
                 <InfoRow label="Released" value={info.released || "Unknown"} />
                 <InfoRow label="Downloads" value={formatInstalls(info.installs)} />
-
                 <div className="pt-4 border-t border-border/40">
                   <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider font-bold">
                     Package ID
@@ -234,7 +244,13 @@ export default async function AppDetailPage({ params }: { params: { appId: strin
 
         <ReviewsList reviews={reviews} />
       </main>
-      <AppFloatingActions appId={appId} appName={info.title} />
+
+      {/* Pasamos los datos iniciales */}
+      <AppFloatingActions
+        appId={info.appId}
+        appName={info.title}
+        initialAnalysisData={existingAnalysis?.insights}
+      />
     </div>
   );
 }
