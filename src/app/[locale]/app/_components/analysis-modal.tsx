@@ -3,7 +3,6 @@
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
 import { toPng } from "html-to-image";
 import {
-  Xls02Icon,
   Alert02Icon,
   CheckListIcon,
   Money03Icon,
@@ -152,14 +151,13 @@ export function AnalysisModal({ isOpen, onClose, data }: AnalysisModalProps) {
                     className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
                     title="Download Full Report"
                   >
-                    {isCapturing ? <Loading03Icon className="animate-spin" /> : <Camera01Icon />}
-                  </button>
-
-                  <button
-                    onClick={onClose}
-                    className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
-                  >
-                    <Xls02Icon />
+                    {isCapturing ? (
+                      <Loading03Icon className="animate-spin" />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <p>Save Image</p> <Camera01Icon />
+                      </div>
+                    )}
                   </button>
                 </div>
               </div>

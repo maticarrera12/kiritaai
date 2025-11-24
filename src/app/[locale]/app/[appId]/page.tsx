@@ -143,46 +143,50 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
               {info.developer || info.developerId}
             </Link>
 
-            <div className="grid grid-cols-3 divide-x divide-border/60 mb-8 max-w-md mx-auto md:mx-0">
-              <div className="flex flex-col items-center px-4 first:pl-0">
-                <div className="flex items-center gap-1 font-bold text-foreground text-xl">
-                  <span>{info.scoreText || info.score?.toFixed(1)}</span>
-                  <StarIcon size={16} className="text-foreground fill-foreground" />
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-8 max-w-2xl mx-auto md:mx-0">
+              <div className="grid grid-cols-3 divide-x divide-border/60 flex-1">
+                <div className="flex flex-col items-center px-4 first:pl-0">
+                  <div className="flex items-center gap-1 font-bold text-foreground text-xl">
+                    <span>{info.scoreText || info.score?.toFixed(1)}</span>
+                    <StarIcon size={16} className="text-foreground fill-foreground" />
+                  </div>
+                  <span className="text-xs text-muted-foreground font-medium mt-0.5">
+                    {formatCompactNumber(info.ratings)}
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground font-medium mt-0.5">
-                  {formatCompactNumber(info.ratings)}
-                </span>
-              </div>
 
-              <div className="flex flex-col items-center px-4">
-                <span className="font-bold text-foreground text-xl">{info.contentRating}</span>
-                <span className="text-xs text-muted-foreground font-medium mt-0.5">Age</span>
-              </div>
-
-              <div className="flex flex-col items-center px-4 last:pr-0">
-                <span className="font-bold text-foreground text-xl">
-                  {formatInstalls(info.installs)}
-                </span>
-                <span className="text-xs text-muted-foreground font-medium mt-0.5">Downloads</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-              <a
-                href={info.url}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/25 hover:scale-105 active:scale-95"
-              >
-                <Download01Icon size={20} strokeWidth={2.5} />
-                Install
-              </a>
-              {isAbandoned && (
-                <div className="flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-orange-50 text-orange-700 font-medium text-sm border border-orange-100">
-                  <Calendar01Icon size={18} />
-                  Last update: {diffDays} days ago
+                <div className="flex flex-col items-center px-4">
+                  <span className="font-bold text-foreground text-xl">{info.contentRating}</span>
+                  <span className="text-xs text-muted-foreground font-medium mt-0.5">Age</span>
                 </div>
-              )}
+
+                <div className="flex flex-col items-center px-4 last:pr-0">
+                  <span className="font-bold text-foreground text-xl">
+                    {formatInstalls(info.installs)}
+                  </span>
+                  <span className="text-xs text-muted-foreground font-medium mt-0.5">
+                    Downloads
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+                <a
+                  href={info.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/25 hover:scale-105 active:scale-95 whitespace-nowrap"
+                >
+                  <Download01Icon size={20} strokeWidth={2.5} />
+                  Install
+                </a>
+                {isAbandoned && (
+                  <div className="flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-orange-50 text-orange-700 font-medium text-sm border border-orange-100">
+                    <Calendar01Icon size={18} />
+                    Last update: {diffDays} days ago
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

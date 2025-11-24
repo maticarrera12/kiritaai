@@ -13,11 +13,11 @@ const layout = async ({ children, params }: any) => {
     return null;
   }
   return (
-    <div className="flex min-h-screen bg-card">
+    <div className="flex h-screen bg-card">
       <AppMainSidebar />
-      <main className="flex-1 ml-6 mr-6 my-6 md:ml-0 rounded-lg overflow-y-auto bg-background pt-14 md:pt-0">
+      <main className="flex-1 ml-6 mr-6 my-6 md:ml-0 rounded-lg overflow-y-auto bg-background pt-14 md:pt-0 flex flex-col">
         <Header />
-        <div className="mx-auto max-w-7xl p-6 md:p-10">{children}</div>
+        <div className="mx-auto max-w-7xl p-6 md:p-10 flex-1 flex flex-col">{children}</div>
       </main>
     </div>
   );
