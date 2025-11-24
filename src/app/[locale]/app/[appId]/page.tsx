@@ -9,10 +9,10 @@ import {
   Alert01Icon,
 } from "hugeicons-react";
 import { headers } from "next/headers";
-import Link from "next/link";
 
 import { AppFloatingActions } from "../_components/app-floatings-actions";
 import ReviewsList from "../_components/reviews-list";
+import { Link } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";

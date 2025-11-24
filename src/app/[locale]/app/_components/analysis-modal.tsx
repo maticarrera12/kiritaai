@@ -29,7 +29,7 @@ function AnimatedNumber({ value, color }: { value: number; color: string }) {
   }, [value, count]);
 
   return (
-    <motion.span className="text-4xl font-black" style={{ color }}>
+    <motion.span className="text-3xl font-black" style={{ color }}>
       {rounded}
     </motion.span>
   );
@@ -136,7 +136,7 @@ export function AnalysisModal({ isOpen, onClose, data }: AnalysisModalProps) {
           >
             <div
               ref={modalContentRef}
-              className="bg-white dark:bg-neutral-900 w-full max-w-3xl max-h-[85vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col pointer-events-auto border border-white/10"
+              className="bg-white dark:bg-neutral-900 w-full max-w-7xl max-h-[90vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col pointer-events-auto border border-white/10"
             >
               <div className="flex justify-between items-center p-6 border-b border-border/50 bg-muted/30 shrink-0">
                 <h2 className="text-xl font-bold flex items-center gap-2">
@@ -162,9 +162,9 @@ export function AnalysisModal({ isOpen, onClose, data }: AnalysisModalProps) {
                 </div>
               </div>
 
-              <div className="overflow-y-auto p-6 md:p-8 space-y-10 custom-scrollbar bg-white dark:bg-neutral-900">
-                <div className="flex flex-col md:flex-row gap-8 items-center">
-                  <div className="relative w-40 h-40 shrink-0">
+              <div className="overflow-y-auto p-6 md:p-8 space-y-6 custom-scrollbar bg-white dark:bg-neutral-900">
+                <div className="flex flex-row gap-8 items-start">
+                  <div className="relative w-32 h-32 shrink-0">
                     <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                       <circle
                         cx="50"
@@ -198,7 +198,7 @@ export function AnalysisModal({ isOpen, onClose, data }: AnalysisModalProps) {
                     </div>
                   </div>
 
-                  <div className="space-y-3 text-center md:text-left">
+                  <div className="flex-1 space-y-2">
                     <h3 className="text-2xl font-bold text-foreground">
                       {score >= 75
                         ? "💎 Gold Mine Detected"
@@ -206,40 +206,67 @@ export function AnalysisModal({ isOpen, onClose, data }: AnalysisModalProps) {
                           ? "⚠️ Moderate Opportunity"
                           : "🛑 Saturated Market"}
                     </h3>
-                    <p className="text-muted-foreground text-lg leading-relaxed">{data.summary}</p>
-                    <p className="font-medium text-foreground italic">
+                    <p className="text-muted-foreground leading-relaxed">{data.summary}</p>
+                    <p className="font-medium text-foreground italic text-sm">
                       "{data.business_opportunity?.verdict}"
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-yellow-50 dark:bg-yellow-900/10 border-2 border-yellow-400 rounded-2xl p-6 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-yellow-400/20 rounded-full blur-xl" />
-                  <div className="relative flex gap-4 items-start">
-                    <div className="bg-yellow-100 dark:bg-yellow-900/30 p-3 rounded-full shrink-0 text-yellow-700 dark:text-yellow-400">
-                      <Money03Icon size={28} />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-yellow-50 dark:bg-yellow-900/10 border-2 border-yellow-400 rounded-2xl p-5 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-yellow-400/20 rounded-full blur-xl" />
+                    <div className="relative flex gap-3 items-start">
+                      <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2.5 rounded-full shrink-0 text-yellow-700 dark:text-yellow-400">
+                        <Money03Icon size={24} />
+                      </div>
+                      <div>
+                        <h4 className="text-base font-bold text-yellow-800 dark:text-yellow-200 mb-1">
+                          Monetization Strategy
+                        </h4>
+                        <p className="text-yellow-900/80 dark:text-yellow-100/80 leading-relaxed text-sm">
+                          {data.business_opportunity?.monetization_analysis}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-yellow-800 dark:text-yellow-200 mb-1">
-                        Monetization Strategy
-                      </h4>
-                      <p className="text-yellow-900/80 dark:text-yellow-100/80 leading-relaxed">
-                        {data.business_opportunity?.monetization_analysis}
-                      </p>
+                  </div>
+
+                  <div>
+                    <h4 className="text-base font-bold mb-3 flex items-center gap-2">
+                      <CheckListIcon className="text-blue-500" size={18} />
+                      Wishlist (Missing Features)
+                    </h4>
+                    <div className="bg-muted/30 rounded-xl border border-border p-3 max-h-[200px] overflow-y-auto custom-scrollbar">
+                      {data.feature_requests?.map((feat: any, i: number) => (
+                        <div
+                          key={i}
+                          className="flex gap-2 py-2 border-b border-border/50 last:border-0"
+                        >
+                          <div className="mt-0.5 bg-blue-100 dark:bg-blue-900/30 p-1 rounded text-blue-600 shrink-0">
+                            <CheckListIcon size={12} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-xs">{feat.title}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                              {feat.description}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="text-lg font-bold mb-4 flex items-center gap-2">
-                    <Alert02Icon className="text-red-500" />
+                  <h4 className="text-base font-bold mb-3 flex items-center gap-2">
+                    <Alert02Icon className="text-red-500" size={18} />
                     Critical Pain Points
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                     {data.pain_points?.map((pain: any, i: number) => (
                       <div
                         key={i}
-                        className={`p-5 rounded-xl border-l-4 shadow-sm ${
+                        className={`p-4 rounded-xl border-l-4 shadow-sm ${
                           pain.severity === "CRITICAL"
                             ? "bg-red-50 dark:bg-red-900/20 border-red-500"
                             : "bg-orange-50 dark:bg-orange-900/10 border-orange-400"
@@ -247,40 +274,19 @@ export function AnalysisModal({ isOpen, onClose, data }: AnalysisModalProps) {
                       >
                         <div className="flex justify-between items-start mb-2">
                           <h5
-                            className={`font-bold ${pain.severity === "CRITICAL" ? "text-red-700 dark:text-red-300" : "text-orange-700 dark:text-orange-300"}`}
+                            className={`font-bold text-sm ${pain.severity === "CRITICAL" ? "text-red-700 dark:text-red-300" : "text-orange-700 dark:text-orange-300"}`}
                           >
                             {pain.title}
                           </h5>
                           {pain.severity === "CRITICAL" && (
-                            <span className="bg-red-200 dark:bg-red-900 text-red-800 dark:text-red-100 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">
+                            <span className="bg-red-200 dark:bg-red-900 text-red-800 dark:text-red-100 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase shrink-0 ml-2">
                               Critical
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-foreground/80">{pain.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-lg font-bold mb-4 flex items-center gap-2">
-                    <CheckListIcon className="text-blue-500" />
-                    Wishlist (Missing Features)
-                  </h4>
-                  <div className="bg-muted/30 rounded-2xl border border-border p-4">
-                    {data.feature_requests?.map((feat: any, i: number) => (
-                      <div
-                        key={i}
-                        className="flex gap-3 py-3 border-b border-border/50 last:border-0"
-                      >
-                        <div className="mt-1 bg-blue-100 dark:bg-blue-900/30 p-1 rounded text-blue-600">
-                          <CheckListIcon size={14} />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-sm">{feat.title}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{feat.description}</p>
-                        </div>
+                        <p className="text-xs text-foreground/80 line-clamp-3">
+                          {pain.description}
+                        </p>
                       </div>
                     ))}
                   </div>
