@@ -84,7 +84,7 @@ export function AppFloatingActions({
             opacity: 1,
             scale: 1,
             y: 0,
-            backgroundColor: hasAnalysis ? "#10b981" : "hsl(var(--primary))",
+            backgroundColor: hasAnalysis ? "#10b981" : "var(--primary)",
           }}
           onClick={handleMainAction}
           disabled={isLoading}
@@ -122,7 +122,7 @@ export function AppFloatingActions({
                 className="flex items-center gap-3"
               >
                 <MagicWand01Icon size={22} />
-                <span className="text-sm md:text-base">Generate Analysis</span>
+                <span className="text-sm hidden md:block md:text-base">Generate Analysis</span>
               </motion.div>
             )}
           </AnimatePresence>

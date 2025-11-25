@@ -99,7 +99,7 @@ export default function SearchPage() {
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    <span>Search</span>
+                    <span className="hidden md:block">Search</span>
                     <ArrowRight01Icon className="w-4 h-4" />
                   </>
                 )}

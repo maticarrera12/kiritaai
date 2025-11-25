@@ -90,7 +90,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
   return (
     <div className="min-h-screen bg-background text-foreground font-sans pb-32">
       <nav className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/40 transition-all">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-2 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
               href="/app"
@@ -114,7 +114,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
         </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto px-4 md:px-6 pt-8 md:pt-12">
+      <main className="max-w-5xl mx-auto px-2 md:px-6 pt-8 md:pt-12">
         <div className="flex flex-col md:flex-row gap-8 md:gap-12 mb-12">
           <div className="relative shrink-0 mx-auto md:mx-0">
             <div className="w-32 h-32 md:w-44 md:h-44 rounded-[2rem] shadow-2xl overflow-hidden border border-border/50 bg-white">
@@ -155,12 +155,12 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
                   </span>
                 </div>
 
-                <div className="flex flex-col items-center px-4">
+                <div className="flex flex-col items-center px-2">
                   <span className="font-bold text-foreground text-xl">{info.contentRating}</span>
                   <span className="text-xs text-muted-foreground font-medium mt-0.5">Age</span>
                 </div>
 
-                <div className="flex flex-col items-center px-4 last:pr-0">
+                <div className="flex flex-col items-center px-2 last:pr-0">
                   <span className="font-bold text-foreground text-xl">
                     {formatInstalls(info.installs)}
                   </span>
