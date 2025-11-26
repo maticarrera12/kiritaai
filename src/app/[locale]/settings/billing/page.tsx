@@ -3,9 +3,9 @@ import { headers } from "next/headers";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
+import { PLANS, type PlanId } from "@/lib/credits/constants";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
-import type { PaymentMetadata } from "@/types/payment";
 
 function formatCurrency(amount: number, currency = "USD") {
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount);
@@ -38,17 +38,13 @@ const BillingPage = async () => {
   const userId = session.user.id;
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { plan: true, planStatus: true, currentPeriodEnd: true },
+    select: { plan: true, planStatus: true, currentPeriodEnd: true, credits: true },
   });
 
-  const [{ _sum }, planLimit, purchases] = await Promise.all([
+  const [{ _sum }, purchases] = await Promise.all([
     prisma.creditTransaction.aggregate({
       _sum: { amount: true },
       where: { userId, type: "DEDUCTION", createdAt: { gte: startOfMonth() } },
-    }),
-    prisma.planLimit.findFirst({
-      where: { plan: user!.plan, interval: "MONTHLY" },
-      select: { monthlyCredits: true },
     }),
     prisma.purchase.findMany({
       where: { userId },
@@ -62,30 +58,18 @@ const BillingPage = async () => {
         createdAt: true,
         provider: true,
         type: true,
-        metadata: true,
       },
     }),
   ]);
 
-  const monthlyCredits = planLimit?.monthlyCredits ?? 300;
-  const usedThisMonth = Math.max(0, _sum.amount ?? 0);
-  const usagePct = Math.min(100, Math.round((usedThisMonth / monthlyCredits) * 100));
-  const remaining = Math.max(0, monthlyCredits - usedThisMonth);
+  // Obtener créditos mensuales del plan desde las constantes
+  const monthlyRecharge =
+    user?.plan && user.plan in PLANS ? PLANS[user.plan as PlanId].limits.aiCredits : 0;
+  const currentCredits = user?.credits ?? 0; // Créditos actuales disponibles
+  const usedThisMonth = Math.abs(_sum.amount ?? 0); // Créditos usados este mes (siempre positivo)
 
-  const lastPayment = purchases.find((p) => {
-    const md = p.metadata as PaymentMetadata | null;
-    return md?.cardBrand && md?.cardLast4;
-  });
-
-  function formatCardLabel(md: PaymentMetadata | null | undefined) {
-    if (!md) return null;
-    const brand = md.cardBrand;
-    const last4 = md.cardLast4;
-    if (!brand || !last4) return null;
-    return `${brand.charAt(0).toUpperCase() + brand.slice(1)} •••• ${last4}`;
-  }
-
-  const lastPaymentLabel = formatCardLabel(lastPayment?.metadata as PaymentMetadata | null);
+  // TODO: Agregar metadata al modelo Purchase si se necesita información de tarjeta
+  const lastPayment = purchases.find((p) => p.status === "COMPLETED");
 
   return (
     <div className="mx-auto max-w-7xl px-8 py-12">
@@ -151,16 +135,17 @@ const BillingPage = async () => {
 
           {/* Usage */}
           <Card className="p-8">
-            <h2 className="mb-4 text-2xl font-semibold text-foreground">Usage</h2>
+            <h2 className="mb-4 text-2xl font-semibold text-foreground">Credits</h2>
             <div className="mb-3 flex items-baseline justify-between">
-              <p className="text-3xl font-semibold text-foreground">{usedThisMonth}</p>
-              <p className="text-sm text-muted-foreground">/ {monthlyCredits} credits</p>
+              <p className="text-3xl font-semibold text-foreground">{currentCredits}</p>
+              <p className="text-sm text-muted-foreground">available</p>
             </div>
-            <div className="h-3 w-full rounded-full bg-muted">
-              <div className="h-3 rounded-full bg-primary" style={{ width: `${usagePct}%` }} />
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>Used this month: {usedThisMonth} credits</p>
+              {monthlyRecharge > 0 && <p>Monthly recharge: {monthlyRecharge} credits</p>}
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Remaining {remaining} · Resets on{" "}
+            <p className="mt-4 text-xs text-muted-foreground">
+              Next recharge on{" "}
               {formatDateSafe(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1))}
             </p>
             <div className="mt-4 flex gap-3">
@@ -177,12 +162,14 @@ const BillingPage = async () => {
           {/* Payment Method */}
           <Card className="p-8">
             <h2 className="mb-4 text-2xl font-semibold text-foreground">Payment Method</h2>
-            {lastPaymentLabel ? (
+            {lastPayment ? (
               <div className="flex items-center justify-between rounded-md border border-border p-5">
                 <div>
-                  <p className="text-base font-medium text-foreground">{lastPaymentLabel}</p>
+                  <p className="text-base font-medium text-foreground">
+                    {lastPayment.provider} • {lastPayment.type}
+                  </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Last used on {formatDateSafe(lastPayment?.createdAt)}
+                    Last used on {formatDateSafe(lastPayment.createdAt)}
                   </p>
                 </div>
                 <Button variant="outline" className="text-xs">
@@ -217,28 +204,21 @@ const BillingPage = async () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {purchases.map((p) => {
-                      const md = p.metadata as PaymentMetadata | null;
-                      const cardLabel =
-                        md?.cardBrand && md?.cardLast4
-                          ? `${md.cardBrand.charAt(0).toUpperCase() + md.cardBrand.slice(1)} •••• ${md.cardLast4}`
-                          : "—";
-                      return (
-                        <tr key={p.id} className="border-t border-border">
-                          <td className="px-6 py-3">{formatDateSafe(p.createdAt)}</td>
-                          <td className="px-6 py-3">{p.type}</td>
-                          <td className="px-6 py-3">{p.provider}</td>
-                          <td className="px-6 py-3">
-                            {formatCurrency(
-                              (p.amount || 0) / 100,
-                              p.currency?.toUpperCase() || "USD"
-                            )}
-                          </td>
-                          <td className="px-6 py-3">{cardLabel}</td>
-                          <td className="px-6 py-3">{p.status}</td>
-                        </tr>
-                      );
-                    })}
+                    {purchases.map((p) => (
+                      <tr key={p.id} className="border-t border-border">
+                        <td className="px-6 py-3">{formatDateSafe(p.createdAt)}</td>
+                        <td className="px-6 py-3">{p.type}</td>
+                        <td className="px-6 py-3">{p.provider}</td>
+                        <td className="px-6 py-3">
+                          {formatCurrency(
+                            (p.amount || 0) / 100,
+                            p.currency?.toUpperCase() || "USD"
+                          )}
+                        </td>
+                        <td className="px-6 py-3">—</td>
+                        <td className="px-6 py-3">{p.status}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>

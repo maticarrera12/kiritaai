@@ -1,14 +1,15 @@
 import Image from "next/image";
+import React from "react";
 
 import { cn } from "@/lib/utils";
 
-interface LogoProps {
+export interface LogoProps {
   className?: string;
   width?: number;
   height?: number;
 }
 
-export default function Logo({ className, width = 33, height = 33 }: LogoProps) {
+const Logo: React.FC<LogoProps> = ({ className, width = 33, height = 33 }) => {
   return (
     <div className={cn("relative", className)}>
       <Image
@@ -21,4 +22,8 @@ export default function Logo({ className, width = 33, height = 33 }: LogoProps) 
       />
     </div>
   );
-}
+};
+
+Logo.displayName = "Logo";
+
+export default Logo;

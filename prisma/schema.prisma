@@ -77,6 +77,11 @@ enum ChatRole {
   SYSTEM
 }
 
+enum PlanInterval {
+  MONTHLY
+  YEARLY
+}
+
 // ============================================
 // BETTER AUTH MODELS (User & Session)
 // ============================================
@@ -384,4 +389,24 @@ model WaitlistUser {
   referrals    WaitlistUser[] @relation("Referrals")
   invited      Boolean        @default(false)
   createdAt    DateTime       @default(now())
+}
+
+// ============================================
+// PLAN LIMITS (Admin Configurable)
+// ============================================
+
+model PlanLimit {
+  id             String        @id @default(cuid())
+  plan           PlanType
+  interval       PlanInterval
+  monthlyCredits Int           @default(0) // AI análisis por mes
+  dailySearches  Int           @default(0) // Búsquedas diarias permitidas
+  features       Json?         // Array of PlanFeature
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([plan, interval], name: "plan_interval")
+  @@index([plan])
+  @@map("plan_limit")
 }
