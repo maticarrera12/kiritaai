@@ -92,6 +92,40 @@ export class CreditService {
     });
   }
 
+  // Get usage statistics for a given period
+  static async getUsageStats(userId: string, days: number = 30) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    // Get all deduction transactions in the period
+    const transactions = await prisma.creditTransaction.findMany({
+      where: {
+        userId,
+        type: "DEDUCTION",
+        createdAt: { gte: startDate },
+      },
+      select: {
+        amount: true,
+        reason: true,
+      },
+    });
+
+    // Calculate total used (amounts are negative, so we use Math.abs)
+    const totalUsed = transactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+    // Group by feature (reason)
+    const byFeature: Record<string, number> = {};
+    for (const t of transactions) {
+      const feature = t.reason || "unknown";
+      byFeature[feature] = (byFeature[feature] || 0) + Math.abs(t.amount);
+    }
+
+    return {
+      totalUsed,
+      byFeature,
+    };
+  }
+
   // MONTHLY RESET (Call when LemonSqueezy webhook confirms renewal)
   // In SaaS, it's normal NOT to accumulate (rollover), but to reset to the plan limit.
   static async resetMonthlyCredits(userId: string) {
