@@ -148,7 +148,6 @@ async function handleLSSubscriptionUpdate(data: any) {
       planStatus: mapLSStatus(status),
       subscriptionProvider: "LEMONSQUEEZY",
       subscriptionId,
-      lemonSqueezyVariantId: variantId,
       currentPeriodStart: renewsAt ? new Date(renewsAt) : undefined,
       currentPeriodEnd: endsAt ? new Date(endsAt) : undefined,
       cancelAtPeriodEnd: data.attributes.cancelled,
@@ -175,9 +174,7 @@ async function handleLSSubscriptionUpdate(data: any) {
         plan: planId,
         amount: parseInt(data.attributes.first_subscription_item.price),
         currency: "usd", // LS a veces envía esto en otro lugar, hardcodeamos USD si es tu única moneda
-        providerCustomerId: customerId,
         providerPaymentId: data.attributes.first_subscription_item.id.toString(),
-        providerSubscriptionId: subscriptionId,
         providerProductId: variantId,
         status: "COMPLETED",
       },
@@ -229,19 +226,10 @@ async function handleLSOrderCreated(data: any) {
 
   if (!user) return;
 
-  // Buscar qué Pack de créditos es
-  // CREDIT_PACKS es un objeto { SMALL: {...}, LARGE: {...} }
   const pack = Object.values(CREDIT_PACKS).find(
     (p) => p.lemonSqueezy?.variantId && p.lemonSqueezy.variantId === variantId
-  ); // Ajusta esto según tu config real en constants.ts (añadí lemonSqueezy ahí)
-
-  // Nota: En el constants.ts anterior no puse IDs de LS, asegúrate de ponerlos si usas LS para packs.
-  // Si no encuentras el pack, ignoramos (puede ser una orden de suscripción inicial que ya manejó el otro evento)
+  );
   if (pack) {
-    // AÑADIR CRÉDITOS (Esto es una COMPRA, así que se suman, no se resetean)
-    // En CreditService no hicimos método 'add', pero podemos usar deduct negativo o crear uno.
-    // Para mantener la coherencia, lo haremos manual con prisma transaction aquí o actualiza CreditService
-
     await prisma.$transaction(async (tx) => {
       // 1. Sumar créditos al usuario
       const updatedUser = await tx.user.update({
@@ -273,11 +261,9 @@ async function handleLSOrderCreated(data: any) {
           credits: pack.credits,
           amount: parseInt(data.attributes.total),
           currency: data.attributes.currency,
-          providerCustomerId: customerId,
           providerPaymentId: data.id,
           providerProductId: variantId,
           status: "COMPLETED",
-          metadata: { packId: pack.id },
         },
       });
     });
