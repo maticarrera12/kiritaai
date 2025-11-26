@@ -320,7 +320,7 @@
     "payments": {
       "title": "Payments",
       "items": [
-        "Integrates Stripe & Lemon Squeezy.",
+        "Integrates Lemon Squeezy.",
         "Subscriptions, credits, and LTD campaigns ready.",
         "Automatic webhooks & plan gating.",
         "Billing panel with real-time analytics."

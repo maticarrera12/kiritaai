@@ -92,7 +92,7 @@ export class CreditService {
     });
   }
 
-  // MONTHLY RESET (Call when Stripe webhook confirms renewal)
+  // MONTHLY RESET (Call when LemonSqueezy webhook confirms renewal)
   // In SaaS, it's normal NOT to accumulate (rollover), but to reset to the plan limit.
   static async resetMonthlyCredits(userId: string) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
