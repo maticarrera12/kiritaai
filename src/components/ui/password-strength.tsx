@@ -73,8 +73,8 @@ export function PasswordStrength({ password, show }: PasswordStrengthProps) {
       return {
         percentage,
         label: "Good",
-        color: "bg-blue-500",
-        bgColor: "bg-blue-100",
+        color: "bg-fuchsia-500",
+        bgColor: "bg-fuchsia-100",
       };
     }
     return {
@@ -104,7 +104,7 @@ export function PasswordStrength({ password, show }: PasswordStrengthProps) {
                 "text-xs font-semibold transition-colors duration-300",
                 percentage <= 33 && "text-red-600",
                 percentage > 33 && percentage <= 66 && "text-yellow-600",
-                percentage > 66 && percentage <= 83 && "text-blue-600",
+                percentage > 66 && percentage <= 83 && "text-fuchsia-600",
                 percentage > 83 && "text-green-600"
               )}
             >

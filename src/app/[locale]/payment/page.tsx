@@ -143,7 +143,7 @@ export default async function PaymentPage({
               </span>
             </div>
           ) : (
-            <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-700">
+            <div className="rounded-md bg-fuchsia-50 p-3 text-sm text-fuchsia-700">
               Processing your receipt... Details will appear in your billing settings shortly.
             </div>
           )}

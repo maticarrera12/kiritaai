@@ -26,8 +26,12 @@ export function AuthShell({
       <div className="hidden lg:flex bg-card text-white flex-col h-full overflow-hidden p-4">
         <div className="bg-black dark:bg-white relative rounded-2xl w-full h-full px-12 py-12 flex flex-col justify-between overflow-hidden">
           <div className="relative z-10">
-            <h2 className="text-6xl font-bold text-white dark:text-black mb-4">{title}</h2>
-            <p className="text-3xl text-muted-foreground max-w-none break-words">{subtitle}</p>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-4xl font-bold text-white dark:text-black mb-4">
+              {title}
+            </h2>
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-xl text-muted-foreground max-w-none break-words">
+              {subtitle}
+            </p>
           </div>
 
           {/* Background logo (big, grey, partially outside to the left) */}
@@ -35,7 +39,7 @@ export function AuthShell({
             aria-hidden="true"
             className="pointer-events-none select-none absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30 text-gray-200 z-0"
           >
-            <Logo className="w-[520px] h-[520px]" />
+            <Logo className="w-[220px] h-[220px]" />
           </div>
 
           {(cardTitle || cardSubtitle) && (
@@ -48,10 +52,10 @@ export function AuthShell({
                     </div>
                   </div>
                   <div className="p-6 flex flex-col justify-between">
-                    <h3 className="font-semibold text-4xl mb-3 text-foreground max-w-3/4 break-words">
+                    <h3 className="font-semibold text-xl sm:text-2xl md:text-3xl lg:text-2xl mb-3 text-foreground max-w-3/4 break-words">
                       {cardTitle}
                     </h3>
-                    <p className="text-lg text-muted-foreground max-w-3/4 break-words">
+                    <p className="text-sm sm:text-base md:text-lg lg:text-base text-muted-foreground max-w-3/4 break-words">
                       {cardSubtitle}
                     </p>
                   </div>

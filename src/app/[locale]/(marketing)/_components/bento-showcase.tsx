@@ -126,7 +126,7 @@ const CardVisual = ({ id }: { id: string }) => {
       return (
         <div className="relative w-full h-full">
           <motion.div
-            className="absolute -right-4 -bottom-12 w-48 h-32 bg-gradient-to-bl from-primary to-blue-600 rounded-xl shadow-2xl flex flex-col p-4 justify-between text-white"
+            className="absolute -right-4 -bottom-12 w-48 h-32 bg-gradient-to-bl from-primary to-fuchsia-600 rounded-xl shadow-2xl flex flex-col p-4 justify-between text-white"
             whileHover={{ y: -10, rotate: -3 }}
             style={{ rotate: -6 }}
           >

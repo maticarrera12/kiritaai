@@ -17,7 +17,7 @@ export default function Footer() {
         {/* TOP SECTION: Brand & CTA */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-16">
           <div className="space-y-4 max-w-sm">
-            <Logo />
+            <Logo className="w-10 h-10" />
             <p className="text-muted-foreground text-sm leading-relaxed">
               {/* Fallback text if translation is missing */}
               Building the biggest open source NextJS Boilerplate for SaaS.
@@ -63,8 +63,6 @@ export default function Footer() {
             <ul className="space-y-3">
               <FooterLink href="/features">Features</FooterLink>
               <FooterLink href="/pricing">Pricing</FooterLink>
-              <FooterLink href="/integrations">Integrations</FooterLink>
-              <FooterLink href="/changelog">Changelog</FooterLink>
             </ul>
           </div>
 
@@ -75,8 +73,6 @@ export default function Footer() {
             </h3>
             <ul className="space-y-3">
               <FooterLink href="/faq">{t("help.faq")}</FooterLink>
-              <FooterLink href="/docs">Documentation</FooterLink>
-              <FooterLink href="/api">API Status</FooterLink>
             </ul>
           </div>
 
@@ -88,7 +84,6 @@ export default function Footer() {
             <ul className="space-y-3">
               <FooterLink href="/legal/terms-of-service">{t("legal.terms")}</FooterLink>
               <FooterLink href="/legal/privacy-policy">{t("legal.privacy")}</FooterLink>
-              <FooterLink href="/legal/cookies">Cookies</FooterLink>
             </ul>
           </div>
         </div>

@@ -55,7 +55,6 @@ async function getAppData(appId: string) {
 export default async function AppDetailPage({ params }: { params: Promise<{ appId: string }> }) {
   const { appId } = await params;
 
-  // 1. Obtener Datos de Scraping
   const data = await getAppData(appId);
 
   if (!data || !data.info) {
@@ -64,12 +63,10 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
 
   const { info, reviews } = data;
 
-  // 2. Obtener Sesión y Análisis Existente
   const session = await auth.api.getSession({ headers: await headers() });
   let existingAnalysis = null;
 
   if (session?.user?.id) {
-    // IMPORTANTE: Buscamos por appId exacto (el que viene del scraping) Y userId
     existingAnalysis = await prisma.analysis.findFirst({
       where: {
         userId: session.user.id,
@@ -249,10 +246,10 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
         <ReviewsList reviews={reviews} />
       </main>
 
-      {/* Pasamos los datos iniciales */}
       <AppFloatingActions
         appId={info.appId}
         appName={info.title}
+        appIcon={info.icon}
         initialAnalysisData={existingAnalysis?.insights}
       />
     </div>

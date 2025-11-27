@@ -122,7 +122,7 @@ export const columns: ColumnDef<UserColumn>[] = [
         plan === "BUSINESS"
           ? "bg-purple-100 text-purple-800 hover:bg-purple-100"
           : plan === "PRO"
-            ? "bg-blue-100 text-blue-800 hover:bg-blue-100"
+            ? "bg-fuchsia-100 text-fuchsia-800 hover:bg-fuchsia-100"
             : "bg-gray-100 text-gray-800 hover:bg-gray-100";
       return <Badge className={color}>{plan}</Badge>;
     },
