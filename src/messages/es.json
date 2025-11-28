@@ -306,7 +306,7 @@
     "payments": {
       "title": "Pagos",
       "items": [
-        "Integración con Stripe y Lemon Squeezy.",
+        "Integración con Lemon Squeezy.",
         "Suscripciones, créditos y campañas LTD listas.",
         "Webhooks automáticos y plan gating.",
         "Panel de facturación con análisis en tiempo real."

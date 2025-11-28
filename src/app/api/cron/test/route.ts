@@ -2,12 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 
-/**
- * Test endpoint to verify cron setup
- * Only works in development mode
- */
 export async function GET() {
-  // Only allow in development
   if (process.env.NODE_ENV === "production") {
     return NextResponse.json({ error: "Not available in production" }, { status: 403 });
   }
@@ -18,7 +13,7 @@ export async function GET() {
     // Find users whose period has ended
     const usersToReset = await prisma.user.findMany({
       where: {
-        plan: { in: ["PRO", "BUSINESS"] },
+        plan: { in: ["PRO_INDIE", "POWER_BUSINESS"] },
         planStatus: "ACTIVE",
         currentPeriodEnd: { lte: now },
       },

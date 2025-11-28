@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Search01Icon, PlayStoreIcon, ArrowRight01Icon, SparklesIcon } from "hugeicons-react";
+import { Search01Icon, PlayStoreIcon, SparklesIcon, Search02Icon } from "hugeicons-react";
 import { useState } from "react";
 
 import SearchResultsPanel from "./_components/search-results-panel";
@@ -99,8 +99,8 @@ export default function SearchPage() {
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    <span>Search</span>
-                    <ArrowRight01Icon className="w-4 h-4" />
+                    <span className="hidden md:block">Search</span>
+                    <Search02Icon className="w-4 h-4" />
                   </>
                 )}
               </button>

@@ -20,8 +20,7 @@ export async function PATCH(
       },
       data: {
         monthlyCredits: body.monthlyCredits,
-        maxProjectsPerMonth: body.maxProjectsPerMonth,
-        maxAssetsPerProject: body.maxAssetsPerProject,
+        dailySearches: body.dailySearches,
       },
     });
 

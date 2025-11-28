@@ -55,12 +55,7 @@ export const PLANS = {
       dailySearches: Number(process.env.BUSINESS_DAILY_SEARCH_LIMIT) || 500,
       aiCredits: Number(process.env.BUSINESS_AI_CREDITS_MONTHLY) || 100,
     },
-    features: [
-      "500 daily searches",
-      "100 AI analyses per month",
-      "Priority support",
-      "White-label reports",
-    ],
+    features: ["500 daily searches", "100 AI analyses per month", "Priority support"],
     // AGREGADO: Configuración de LS
     lemonSqueezy: {
       monthly: process.env.NEXT_PUBLIC_LS_VARIANT_ID_BUSINESS_MONTHLY || "",

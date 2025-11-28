@@ -170,7 +170,6 @@ async function handleLSSubscriptionUpdate(data: any, meta: any) {
       planStatus: mapLSStatus(status),
       subscriptionProvider: "LEMONSQUEEZY",
       subscriptionId,
-      lemonSqueezyVariantId: variantId,
       currentPeriodStart: renewsAt ? new Date(renewsAt) : undefined,
       currentPeriodEnd: endsAt ? new Date(endsAt) : undefined,
       cancelAtPeriodEnd: data.attributes.cancelled,
@@ -293,11 +292,9 @@ async function handleLSOrderCreated(data: any, meta: any) {
           credits: pack.credits,
           amount: parseInt(data.attributes.total),
           currency: data.attributes.currency,
-          providerCustomerId: customerId,
           providerPaymentId: data.id,
           providerProductId: variantId,
           status: "COMPLETED",
-          metadata: { packId: pack.id },
         },
       });
     });

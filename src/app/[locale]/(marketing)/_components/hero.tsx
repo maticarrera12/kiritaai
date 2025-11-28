@@ -1,7 +1,6 @@
 "use client";
 
 import { ArrowRight02Icon, StarIcon, CreditCardIcon, ChartAverageIcon } from "hugeicons-react";
-import NextLink from "next/link";
 import { useTranslations } from "next-intl";
 
 import AnimatedButton from "@/components/AnimatedButton/AnimatedButton";
@@ -12,12 +11,12 @@ const Hero = () => {
   return (
     <section className="relative min-h-[110vh] flex items-center justify-center px-4 md:px-6 overflow-hidden bg-background">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[600px] bg-primary/10 blur-[120px] rounded-full pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
-      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-400/5 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-fuchsia-400/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="container max-w-7xl mx-auto w-full relative z-10">
-        <div className="flex flex-col items-center space-y-16 py-24 w-full">
-          <div className="flex flex-col items-center text-center space-y-8 max-w-4xl w-full px-2">
-            <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white dark:bg-white/5 border border-border shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+        <div className="flex flex-col items-center space-y-4 py-16 w-full">
+          <div className="flex flex-col items-center text-center space-y-4 max-w-4xl w-full px-2">
+            <div className="inline-flex items-center gap-2.5 px-4 mt-10 py-1.5 rounded-full bg-white dark:bg-white/5 border border-border shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
@@ -30,10 +29,10 @@ const Hero = () => {
             <div className="w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100 fill-mode-backwards">
               <h1 className="text-5xl sm:text-7xl md:text-6xl font-bold tracking-tighter text-foreground leading-[1.1] md:leading-[1.05]">
                 {t("heading.part1")}{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary to-blue-600 relative inline-block">
+                <span className="text-transparent pr-1 bg-clip-text bg-gradient-to-br from-blue-600 to-fuchsia-600 relative inline-block overflow-visible">
                   {t("heading.highlight")}
                   <svg
-                    className="absolute w-full h-3 -bottom-1 left-0 text-primary opacity-30"
+                    className="absolute w-full h-3 -bottom-3 left-0 text-primary opacity-30"
                     viewBox="0 0 100 10"
                     preserveAspectRatio="none"
                   >
@@ -55,7 +54,7 @@ const Hero = () => {
               {t("description.part2")}
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 fill-mode-backwards w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-0 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 fill-mode-backwards w-full sm:w-auto">
               <div className="[&_button]:rounded-full [&_button]:px-8 [&_button]:h-14 [&_button]:text-lg [&_button]:shadow-lg [&_button]:shadow-primary/20">
                 <AnimatedButton
                   label={t("cta")}
@@ -66,13 +65,13 @@ const Hero = () => {
                 />
               </div>
 
-              <NextLink
+              {/* <NextLink
                 href="/docs"
                 className="group flex items-center gap-2 h-14 px-8 rounded-full border border-border/60 bg-white/50 dark:bg-white/5 hover:bg-muted text-foreground transition-all duration-300 hover:scale-105"
               >
                 <span className="font-medium">Documentation</span>
                 <ArrowRight02Icon className="w-5 h-5 text-primary transition-transform group-hover:translate-x-1" />
-              </NextLink>
+              </NextLink> */}
             </div>
           </div>
 
@@ -99,7 +98,7 @@ const Hero = () => {
               <div className="absolute inset-0 pt-14 flex flex-col bg-gradient-to-b from-white/0 to-white/40 dark:to-black/40">
                 <div className="flex-1 flex items-center justify-center p-10">
                   <div className="text-center space-y-6">
-                    <div className="w-24 h-24 mx-auto bg-gradient-to-tr from-primary to-blue-400 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-primary/30 rotate-12">
+                    <div className="w-24 h-24 mx-auto bg-gradient-to-tr from-primary to-fuchsia-400 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-primary/30 rotate-12">
                       <StarIcon className="w-12 h-12" />
                     </div>
                     <div className="space-y-2">

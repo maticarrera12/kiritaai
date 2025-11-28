@@ -45,76 +45,113 @@
 }
 
 :root {
+  /* Revolut mantiene esquinas redondeadas */
   --radius: 1rem;
+
+  /* --- MODO CLARO --- */
+
+  /* Fondo blanco puro para limpieza total */
   --background: oklch(1 0 0);
-  --foreground: oklch(0.13 0.02 260);
-  --card: oklch(0.99 0.005 260);
-  --card-foreground: oklch(0.13 0.02 260);
+
+  /* Texto casi negro, pero con un toque imperceptible de fuchsia profundo (Hue 325) */
+  --foreground: oklch(0.13 0.02 325);
+
+  /* Tarjetas muy sutiles */
+  --card: oklch(0.99 0.005 325);
+  --card-foreground: oklch(0.13 0.02 325);
+
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.13 0.02 260);
-  --primary: oklch(0.58 0.233 260);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.96 0.01 260);
-  --secondary-foreground: oklch(0.35 0.03 260);
-  --muted: oklch(0.96 0.01 260);
-  --muted-foreground: oklch(0.55 0.03 260);
-  --accent: oklch(0.96 0.01 260);
-  --accent-foreground: oklch(0.25 0.02 260);
+  --popover-foreground: oklch(0.13 0.02 325);
+
+  /* EL FUCHSIA (Primary) - Vibrante y eléctrico */
+  --primary: oklch(0.55 0.23 325);
+  --primary-foreground: oklch(1 0 0); /* Texto blanco sobre fuchsia */
+
+  /* Secundarios con tinte rosado muy suave */
+  --secondary: oklch(0.96 0.01 325);
+  --secondary-foreground: oklch(0.35 0.04 325);
+
+  --muted: oklch(0.96 0.01 325);
+  --muted-foreground: oklch(0.55 0.04 325); /* Texto gris-rosado */
+
+  --accent: oklch(0.96 0.01 325);
+  --accent-foreground: oklch(0.25 0.04 325);
+
   --destructive: oklch(0.6 0.22 25);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.92 0.01 260);
-  --input: oklch(0.92 0.01 260);
-  --ring: oklch(0.58 0.233 260);
-  --chart-1: oklch(0.58 0.233 260);
-  --chart-2: oklch(0.65 0.18 150);
-  --chart-3: oklch(0.85 0.15 90);
-  --chart-4: oklch(0.6 0.2 25);
-  --chart-5: oklch(0.7 0.15 320);
 
-  --sidebar: oklch(0.985 0.005 260);
-  --sidebar-foreground: oklch(0.13 0.02 260);
-  --sidebar-primary: oklch(0.58 0.233 260);
+  /* Bordes tintados */
+  --border: oklch(0.92 0.01 325);
+  --input: oklch(0.92 0.01 325);
+  --ring: oklch(0.55 0.23 325); /* Anillo de foco fuchsia */
+
+  /* Gráficos para dashboards */
+  --chart-1: oklch(0.55 0.23 325); /* Fuchsia Principal */
+  --chart-2: oklch(0.65 0.2 260); /* Azul/Violeta (Análogo) */
+  --chart-3: oklch(0.7 0.18 180); /* Turquesa (Contraste) */
+  --chart-4: oklch(0.85 0.16 85); /* Amarillo/Naranja */
+  --chart-5: oklch(0.6 0.22 350); /* Rosa/Rojo */
+
+  /* Sidebar Variables */
+  --sidebar: oklch(0.985 0.005 325);
+  --sidebar-foreground: oklch(0.13 0.02 325);
+  --sidebar-primary: oklch(0.55 0.23 325);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.95 0.01 260);
-  --sidebar-accent-foreground: oklch(0.13 0.02 260);
-  --sidebar-border: oklch(0.92 0.01 260);
-  --sidebar-ring: oklch(0.58 0.233 260);
+  --sidebar-accent: oklch(0.95 0.01 325);
+  --sidebar-accent-foreground: oklch(0.13 0.02 325);
+  --sidebar-border: oklch(0.92 0.01 325);
+  --sidebar-ring: oklch(0.55 0.23 325);
 }
 
 .dark {
-  --background: oklch(0.13 0.02 260);
-  --foreground: oklch(0.98 0.005 260);
-  --card: oklch(0.16 0.02 260);
-  --card-foreground: oklch(0.98 0.005 260);
-  --popover: oklch(0.13 0.02 260);
-  --popover-foreground: oklch(0.98 0.005 260);
-  --primary: oklch(0.62 0.22 260);
+  /* --- MODO OSCURO --- */
+
+  /* Fondo casi negro, con un tinte "Deep Plum" (Ciruela muy oscuro) */
+  --background: oklch(0.13 0.02 325);
+  --foreground: oklch(0.98 0.005 325);
+
+  /* Tarjetas un poco más claras para elevarlas */
+  --card: oklch(0.16 0.02 325);
+  --card-foreground: oklch(0.98 0.005 325);
+
+  --popover: oklch(0.13 0.02 325);
+  --popover-foreground: oklch(0.98 0.005 325);
+
+  /* El fuchsia brilla un poco más en dark mode (Luminosidad 0.65) */
+  --primary: oklch(0.65 0.23 325);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.25 0.03 260);
-  --secondary-foreground: oklch(0.98 0.005 260);
-  --muted: oklch(0.25 0.03 260);
-  --muted-foreground: oklch(0.7 0.02 260);
-  --accent: oklch(0.25 0.03 260);
-  --accent-foreground: oklch(0.98 0.005 260);
+
+  --secondary: oklch(0.25 0.04 325);
+  --secondary-foreground: oklch(0.98 0.005 325);
+
+  --muted: oklch(0.25 0.04 325);
+  --muted-foreground: oklch(0.7 0.03 325);
+
+  --accent: oklch(0.25 0.04 325);
+  --accent-foreground: oklch(0.98 0.005 325);
+
   --destructive: oklch(0.6 0.2 25);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.25 0.03 260);
-  --input: oklch(0.25 0.03 260);
-  --ring: oklch(0.62 0.22 260);
-  --chart-1: oklch(0.62 0.22 260);
-  --chart-2: oklch(0.7 0.16 150);
-  --chart-3: oklch(0.88 0.14 90);
-  --chart-4: oklch(0.65 0.2 25);
-  --chart-5: oklch(0.75 0.14 320);
 
-  --sidebar: oklch(0.16 0.02 260);
-  --sidebar-foreground: oklch(0.98 0.005 260);
-  --sidebar-primary: oklch(0.62 0.22 260);
+  --border: oklch(0.25 0.04 325);
+  --input: oklch(0.25 0.04 325);
+  --ring: oklch(0.65 0.23 325);
+
+  /* Gráficos ajustados para dark mode */
+  --chart-1: oklch(0.65 0.23 325); /* Fuchsia Neón */
+  --chart-2: oklch(0.7 0.2 260);
+  --chart-3: oklch(0.75 0.18 180);
+  --chart-4: oklch(0.88 0.16 85);
+  --chart-5: oklch(0.65 0.22 350);
+
+  --sidebar: oklch(0.16 0.02 325);
+  --sidebar-foreground: oklch(0.98 0.005 325);
+  --sidebar-primary: oklch(0.65 0.23 325);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.25 0.03 260);
-  --sidebar-accent-foreground: oklch(0.98 0.005 260);
-  --sidebar-border: oklch(0.25 0.03 260);
-  --sidebar-ring: oklch(0.62 0.22 260);
+  --sidebar-accent: oklch(0.25 0.04 325);
+  --sidebar-accent-foreground: oklch(0.98 0.005 325);
+  --sidebar-border: oklch(0.25 0.04 325);
+  --sidebar-ring: oklch(0.65 0.23 325);
 }
 
 @layer base {

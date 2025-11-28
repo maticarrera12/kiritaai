@@ -9,10 +9,10 @@ import {
   Alert01Icon,
 } from "hugeicons-react";
 import { headers } from "next/headers";
-import Link from "next/link";
 
 import { AppFloatingActions } from "../_components/app-floatings-actions";
 import ReviewsList from "../_components/reviews-list";
+import { Link } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
@@ -55,7 +55,6 @@ async function getAppData(appId: string) {
 export default async function AppDetailPage({ params }: { params: Promise<{ appId: string }> }) {
   const { appId } = await params;
 
-  // 1. Obtener Datos de Scraping
   const data = await getAppData(appId);
 
   if (!data || !data.info) {
@@ -64,12 +63,10 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
 
   const { info, reviews } = data;
 
-  // 2. Obtener Sesión y Análisis Existente
   const session = await auth.api.getSession({ headers: await headers() });
   let existingAnalysis = null;
 
   if (session?.user?.id) {
-    // IMPORTANTE: Buscamos por appId exacto (el que viene del scraping) Y userId
     existingAnalysis = await prisma.analysis.findFirst({
       where: {
         userId: session.user.id,
@@ -90,7 +87,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
   return (
     <div className="min-h-screen bg-background text-foreground font-sans pb-32">
       <nav className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/40 transition-all">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-2 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
               href="/app"
@@ -114,7 +111,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
         </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto px-4 md:px-6 pt-8 md:pt-12">
+      <main className="max-w-5xl mx-auto px-2 md:px-6 pt-8 md:pt-12">
         <div className="flex flex-col md:flex-row gap-8 md:gap-12 mb-12">
           <div className="relative shrink-0 mx-auto md:mx-0">
             <div className="w-32 h-32 md:w-44 md:h-44 rounded-[2rem] shadow-2xl overflow-hidden border border-border/50 bg-white">
@@ -155,12 +152,12 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
                   </span>
                 </div>
 
-                <div className="flex flex-col items-center px-4">
+                <div className="flex flex-col items-center px-2">
                   <span className="font-bold text-foreground text-xl">{info.contentRating}</span>
                   <span className="text-xs text-muted-foreground font-medium mt-0.5">Age</span>
                 </div>
 
-                <div className="flex flex-col items-center px-4 last:pr-0">
+                <div className="flex flex-col items-center px-2 last:pr-0">
                   <span className="font-bold text-foreground text-xl">
                     {formatInstalls(info.installs)}
                   </span>
@@ -249,10 +246,10 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
         <ReviewsList reviews={reviews} />
       </main>
 
-      {/* Pasamos los datos iniciales */}
       <AppFloatingActions
         appId={info.appId}
         appName={info.title}
+        appIcon={info.icon}
         initialAnalysisData={existingAnalysis?.insights}
       />
     </div>

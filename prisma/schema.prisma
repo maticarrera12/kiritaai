@@ -32,7 +32,6 @@ enum PlanStatus {
 }
 
 enum SubscriptionProvider {
-  STRIPE
   LEMONSQUEEZY
 }
 
@@ -75,6 +74,11 @@ enum ChatRole {
   USER
   ASSISTANT
   SYSTEM
+}
+
+enum PlanInterval {
+  MONTHLY
+  YEARLY
 }
 
 // ============================================
@@ -229,7 +233,7 @@ model CreditTransaction {
 }
 
 // ============================================
-// COMPRAS (Stripe / LemonSqueezy)
+// COMPRAS (LemonSqueezy)
 // ============================================
 
 model Purchase {
@@ -248,7 +252,7 @@ model Purchase {
   currency String   @default("usd")
 
   // IDs externos
-  providerPaymentId      String   @unique // ID de Stripe Charge / Invoice
+  providerPaymentId      String   @unique // ID de LemonSqueezy Order / Subscription
   providerProductId      String?
   providerCustomerId     String?
   providerSubscriptionId String?
@@ -388,4 +392,24 @@ model WaitlistUser {
   referrals    WaitlistUser[] @relation("Referrals")
   invited      Boolean        @default(false)
   createdAt    DateTime       @default(now())
+}
+
+// ============================================
+// PLAN LIMITS (Admin Configurable)
+// ============================================
+
+model PlanLimit {
+  id             String        @id @default(cuid())
+  plan           PlanType
+  interval       PlanInterval
+  monthlyCredits Int           @default(0) // AI análisis por mes
+  dailySearches  Int           @default(0) // Búsquedas diarias permitidas
+  features       Json?         // Array of PlanFeature
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([plan, interval], name: "plan_interval")
+  @@index([plan])
+  @@map("plan_limit")
 }

@@ -3,10 +3,6 @@
     "profileImage": "Profile image",
     "menu": {
       "option1": "Settings",
-      "option2": "Projects",
-      "option3": "Documentation",
-      "option4": "Bookmarks",
-      "option5": "Edit Profile",
       "adminPanel": "Admin Panel",
       "logout": "Log Out"
     }
@@ -288,17 +284,18 @@
   },
   "hero": {
     "heading": {
-      "part1": "Concise Heading that Describes",
-      "highlight": "the benefit",
-      "part2": "of your product"
+      "part1": "Turn Messy App Reviews",
+      "highlight": "Into Signals",
+      "part2": "For Your Product Roadmap"
     },
     "description": {
-      "part1": "Descriptive content to describe",
-      "highlight": "what",
-      "part2": "the product is."
+      "part1": "Stop manually reading thousands of comments.",
+      "highlight": "Scrape Google Play data in seconds",
+      "part2": "and let AI extract hidden opportunities, critical bugs, and feature requests that drive growth."
     },
-    "cta": "Get Started",
-    "imagePlaceholder": "Replace image"
+    "cta": "Spy on Apps",
+    "imagePlaceholder": "Replace image",
+    "badge": "App AI Analyser"
   },
   "featureTabs": {
     "tabs": {
@@ -320,7 +317,7 @@
     "payments": {
       "title": "Payments",
       "items": [
-        "Integrates Stripe & Lemon Squeezy.",
+        "Integrates Lemon Squeezy.",
         "Subscriptions, credits, and LTD campaigns ready.",
         "Automatic webhooks & plan gating.",
         "Billing panel with real-time analytics."

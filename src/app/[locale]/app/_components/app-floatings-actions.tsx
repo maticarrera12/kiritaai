@@ -11,18 +11,19 @@ import { useGenerateAnalysis } from "@/hooks/use-analysis";
 interface AppFloatingActionsProps {
   appId: string;
   appName: string;
+  appIcon?: string;
   initialAnalysisData?: any;
 }
 
 export function AppFloatingActions({
   appId,
   appName,
+  appIcon,
   initialAnalysisData,
 }: AppFloatingActionsProps) {
   const [showModal, setShowModal] = useState(false);
   const [analysisData, setAnalysisData] = useState<any>(initialAnalysisData);
 
-  // CRÍTICO: Sincronizar estado si cambian los props (navegación)
   useEffect(() => {
     setAnalysisData(initialAnalysisData);
   }, [initialAnalysisData, appId]);
@@ -58,7 +59,13 @@ export function AppFloatingActions({
 
   return (
     <>
-      <AnalysisModal isOpen={showModal} onClose={() => setShowModal(false)} data={analysisData} />
+      <AnalysisModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        data={analysisData}
+        appName={appName}
+        appIcon={appIcon}
+      />
 
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 items-end">
         <motion.button
@@ -84,7 +91,7 @@ export function AppFloatingActions({
             opacity: 1,
             scale: 1,
             y: 0,
-            backgroundColor: hasAnalysis ? "#10b981" : "hsl(var(--primary))",
+            backgroundColor: hasAnalysis ? "#10b981" : "var(--primary)",
           }}
           onClick={handleMainAction}
           disabled={isLoading}
@@ -122,7 +129,7 @@ export function AppFloatingActions({
                 className="flex items-center gap-3"
               >
                 <MagicWand01Icon size={22} />
-                <span className="text-sm md:text-base">Generate Analysis</span>
+                <span className="text-sm hidden md:block md:text-base">Generate Analysis</span>
               </motion.div>
             )}
           </AnimatePresence>

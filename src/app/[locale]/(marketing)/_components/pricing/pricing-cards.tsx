@@ -105,9 +105,7 @@ export function PricingCards() {
 
     const pack = CREDIT_PACKS[packKey as keyof typeof CREDIT_PACKS];
 
-    // En tu constants.ts deberías tener lemonSqueezy.variantId en los packs también
-    // Si no está tipado, asegúrate de agregarlo en constants.ts
-    const variantId = (pack as any).lemonSqueezy?.variantId || (pack as any).stripe?.priceId;
+    const variantId = pack.lemonSqueezy?.variantId;
 
     if (!variantId) {
       toast.error("Pack configuration missing");

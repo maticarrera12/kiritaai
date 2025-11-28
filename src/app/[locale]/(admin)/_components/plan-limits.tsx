@@ -70,10 +70,10 @@ export function PlanLimitsClient() {
 
   const handleUpdateLimitField = (
     plan: PlanLimit,
-    field: "monthlyCredits" | "maxProjectsPerMonth" | "maxAssetsPerProject",
+    field: "monthlyCredits" | "dailySearches",
     value: string
   ) => {
-    const parsed = value === "" ? null : Number.isNaN(Number(value)) ? null : Number(value);
+    const parsed = value === "" ? 0 : Number.isNaN(Number(value)) ? 0 : Number(value);
 
     const payload: any = {
       plan: plan.plan,
@@ -82,8 +82,8 @@ export function PlanLimitsClient() {
 
     if (field === "monthlyCredits") {
       payload.monthlyCredits = parsed ?? 0;
-    } else {
-      payload[field] = parsed;
+    } else if (field === "dailySearches") {
+      payload.dailySearches = parsed ?? 0;
     }
 
     updateLimits.mutate(payload, {
@@ -150,8 +150,7 @@ export function PlanLimitsClient() {
               <TableRow>
                 <TableHead className="w-[120px]">Plan</TableHead>
                 <TableHead className="w-[160px] text-right">Monthly credits</TableHead>
-                <TableHead className="w-[160px] text-right">Max projects / month</TableHead>
-                <TableHead className="w-[180px] text-right">Max assets / project</TableHead>
+                <TableHead className="w-[160px] text-right">Daily searches</TableHead>
                 <TableHead className="w-[140px] text-right">Features</TableHead>
               </TableRow>
             </TableHeader>
@@ -183,36 +182,14 @@ export function PlanLimitsClient() {
                     />
                   </TableCell>
 
-                  {/* Max projects */}
+                  {/* Daily searches */}
                   <TableCell className="text-right">
                     <Input
-                      defaultValue={plan.maxProjectsPerMonth ?? ""}
-                      placeholder="Unlimited"
+                      defaultValue={plan.dailySearches}
                       type="number"
                       min={0}
                       className="ml-auto h-8 w-28 text-right"
-                      onBlur={(e) =>
-                        handleUpdateLimitField(plan, "maxProjectsPerMonth", e.target.value)
-                      }
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          (e.target as HTMLInputElement).blur();
-                        }
-                      }}
-                    />
-                  </TableCell>
-
-                  {/* Max assets per project */}
-                  <TableCell className="text-right">
-                    <Input
-                      defaultValue={plan.maxAssetsPerProject ?? ""}
-                      placeholder="Unlimited"
-                      type="number"
-                      min={0}
-                      className="ml-auto h-8 w-32 text-right"
-                      onBlur={(e) =>
-                        handleUpdateLimitField(plan, "maxAssetsPerProject", e.target.value)
-                      }
+                      onBlur={(e) => handleUpdateLimitField(plan, "dailySearches", e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           (e.target as HTMLInputElement).blur();

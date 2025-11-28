@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       balance: user.credits,
       plan: user.plan,
-      monthlyAllocation: planConfig.credits.monthly,
+      monthlyAllocation: planConfig.limits.aiCredits,
       usedThisMonth: stats.totalUsed,
       resetDate: user.currentPeriodEnd,
       usage: stats.byFeature,

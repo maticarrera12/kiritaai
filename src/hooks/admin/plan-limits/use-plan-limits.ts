@@ -18,8 +18,7 @@ export type PlanLimit = {
   plan: PlanType;
   interval: PlanInterval;
   monthlyCredits: number;
-  maxProjectsPerMonth: number | null;
-  maxAssetsPerProject: number | null;
+  dailySearches: number;
   features: PlanFeature[];
 };
 

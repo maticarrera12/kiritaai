@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     // Find users whose period has ended
     const usersToReset = await prisma.user.findMany({
       where: {
-        plan: { in: ["PRO", "BUSINESS"] },
+        plan: { in: ["PRO_INDIE", "POWER_BUSINESS"] },
         planStatus: "ACTIVE",
         currentPeriodEnd: { lte: now },
       },
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     for (const user of usersToReset) {
       try {
-        await CreditService.monthlyReset(user.id);
+        await CreditService.resetMonthlyCredits(user.id);
 
         // Update currentPeriodEnd to avoid processing same user again
         const nextPeriod = new Date(now);

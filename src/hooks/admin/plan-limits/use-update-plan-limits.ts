@@ -9,8 +9,7 @@ type UpdatePlanLimitsInput = {
   plan: PlanType;
   interval: PlanInterval;
   monthlyCredits?: number;
-  maxProjectsPerMonth?: number | null;
-  maxAssetsPerProject?: number | null;
+  dailySearches?: number;
 };
 
 export function useUpdatePlanLimits() {

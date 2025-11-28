@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence, Variants } from "framer-motion";
+// eslint-disable-next-line unused-imports/no-unused-imports
 import { BookOpen01Icon, Home12Icon, SaleTag01Icon } from "hugeicons-react";
 import { useState, useEffect } from "react";
 
@@ -21,7 +22,7 @@ import { cn } from "@/lib/utils";
 const navigationLinks = [
   { href: "/", label: "Home", icon: Home12Icon, scrollTo: "top" },
   { href: "#pricing", label: "Pricing", icon: SaleTag01Icon, scrollTo: "pricing" },
-  { href: "/docs", label: "Docs", icon: BookOpen01Icon },
+  // { href: "/docs", label: "Docs", icon: BookOpen01Icon },
 ];
 
 const sidebarVariants: Variants = {
@@ -198,13 +199,13 @@ export default function Navbar() {
                 <LanguageSwitcher />
               </div>
 
-              <Button
+              {/* <Button
                 onClick={() => push("/waitlist")}
                 variant="outline"
                 className="text-sm cursor-pointer rounded-full bg-transparent border-2 text-foreground hover:bg-muted hidden sm:flex"
               >
                 Waitlist
-              </Button>
+              </Button> */}
 
               {!isLoading &&
                 (session?.user ? (
@@ -272,7 +273,7 @@ export default function Navbar() {
                     <LanguageSwitcher />
                   </div>
 
-                  <Button
+                  {/* <Button
                     className="w-full rounded-full mt-4"
                     onClick={() => {
                       push("/waitlist");
@@ -280,7 +281,7 @@ export default function Navbar() {
                     }}
                   >
                     Join Waitlist
-                  </Button>
+                  </Button> */}
                 </motion.div>
               </div>
             </motion.aside>
