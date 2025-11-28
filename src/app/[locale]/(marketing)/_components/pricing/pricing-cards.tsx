@@ -34,7 +34,7 @@ interface CreditPackCardProps {
 
 export function PricingCards() {
   const t = useTranslations("pricing");
-  const { push } = useLocaleRouting();
+  const { push, locale } = useLocaleRouting();
   const [interval, setInterval] = useState<"monthly" | "annual">("monthly");
 
   // Estado para manejar la carga (checkout redirect)
@@ -75,7 +75,8 @@ export function PricingCards() {
     const variantId =
       interval === "monthly" ? plan.lemonSqueezy?.monthly : plan.lemonSqueezy?.annual;
 
-    if (!variantId) {
+    if (!variantId || variantId.trim() === "") {
+      console.error("Variant ID missing for plan:", plan.id, "interval:", interval);
       toast.error("Configuration error: Plan ID missing");
       return;
     }
@@ -84,7 +85,7 @@ export function PricingCards() {
       setIsCheckingOut(plan.id);
 
       // 3. Llamar al Server Action
-      const checkoutUrl = await getCheckoutUrl(variantId);
+      const checkoutUrl = await getCheckoutUrl(variantId, undefined, locale);
 
       // 4. Redirigir a Lemon Squeezy
       window.location.href = checkoutUrl;
@@ -115,7 +116,7 @@ export function PricingCards() {
 
     try {
       setIsCheckingOut(`pack-${pack.id}`);
-      const checkoutUrl = await getCheckoutUrl(variantId);
+      const checkoutUrl = await getCheckoutUrl(variantId, undefined, locale);
       window.location.href = checkoutUrl;
     } catch (error) {
       toast.error("Failed to start checkout");
@@ -372,7 +373,7 @@ function CreditPackCard({
       <button
         onClick={onBuyCredits}
         disabled={isLoading}
-        className="w-full py-3 rounded-xl font-bold text-sm bg-white border border-border shadow-sm group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all flex justify-center items-center"
+        className="w-full py-3 rounded-xl font-bold text-sm bg-background border border-border shadow-sm group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all flex justify-center items-center"
       >
         {isLoading ? <Loading03Icon className="animate-spin w-4 h-4" /> : "Buy Credits"}
       </button>

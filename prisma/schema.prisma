@@ -121,8 +121,8 @@ model User {
   currentPeriodEnd       DateTime?
   cancelAtPeriodEnd      Boolean   @default(false)
 
-  stripeCustomerId       String?   @unique
   lemonSqueezyCustomerId String?   @unique
+  lemonSqueezyVariantId  String?
 
   // Relations
   creditHistory CreditTransaction[]
@@ -250,6 +250,10 @@ model Purchase {
   // IDs externos
   providerPaymentId      String   @unique // ID de Stripe Charge / Invoice
   providerProductId      String?
+  providerCustomerId     String?
+  providerSubscriptionId String?
+
+  metadata Json? // Metadata adicional (ej: packId, appId, etc.)
 
   status PurchaseStatus
 

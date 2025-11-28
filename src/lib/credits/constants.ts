@@ -76,7 +76,6 @@ export const CREDIT_PACKS = {
     credits: Number(process.env.PACK_SMALL_CREDITS) || 10,
     price: Number(process.env.PACK_SMALL_PRICE) || 5,
     description: "10 extra AI analyses",
-    // AGREGADO: Configuración de LS para packs
     lemonSqueezy: {
       variantId: process.env.NEXT_PUBLIC_LS_VARIANT_ID_PACK_SMALL || "",
     },
@@ -87,7 +86,6 @@ export const CREDIT_PACKS = {
     credits: Number(process.env.PACK_LARGE_CREDITS) || 50,
     price: Number(process.env.PACK_LARGE_PRICE) || 20,
     description: "50 extra AI analyses",
-    // AGREGADO: Configuración de LS para packs
     lemonSqueezy: {
       variantId: process.env.NEXT_PUBLIC_LS_VARIANT_ID_PACK_LARGE || "",
     },

@@ -28,7 +28,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export default async function LocaleLayout({ children, params }: any) {
-  const { locale } = params;
+  const { locale } = await params;
   const messages = await loadMessages(locale);
 
   return (

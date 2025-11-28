@@ -5,10 +5,11 @@ import { redirect } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
 
 export default async function SettingsLayout({ children, params }: any) {
+  const { locale } = await params;
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session?.user) {
-    redirect({ href: "/signin", locale: params.locale });
+    redirect({ href: "/signin", locale });
     return null;
   }
 

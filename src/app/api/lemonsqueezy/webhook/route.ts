@@ -2,9 +2,8 @@ import { PlanStatus } from "@prisma/client";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
-// Importamos los servicios nuevos
+// Asegúrate de importar tus servicios y constantes correctamente
 import { CreditService } from "@/lib/credits";
-// Importamos las constantes nuevas (Plans, Packs)
 import { PLANS, CREDIT_PACKS, type PlanId } from "@/lib/credits/constants";
 import { prisma } from "@/lib/prisma";
 
@@ -15,7 +14,6 @@ export async function POST(req: NextRequest) {
     const body = await req.text();
     const signature = req.headers.get("x-signature");
 
-    // 1. Verificar firma (Seguridad)
     if (!verifySignature(body, signature)) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
@@ -23,12 +21,18 @@ export async function POST(req: NextRequest) {
     const payload = JSON.parse(body);
     const { meta, data } = payload;
 
-    // 2. Manejar eventos
-    // https://docs.lemonsqueezy.com/help/webhooks#event-types
+    // --- DEBUG LOG ---
+    console.log(`Webhook Event: ${meta.event_name}`, {
+      custom_data: meta.custom_data,
+      customerId: data.attributes.customer_id,
+    });
+    // ----------------
+
     switch (meta.event_name) {
       case "subscription_created":
       case "subscription_updated":
-        await handleLSSubscriptionUpdate(data);
+        // Pasamos 'meta' para acceder a custom_data
+        await handleLSSubscriptionUpdate(data, meta);
         break;
 
       case "subscription_cancelled":
@@ -44,12 +48,10 @@ export async function POST(req: NextRequest) {
         break;
 
       case "order_created":
-        // Maneja compras únicas (Packs de Créditos)
-        await handleLSOrderCreated(data);
+        await handleLSOrderCreated(data, meta);
         break;
 
       case "subscription_payment_success":
-        // Maneja renovación mensual (Relleno de créditos)
         await handleLSPaymentSuccess(data);
         break;
 
@@ -58,17 +60,13 @@ export async function POST(req: NextRequest) {
         break;
 
       default:
-        return NextResponse.json(
-          { received: true, ignoredEvent: meta.event_name },
-          { status: 202 }
-        );
+        return NextResponse.json({ received: true }, { status: 200 });
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error("Webhook Error:", error);
-    const message = error instanceof Error ? error.message : "Webhook handler failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Webhook failed" }, { status: 500 });
   }
 }
 
@@ -83,7 +81,6 @@ function verifySignature(body: string, signature: string | null): boolean {
   return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
 }
 
-// Mapear estado de LS a nuestro Prisma Enum
 function mapLSStatus(status: string): PlanStatus {
   const mapping: Record<string, PlanStatus> = {
     on_trial: PlanStatus.TRIALING,
@@ -97,10 +94,10 @@ function mapLSStatus(status: string): PlanStatus {
   return mapping[status] || PlanStatus.ACTIVE;
 }
 
-// Encontrar qué plan es según el Variant ID de LS
 function getPlanFromVariantId(variantId: string): PlanId | null {
   const vId = variantId.toString();
   for (const [planName, config] of Object.entries(PLANS)) {
+    // Verificamos tanto mensual como anual
     if (config.lemonSqueezy?.monthly === vId || config.lemonSqueezy?.annual === vId) {
       return planName as PlanId;
     }
@@ -108,39 +105,64 @@ function getPlanFromVariantId(variantId: string): PlanId | null {
   return null;
 }
 
+/**
+ * BUSQUEDA INTELIGENTE DE USUARIO
+ * 1. Intenta por lemonSqueezyCustomerId (usuarios recurrentes)
+ * 2. Si falla, intenta por custom_data.user_id (primera compra)
+ */
+async function findUserForWebhook(customerId: string, customData?: any) {
+  // 1. Buscar por Customer ID
+  let user = await prisma.user.findUnique({
+    where: { lemonSqueezyCustomerId: customerId.toString() },
+  });
+
+  // 2. Si no existe, buscar por el ID interno que enviamos en el checkout
+  if (!user && customData?.user_id) {
+    console.log(`User not found by CustomerID. Trying Custom ID: ${customData.user_id}`);
+    user = await prisma.user.findUnique({
+      where: { id: customData.user_id },
+    });
+
+    // Si lo encontramos por ID interno, GUARDAMOS el customer ID para la próxima
+    if (user) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { lemonSqueezyCustomerId: customerId.toString() },
+      });
+      console.log(`User linked to LS Customer ID: ${customerId}`);
+    }
+  }
+
+  return user;
+}
+
 // ------------------------------------------
-// HANDLERS LÓGICOS
+// HANDLERS
 // ------------------------------------------
 
-async function handleLSSubscriptionUpdate(data: any) {
+async function handleLSSubscriptionUpdate(data: any, meta: any) {
   const customerId = data.attributes.customer_id.toString();
   const variantId = data.attributes.variant_id.toString();
   const subscriptionId = data.id.toString();
   const status = data.attributes.status;
-  const renewsAt = data.attributes.renews_at; // Puede ser null si cancelado
+  const renewsAt = data.attributes.renews_at;
   const endsAt = data.attributes.ends_at;
 
-  // 1. Buscar usuario
-  const user = await prisma.user.findUnique({
-    where: { lemonSqueezyCustomerId: customerId },
-  });
+  const user = await findUserForWebhook(customerId, meta.custom_data);
 
   if (!user) {
-    console.warn(`Webhook: User not found for LS Customer ID ${customerId}`);
+    console.error(`CRITICAL: User not found for LS Customer ID ${customerId} nor Custom ID.`);
     return;
   }
 
-  // 2. Identificar Plan
   const planId = getPlanFromVariantId(variantId);
   if (!planId) {
     console.warn(`Webhook: Plan not found for Variant ID ${variantId}`);
     return;
   }
 
-  // 3. ¿Es una suscripción nueva?
   const isNewSubscription = status === "active" && user.subscriptionId !== subscriptionId;
 
-  // 4. Actualizar usuario
   await prisma.user.update({
     where: { id: user.id },
     data: {
@@ -155,28 +177,31 @@ async function handleLSSubscriptionUpdate(data: any) {
     },
   });
 
-  // 5. Si es NUEVA suscripción, dar los créditos iniciales (Rellenar)
-  // (Nota: Usamos resetMonthlyCredits que setea al límite del plan)
   if (isNewSubscription) {
     await CreditService.resetMonthlyCredits(user.id);
   }
 
-  // 6. Registrar la compra en historial
-  // (Solo si es 'active' para no registrar intentos fallidos como compras completadas)
+  // Registrar Compra
   if (status === "active") {
-    // Usamos upsert para evitar duplicados si el webhook llega dos veces
+    // CORRECCIÓN AQUÍ: Usamos data.attributes.total en lugar de first_subscription_item.price
+    const amount = data.attributes.total;
+
+    // Fallback de seguridad para el payment ID
+    const paymentId =
+      data.attributes.first_subscription_item?.id?.toString() || `sub_pay_${subscriptionId}`;
+
     await prisma.purchase.upsert({
-      where: { providerPaymentId: data.attributes.first_subscription_item.id.toString() },
-      update: { status: "COMPLETED" }, // Si ya existe, aseguramos estado
+      where: { providerPaymentId: paymentId },
+      update: { status: "COMPLETED" },
       create: {
         userId: user.id,
         type: "SUBSCRIPTION",
         provider: "LEMONSQUEEZY",
         plan: planId,
-        amount: parseInt(data.attributes.first_subscription_item.price),
-        currency: "usd", // LS a veces envía esto en otro lugar, hardcodeamos USD si es tu única moneda
+        amount: Number(amount) || 0, // Aseguramos que sea número
+        currency: data.attributes.currency || "usd", // Usamos la moneda real o default a USD
         providerCustomerId: customerId,
-        providerPaymentId: data.attributes.first_subscription_item.id.toString(),
+        providerPaymentId: paymentId,
         providerSubscriptionId: subscriptionId,
         providerProductId: variantId,
         status: "COMPLETED",
@@ -187,63 +212,60 @@ async function handleLSSubscriptionUpdate(data: any) {
 
 async function handleLSSubscriptionCanceled(data: any) {
   const customerId = data.attributes.customer_id.toString();
-  await prisma.user.update({
-    where: { lemonSqueezyCustomerId: customerId },
-    data: {
-      cancelAtPeriodEnd: true,
-      // No cambiamos el plan todavía, espera a que expire el periodo
-    },
-  });
+  // Aquí asumimos que ya existe el customerId porque es una cancelación
+  const user = await prisma.user.findUnique({ where: { lemonSqueezyCustomerId: customerId } });
+
+  if (user) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { cancelAtPeriodEnd: true },
+    });
+  }
 }
 
 async function handleLSSubscriptionResumed(data: any) {
   const customerId = data.attributes.customer_id.toString();
-  await prisma.user.update({
-    where: { lemonSqueezyCustomerId: customerId },
-    data: {
-      cancelAtPeriodEnd: false,
-      planStatus: PlanStatus.ACTIVE,
-    },
-  });
+  const user = await prisma.user.findUnique({ where: { lemonSqueezyCustomerId: customerId } });
+
+  if (user) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { cancelAtPeriodEnd: false, planStatus: PlanStatus.ACTIVE },
+    });
+  }
 }
 
 async function handleLSSubscriptionExpired(data: any) {
   const customerId = data.attributes.customer_id.toString();
-  await prisma.user.update({
-    where: { lemonSqueezyCustomerId: customerId },
-    data: {
-      plan: "FREE",
-      planStatus: PlanStatus.CANCELED,
-      subscriptionId: null, // Desvinculamos
-    },
-  });
+  const user = await prisma.user.findUnique({ where: { lemonSqueezyCustomerId: customerId } });
+
+  if (user) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        plan: "FREE",
+        planStatus: PlanStatus.CANCELED,
+        subscriptionId: null,
+      },
+    });
+  }
 }
 
-async function handleLSOrderCreated(data: any) {
+async function handleLSOrderCreated(data: any, meta: any) {
   const customerId = data.attributes.customer_id.toString();
   const variantId = data.attributes.first_order_item.variant_id.toString();
 
-  const user = await prisma.user.findUnique({
-    where: { lemonSqueezyCustomerId: customerId },
-  });
+  // Usamos el helper inteligente también aquí
+  const user = await findUserForWebhook(customerId, meta.custom_data);
 
   if (!user) return;
 
-  // Buscar qué Pack de créditos es
-  // CREDIT_PACKS es un objeto { SMALL: {...}, LARGE: {...} }
   const pack = Object.values(CREDIT_PACKS).find(
     (p) => p.lemonSqueezy?.variantId && p.lemonSqueezy.variantId === variantId
-  ); // Ajusta esto según tu config real en constants.ts (añadí lemonSqueezy ahí)
+  );
 
-  // Nota: En el constants.ts anterior no puse IDs de LS, asegúrate de ponerlos si usas LS para packs.
-  // Si no encuentras el pack, ignoramos (puede ser una orden de suscripción inicial que ya manejó el otro evento)
   if (pack) {
-    // AÑADIR CRÉDITOS (Esto es una COMPRA, así que se suman, no se resetean)
-    // En CreditService no hicimos método 'add', pero podemos usar deduct negativo o crear uno.
-    // Para mantener la coherencia, lo haremos manual con prisma transaction aquí o actualiza CreditService
-
     await prisma.$transaction(async (tx) => {
-      // 1. Sumar créditos al usuario
       const updatedUser = await tx.user.update({
         where: { id: user.id },
         data: {
@@ -252,11 +274,10 @@ async function handleLSOrderCreated(data: any) {
         },
       });
 
-      // 2. Crear registro de transacción
       await tx.creditTransaction.create({
         data: {
           userId: user.id,
-          type: "PURCHASE", // Enum Purchase
+          type: "PURCHASE",
           amount: pack.credits,
           balance: updatedUser.credits,
           reason: "pack_purchase",
@@ -264,11 +285,10 @@ async function handleLSOrderCreated(data: any) {
         },
       });
 
-      // 3. Crear registro de compra financiera
       await tx.purchase.create({
         data: {
           userId: user.id,
-          type: "PACK_ONE_TIME", // Enum corregido
+          type: "PACK_ONE_TIME",
           provider: "LEMONSQUEEZY",
           credits: pack.credits,
           amount: parseInt(data.attributes.total),
@@ -285,25 +305,24 @@ async function handleLSOrderCreated(data: any) {
 }
 
 async function handleLSPaymentSuccess(data: any) {
-  // Este evento ocurre cada mes cuando se cobra la suscripción
   const customerId = data.attributes.customer_id.toString();
-
   const user = await prisma.user.findUnique({
     where: { lemonSqueezyCustomerId: customerId },
   });
 
   if (!user || user.plan === "FREE") return;
 
-  // Lógica de renovación: Rellenar créditos hasta el tope del plan
   await CreditService.resetMonthlyCredits(user.id);
 }
 
 async function handleLSPaymentFailed(data: any) {
   const customerId = data.attributes.customer_id.toString();
-  await prisma.user.update({
-    where: { lemonSqueezyCustomerId: customerId },
-    data: {
-      planStatus: PlanStatus.PAST_DUE, // Marcar como impago
-    },
-  });
+  const user = await prisma.user.findUnique({ where: { lemonSqueezyCustomerId: customerId } });
+
+  if (user) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { planStatus: PlanStatus.PAST_DUE },
+    });
+  }
 }
