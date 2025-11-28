@@ -67,18 +67,21 @@ export function AppFloatingActions({
         appIcon={appIcon}
       />
 
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 items-end">
+      <div
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex flex-col gap-3 items-end"
+        style={{ maxWidth: "calc(100vw - 2rem)" }}
+      >
         <motion.button
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           onClick={handleChat}
-          className="group flex items-center gap-3 bg-background text-foreground border border-border shadow-lg hover:shadow-xl px-5 py-3 rounded-full transition-all hover:scale-105 active:scale-95"
+          className="group flex items-center gap-2 md:gap-3 bg-background text-foreground border border-border shadow-lg hover:shadow-xl px-3 py-2.5 md:px-5 md:py-3 rounded-full transition-all hover:scale-105 active:scale-95 whitespace-nowrap shrink-0"
         >
           <span className="font-semibold text-sm hidden md:block group-hover:block transition-all">
             Ask KiritaAI
           </span>
-          <div className="relative">
+          <div className="relative shrink-0">
             <Message01Icon size={22} className="text-foreground" />
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-background" />
           </div>
@@ -95,7 +98,7 @@ export function AppFloatingActions({
           }}
           onClick={handleMainAction}
           disabled={isLoading}
-          className="flex items-center gap-3 text-primary-foreground shadow-xl shadow-primary/20 px-6 py-4 rounded-full font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 md:gap-3 text-primary-foreground shadow-xl shadow-primary/20 px-3 py-2.5 md:px-6 md:py-4 rounded-full font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed whitespace-nowrap shrink-0"
         >
           <AnimatePresence mode="wait" initial={false}>
             {isLoading ? (
@@ -104,7 +107,7 @@ export function AppFloatingActions({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="flex items-center gap-3"
+                className="flex items-center gap-2 md:gap-3 shrink-0"
               >
                 <SparklesIcon className="animate-spin" size={22} />
                 <span className="text-sm md:text-base">Analyzing...</span>
@@ -115,10 +118,10 @@ export function AppFloatingActions({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="flex items-center gap-3"
+                className="flex items-center gap-2 md:gap-3 shrink-0"
               >
                 <FileViewIcon size={22} />
-                <span className="text-sm md:text-base">View Report</span>
+                <span className="text-sm hidden md:block md:text-base">View Report</span>
               </motion.div>
             ) : (
               <motion.div
@@ -126,7 +129,7 @@ export function AppFloatingActions({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="flex items-center gap-3"
+                className="flex items-center gap-2 md:gap-3 shrink-0"
               >
                 <MagicWand01Icon size={22} />
                 <span className="text-sm hidden md:block md:text-base">Generate Analysis</span>

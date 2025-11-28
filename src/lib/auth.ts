@@ -3,7 +3,6 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
 
-import { sendEmailVerificationEmail } from "./emails/emailVerification";
 import { sendChangeEmailVerification } from "./emails/sendChangeEmailVerification";
 import { sendDeleteAccountVerification } from "./emails/sendDeleteAccountVerification";
 import { sendPasswordResetEmail } from "./emails/sendPasswordResetEmail";
@@ -77,17 +76,9 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false,
     sendResetPassword: async ({ user, url }) => {
       await sendPasswordResetEmail({ user, url });
-    },
-  },
-  emailVerification: {
-    autoSignInAfterVerification: true,
-    sendOnSignUp: true,
-    callbackURL: "/verify-email-success",
-    sendVerificationEmail: async ({ user, url }) => {
-      await sendEmailVerificationEmail({ user, url });
     },
   },
   socialProviders: {

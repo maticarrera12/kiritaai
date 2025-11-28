@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowRight02Icon, StarIcon, CreditCardIcon, ChartAverageIcon } from "hugeicons-react";
+import { ArrowRight02Icon, CreditCardIcon } from "hugeicons-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import AnimatedButton from "@/components/AnimatedButton/AnimatedButton";
@@ -79,7 +80,7 @@ const Hero = () => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
 
             <div
-              className="relative mx-auto max-w-6xl aspect-[16/9] md:aspect-[21/10] rounded-[2.5rem] border border-white/60 dark:border-white/10 bg-white/40 dark:bg-black/40 backdrop-blur-2xl shadow-2xl overflow-hidden
+              className="relative mx-auto max-w-6xl rounded-[2.5rem] border border-white/60 dark:border-white/10 bg-white/40 dark:bg-black/40 backdrop-blur-2xl shadow-2xl overflow-hidden
               transform transition-transform duration-700 hover:scale-[1.005] hover:-translate-y-1"
               style={{
                 transform: "rotateX(12deg) scale(0.95)",
@@ -95,34 +96,28 @@ const Hero = () => {
                 <div className="h-1.5 w-32 rounded-full bg-border/50" />
               </div>
 
-              <div className="absolute inset-0 pt-14 flex flex-col bg-gradient-to-b from-white/0 to-white/40 dark:to-black/40">
-                <div className="flex-1 flex items-center justify-center p-10">
-                  <div className="text-center space-y-6">
-                    <div className="w-24 h-24 mx-auto bg-gradient-to-tr from-primary to-fuchsia-400 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-primary/30 rotate-12">
-                      <StarIcon className="w-12 h-12" />
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-4xl font-bold text-foreground/80 tracking-tight">
-                        $142,302.00
-                      </p>
-                      <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest">
-                        {t("imagePlaceholder")}
-                      </p>
-                    </div>
-                  </div>
+              <div className="relative pt-14 w-full">
+                {/* Mobile image */}
+                <div className="relative w-full md:hidden">
+                  <Image
+                    src="/hero/hero_1_mobile.png"
+                    alt="Hero image"
+                    width={800}
+                    height={600}
+                    className="w-full h-auto object-contain"
+                    priority
+                  />
                 </div>
-
-                <div className="h-32 border-t border-white/20 bg-white/10 grid grid-cols-3 divide-x divide-white/20">
-                  <div className="flex items-center justify-center gap-3 opacity-50">
-                    <ChartAverageIcon className="w-6 h-6" />
-                    <div className="h-2 w-20 bg-current rounded-full" />
-                  </div>
-                  <div className="hidden md:flex items-center justify-center opacity-50">
-                    <div className="h-2 w-24 bg-current rounded-full" />
-                  </div>
-                  <div className="hidden md:flex items-center justify-center opacity-50">
-                    <div className="h-2 w-24 bg-current rounded-full" />
-                  </div>
+                {/* Desktop image */}
+                <div className="relative w-full hidden md:block">
+                  <Image
+                    src="/hero/hero_1.png"
+                    alt="Hero image"
+                    width={1200}
+                    height={600}
+                    className="w-full h-auto object-contain"
+                    priority
+                  />
                 </div>
               </div>
 

@@ -111,7 +111,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
         </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto px-2 md:px-6 pt-8 md:pt-12">
+      <main className="max-w-5xl mx-auto px-2 md:px-6 pt-8 md:pt-12 overflow-x-hidden">
         <div className="flex flex-col md:flex-row gap-8 md:gap-12 mb-12">
           <div className="relative shrink-0 mx-auto md:mx-0">
             <div className="w-32 h-32 md:w-44 md:h-44 rounded-[2rem] shadow-2xl overflow-hidden border border-border/50 bg-white">
@@ -210,10 +210,12 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6 min-w-0">
             <h2 className="text-2xl font-bold tracking-tight">About this app</h2>
-            <div className="prose prose-gray dark:prose-invert max-w-none text-muted-foreground leading-relaxed">
-              <p className="whitespace-pre-wrap text-base">{info.description}</p>
+            <div className="prose prose-gray dark:prose-invert max-w-none text-muted-foreground leading-relaxed overflow-hidden">
+              <p className="whitespace-pre-wrap text-base break-words break-all">
+                {info.description}
+              </p>
             </div>
           </div>
 

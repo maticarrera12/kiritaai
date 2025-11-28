@@ -9,7 +9,6 @@
     "email": "react-email dev",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "prepare": "husky",
