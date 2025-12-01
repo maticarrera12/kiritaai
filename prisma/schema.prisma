@@ -112,11 +112,12 @@ model User {
   planStatus    PlanStatus  @default(ACTIVE)
 
   // 1. MONEDA REAL (IA): Créditos acumulables/mensuales
-  credits         Int   @default(0)
+  monthlyCredits  Int   @default(0) 
+  extraCredits    Int   @default(0) 
   lifetimeCredits Int   @default(0)
 
   // 2. LÍMITE DIARIO (Scraping): Se resetea cada 24h
-  dailyUsage      DailyUsage?
+  usage           UserUsage?
 
   // Subscription Details
   subscriptionProvider   SubscriptionProvider?
@@ -192,14 +193,19 @@ model Verification {
 // TRACKING DE USO (NUEVO)
 // ============================================
 
-// Controla el límite de búsquedas diarias (Scraping)
-model DailyUsage {
+model UserUsage {
   id        String   @id @default(cuid())
-  userId    String   @unique // Una entrada por usuario
+  userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  date      String   // Formato "YYYY-MM-DD" para fácil reseteo
-  searches  Int      @default(0)
+  // --- TRACKING DIARIO (Scraping) ---
+  dayDate       String   @default("") // Formato "YYYY-MM-DD"
+  dailySearches Int      @default(0)
+
+  // --- TRACKING MENSUAL (Chatbot) ---
+  // Usamos el periodo de facturación para saber cuándo resetear
+  billingCycleStr String   @default("") // Formato "YYYY-MM"
+  monthlyChatCount Int     @default(0)
   
   updatedAt DateTime @updatedAt
 }

@@ -1,5 +1,3 @@
-// lib/credits/constants.ts
-
 export const PLANS = {
   FREE: {
     id: "free",
@@ -10,9 +8,15 @@ export const PLANS = {
     limits: {
       dailySearches: Number(process.env.FREE_DAILY_SEARCH_LIMIT) || 5,
       aiCredits: 1,
+      maxChatMessages: 10,
     },
-    features: ["5 daily searches", "View basic app cards", "1 AI analysis", "No data export"],
-    // AGREGADO: Necesario para que TS no se queje
+    features: [
+      "5 daily searches",
+      "View basic app cards",
+      "1 AI analysis",
+      "10 Chat messages",
+      "No data export",
+    ],
     lemonSqueezy: { monthly: null, annual: null },
   },
 
@@ -28,14 +32,16 @@ export const PLANS = {
     limits: {
       dailySearches: Number(process.env.PRO_DAILY_SEARCH_LIMIT) || 150,
       aiCredits: Number(process.env.PRO_AI_CREDITS_MONTHLY) || 30,
+      maxChatMessages: 500,
     },
     features: [
       "150 daily searches",
       "30 AI analyses per month",
+      "500 Chat messages",
       "Opportunity detection",
       "Unlimited history",
+      "CSV/Excel Export",
     ],
-    // AGREGADO: Configuración de LS
     lemonSqueezy: {
       monthly: process.env.NEXT_PUBLIC_LS_VARIANT_ID_PRO_MONTHLY || "",
       annual: process.env.NEXT_PUBLIC_LS_VARIANT_ID_PRO_ANNUAL || "",
@@ -54,9 +60,15 @@ export const PLANS = {
     limits: {
       dailySearches: Number(process.env.BUSINESS_DAILY_SEARCH_LIMIT) || 500,
       aiCredits: Number(process.env.BUSINESS_AI_CREDITS_MONTHLY) || 100,
+      maxChatMessages: 2000,
     },
-    features: ["500 daily searches", "100 AI analyses per month", "Priority support"],
-    // AGREGADO: Configuración de LS
+    features: [
+      "500 daily searches",
+      "100 AI analyses per month",
+      "2,000 Chat messages",
+      "Priority support",
+      "White-label reports",
+    ],
     lemonSqueezy: {
       monthly: process.env.NEXT_PUBLIC_LS_VARIANT_ID_BUSINESS_MONTHLY || "",
       annual: process.env.NEXT_PUBLIC_LS_VARIANT_ID_BUSINESS_ANNUAL || "",
@@ -113,5 +125,5 @@ export const PLAN_FEATURES = {
   },
 } as const;
 
-export type PlanId = keyof typeof PLANS;
+export type PlanType = keyof typeof PLANS;
 export type FeatureKey = keyof typeof PLAN_FEATURES.PRO_INDIE;

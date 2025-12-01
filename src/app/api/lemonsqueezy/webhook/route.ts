@@ -2,9 +2,8 @@ import { PlanStatus } from "@prisma/client";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
-// Asegúrate de importar tus servicios y constantes correctamente
 import { CreditService } from "@/lib/credits";
-import { PLANS, CREDIT_PACKS, type PlanId } from "@/lib/credits/constants";
+import { PLANS, CREDIT_PACKS, type PlanType } from "@/lib/credits/constants";
 import { prisma } from "@/lib/prisma";
 
 const webhookSecret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET!;
@@ -31,7 +30,6 @@ export async function POST(req: NextRequest) {
     switch (meta.event_name) {
       case "subscription_created":
       case "subscription_updated":
-        // Pasamos 'meta' para acceder a custom_data
         await handleLSSubscriptionUpdate(data, meta);
         break;
 
@@ -94,12 +92,11 @@ function mapLSStatus(status: string): PlanStatus {
   return mapping[status] || PlanStatus.ACTIVE;
 }
 
-function getPlanFromVariantId(variantId: string): PlanId | null {
+function getPlanFromVariantId(variantId: string): PlanType | null {
   const vId = variantId.toString();
   for (const [planName, config] of Object.entries(PLANS)) {
-    // Verificamos tanto mensual como anual
     if (config.lemonSqueezy?.monthly === vId || config.lemonSqueezy?.annual === vId) {
-      return planName as PlanId;
+      return planName as PlanType;
     }
   }
   return null;
@@ -170,6 +167,7 @@ async function handleLSSubscriptionUpdate(data: any, meta: any) {
       planStatus: mapLSStatus(status),
       subscriptionProvider: "LEMONSQUEEZY",
       subscriptionId,
+      lemonSqueezyVariantId: variantId,
       currentPeriodStart: renewsAt ? new Date(renewsAt) : undefined,
       currentPeriodEnd: endsAt ? new Date(endsAt) : undefined,
       cancelAtPeriodEnd: data.attributes.cancelled,
@@ -177,12 +175,13 @@ async function handleLSSubscriptionUpdate(data: any, meta: any) {
   });
 
   if (isNewSubscription) {
+    // Si es nueva suscripción, llenamos el bolsillo MENSUAL
     await CreditService.resetMonthlyCredits(user.id);
   }
 
   // Registrar Compra
   if (status === "active") {
-    // CORRECCIÓN AQUÍ: Usamos data.attributes.total en lugar de first_subscription_item.price
+    // CORRECCIÓN: Usamos data.attributes.total
     const amount = data.attributes.total;
 
     // Fallback de seguridad para el payment ID
@@ -198,7 +197,7 @@ async function handleLSSubscriptionUpdate(data: any, meta: any) {
         provider: "LEMONSQUEEZY",
         plan: planId,
         amount: Number(amount) || 0, // Aseguramos que sea número
-        currency: data.attributes.currency || "usd", // Usamos la moneda real o default a USD
+        currency: data.attributes.currency || "usd",
         providerCustomerId: customerId,
         providerPaymentId: paymentId,
         providerSubscriptionId: subscriptionId,
@@ -211,7 +210,6 @@ async function handleLSSubscriptionUpdate(data: any, meta: any) {
 
 async function handleLSSubscriptionCanceled(data: any) {
   const customerId = data.attributes.customer_id.toString();
-  // Aquí asumimos que ya existe el customerId porque es una cancelación
   const user = await prisma.user.findUnique({ where: { lemonSqueezyCustomerId: customerId } });
 
   if (user) {
@@ -264,39 +262,24 @@ async function handleLSOrderCreated(data: any, meta: any) {
   );
 
   if (pack) {
-    await prisma.$transaction(async (tx) => {
-      const updatedUser = await tx.user.update({
-        where: { id: user.id },
-        data: {
-          credits: { increment: pack.credits },
-          lifetimeCredits: { increment: pack.credits },
-        },
-      });
+    // 1. Añadimos créditos al bolsillo EXTRA
+    await CreditService.addPackCredits(user.id, pack.credits, `Pack purchased: ${pack.name}`);
 
-      await tx.creditTransaction.create({
-        data: {
-          userId: user.id,
-          type: "PURCHASE",
-          amount: pack.credits,
-          balance: updatedUser.credits,
-          reason: "pack_purchase",
-          description: `Pack comprado: ${pack.name}`,
-        },
-      });
-
-      await tx.purchase.create({
-        data: {
-          userId: user.id,
-          type: "PACK_ONE_TIME",
-          provider: "LEMONSQUEEZY",
-          credits: pack.credits,
-          amount: parseInt(data.attributes.total),
-          currency: data.attributes.currency,
-          providerPaymentId: data.id,
-          providerProductId: variantId,
-          status: "COMPLETED",
-        },
-      });
+    // 2. Registramos la compra
+    await prisma.purchase.create({
+      data: {
+        userId: user.id,
+        type: "PACK_ONE_TIME",
+        provider: "LEMONSQUEEZY",
+        credits: pack.credits,
+        amount: parseInt(data.attributes.total),
+        currency: data.attributes.currency,
+        providerCustomerId: customerId,
+        providerPaymentId: data.id,
+        providerProductId: variantId,
+        status: "COMPLETED",
+        metadata: { packId: pack.id },
+      },
     });
   }
 }
@@ -309,6 +292,7 @@ async function handleLSPaymentSuccess(data: any) {
 
   if (!user || user.plan === "FREE") return;
 
+  // Lógica de renovación: Rellena el bolsillo MENSUAL
   await CreditService.resetMonthlyCredits(user.id);
 }
 

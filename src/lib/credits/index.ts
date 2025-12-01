@@ -1,32 +1,26 @@
 import { Prisma } from "@prisma/client";
 
-import { PLANS, type PlanId } from "./constants";
-import { prisma } from "../prisma";
+import { PLANS, type PlanType } from "./constants";
+import { prisma } from "@/lib/prisma";
 
-// ==========================================
-// 1. AI CREDITS SERVICE (ROBUST)
-// ==========================================
 export class CreditService {
-  // Check balance
-  static async hasCredits(userId: string, amount: number = 1): Promise<boolean> {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { credits: true },
-    });
-    return (user?.credits ?? 0) >= amount;
-  }
-
-  // Get balance
+  // 1. CALCULAR SALDO TOTAL (Suma de ambos bolsillos)
   static async getBalance(userId: string): Promise<number> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { credits: true },
+      select: { monthlyCredits: true, extraCredits: true },
     });
-    return user?.credits ?? 0;
+    return (user?.monthlyCredits ?? 0) + (user?.extraCredits ?? 0);
   }
 
-  // DEDUCT CREDITS (For AI analysis)
-  // Usage: await CreditService.deduct({ userId, amount: 1, reason: 'ai_analysis', metadata: { appId: 'com.whatsapp' } })
+  // 2. VERIFICAR SI ALCANZA
+  static async hasCredits(userId: string, amount: number = 1): Promise<boolean> {
+    const balance = await this.getBalance(userId);
+    return balance >= amount;
+  }
+
+  // 3. GASTAR CRÉDITOS (Lógica de prioridad)
+  // Primero gastamos los mensuales (que caducan), luego los extra.
   static async deduct(params: {
     userId: string;
     amount: number;
@@ -40,184 +34,116 @@ export class CreditService {
       return await prisma.$transaction(async (tx) => {
         const user = await tx.user.findUnique({ where: { id: userId } });
 
-        if (!user || user.credits < amount) {
-          throw new Error("Insufficient credits to perform this action.");
+        if (!user) throw new Error("User not found");
+
+        const totalBalance = user.monthlyCredits + user.extraCredits;
+        if (totalBalance < amount) {
+          throw new Error("Insufficient credits.");
         }
 
+        // --- LÓGICA DE LOS DOS BOLSILLOS ---
+        let newMonthly = user.monthlyCredits;
+        let newExtra = user.extraCredits;
+        let remainingToDeduct = amount;
+
+        // A. Intentar pagar con créditos mensuales
+        if (newMonthly >= remainingToDeduct) {
+          newMonthly -= remainingToDeduct;
+          remainingToDeduct = 0;
+        } else {
+          // Si no alcanza, gastamos todos los mensuales y pasamos al extra
+          remainingToDeduct -= newMonthly;
+          newMonthly = 0;
+        }
+
+        // B. Si falta, pagar con créditos extra
+        if (remainingToDeduct > 0) {
+          newExtra -= remainingToDeduct;
+        }
+
+        // Actualizar Usuario
         const updatedUser = await tx.user.update({
           where: { id: userId },
-          data: { credits: { decrement: amount } },
+          data: {
+            monthlyCredits: newMonthly,
+            extraCredits: newExtra,
+          },
         });
 
+        // Registrar Transacción (Guardamos el desglose en metadata si quieres)
         await tx.creditTransaction.create({
           data: {
             userId,
             type: "DEDUCTION",
             amount: -amount,
-            balance: updatedUser.credits,
+            balance: newMonthly + newExtra, // Saldo total resultante
             reason,
             description: description || `AI consumption: ${reason}`,
-            metadata,
+            metadata: {
+              ...(metadata as object),
+              split: {
+                monthly: user.monthlyCredits - newMonthly,
+                extra: user.extraCredits - newExtra,
+              },
+            },
           },
         });
 
-        return { success: true, newBalance: updatedUser.credits };
+        return { success: true, newBalance: newMonthly + newExtra };
       });
     } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
+      return { success: false, error: error instanceof Error ? error.message : "Error" };
     }
   }
 
-  // REFUND (If GPT fails)
-  static async refund(userId: string, amount: number, reason: string) {
+  // 4. AÑADIR CRÉDITOS (PACKS) -> Van al bolsillo EXTRA
+  static async addPackCredits(userId: string, amount: number, description: string) {
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.update({
         where: { id: userId },
-        data: { credits: { increment: amount } },
+        data: { extraCredits: { increment: amount } }, // Sumar a EXTRA
       });
 
       await tx.creditTransaction.create({
         data: {
           userId,
-          type: "REFUND",
+          type: "PURCHASE",
           amount: amount,
-          balance: user.credits,
-          reason,
-          description: `Refund due to error: ${reason}`,
+          balance: user.monthlyCredits + user.extraCredits,
+          reason: "pack_purchase",
+          description,
         },
       });
     });
   }
 
-  // Get usage statistics for a given period
-  static async getUsageStats(userId: string, days: number = 30) {
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
-
-    // Get all deduction transactions in the period
-    const transactions = await prisma.creditTransaction.findMany({
-      where: {
-        userId,
-        type: "DEDUCTION",
-        createdAt: { gte: startDate },
-      },
-      select: {
-        amount: true,
-        reason: true,
-      },
-    });
-
-    // Calculate total used (amounts are negative, so we use Math.abs)
-    const totalUsed = transactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
-
-    // Group by feature (reason)
-    const byFeature: Record<string, number> = {};
-    for (const t of transactions) {
-      const feature = t.reason || "unknown";
-      byFeature[feature] = (byFeature[feature] || 0) + Math.abs(t.amount);
-    }
-
-    return {
-      totalUsed,
-      byFeature,
-    };
-  }
-
-  // MONTHLY RESET (Call when LemonSqueezy webhook confirms renewal)
-  // In SaaS, it's normal NOT to accumulate (rollover), but to reset to the plan limit.
+  // 5. REINICIO MENSUAL (SUBSCRIPCIÓN) -> Toca solo el bolsillo MENSUAL
   static async resetMonthlyCredits(userId: string) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.plan === "FREE") return;
 
-    const planLimit = PLANS[user.plan as PlanId].limits.aiCredits;
+    const planLimit = PLANS[user.plan as PlanType].limits.aiCredits;
 
-    // If they have fewer credits than their plan, we replenish them.
-    // If they bought extra packs and have more, we DON'T take them away (we respect their purchase).
-    if (user.credits < planLimit) {
-      const diff = planLimit - user.credits;
-
+    // Simplemente reseteamos monthlyCredits al límite del plan.
+    // Los extraCredits quedan INTACTOS (¡Esa es la clave!).
+    if (user.monthlyCredits !== planLimit) {
       await prisma.$transaction(async (tx) => {
         const updatedUser = await tx.user.update({
           where: { id: userId },
-          data: { credits: planLimit }, // Set directly to limit
+          data: { monthlyCredits: planLimit }, // Reset forzado a 30 (o 100)
         });
 
         await tx.creditTransaction.create({
           data: {
             userId,
             type: "SUBSCRIPTION",
-            amount: diff,
-            balance: updatedUser.credits,
+            amount: planLimit - user.monthlyCredits, // Solo para registro
+            balance: updatedUser.monthlyCredits + updatedUser.extraCredits,
             reason: "monthly_reset",
-            description: `Monthly reset of ${user.plan} plan`,
+            description: `Monthly plan refresh (${planLimit} credits)`,
           },
         });
       });
     }
-  }
-}
-
-// ==========================================
-// 2. SEARCH SERVICE (LIGHTWEIGHT)
-// ==========================================
-export class DailyUsageService {
-  // Check and register a search
-  static async trackSearch(userId: string): Promise<{ allowed: boolean; error?: string }> {
-    const today = new Date().toISOString().split("T")[0]; // "2024-05-20"
-
-    // 1. Get current usage and plan
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { dailyUsage: true },
-    });
-
-    if (!user) return { allowed: false, error: "User not found" };
-
-    // 2. Determine limit according to plan
-    const planLimit = PLANS[user.plan as PlanId].limits.dailySearches;
-
-    // 3. Check if we're on a new day or same day
-    let currentCount = 0;
-
-    if (user.dailyUsage && user.dailyUsage.date === today) {
-      currentCount = user.dailyUsage.searches;
-    }
-
-    // 4. Block if exceeds
-    if (currentCount >= planLimit) {
-      return {
-        allowed: false,
-        error: `You have reached your daily limit of ${planLimit} searches.`,
-      };
-    }
-
-    // 5. Increment (Upsert handles atomic creation or update)
-    await prisma.dailyUsage.upsert({
-      where: { userId },
-      update: {
-        date: today, // If the date was old, update to today
-        searches: user.dailyUsage?.date === today ? { increment: 1 } : 1,
-      },
-      create: {
-        userId,
-        date: today,
-        searches: 1,
-      },
-    });
-
-    return { allowed: true };
-  }
-
-  static async getUsage(userId: string) {
-    const today = new Date().toISOString().split("T")[0];
-    const usage = await prisma.dailyUsage.findUnique({ where: { userId } });
-
-    if (usage && usage.date === today) {
-      return usage.searches;
-    }
-    return 0;
   }
 }
