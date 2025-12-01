@@ -42,8 +42,8 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center bg-background overflow-hidden h-full">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+    <div className="relative flex flex-col items-center justify-center bg-background overflow-hidden w-full h-full">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-4xl px-4 text-center space-y-10">
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-700">

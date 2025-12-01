@@ -2,7 +2,7 @@
 import React from "react";
 
 import FeatureStepper from "./_components/feature-stepper";
-import { FeatureTabs } from "./_components/feature-tabs";
+// import { FeatureTabs } from "./_components/feature-tabs";
 import LogoMarquee from "./_components/logo-marquee";
 import BentoShowcase from "@/app/[locale]/(marketing)/_components/bento-showcase";
 import Faq from "@/app/[locale]/(marketing)/_components/faq";
@@ -15,7 +15,7 @@ const page = () => {
       <Hero />
       <LogoMarquee />
       <BentoShowcase />
-      <FeatureTabs />
+      {/* <FeatureTabs /> */}
       <FeatureStepper />
       <PricingCards />
       <Faq />

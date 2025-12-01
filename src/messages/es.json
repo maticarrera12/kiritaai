@@ -342,17 +342,18 @@
   },
   "hero": {
     "heading": {
-      "part1": "Título Conciso que Describe",
-      "highlight": "el beneficio",
-      "part2": "de tu producto"
+      "part1": "Róbale a tu Competencia",
+      "highlight": "Sus Mejores Ideas",
+      "part2": "Y Desarróllalas Tú Primero"
     },
     "description": {
-      "part1": "Contenido descriptivo para describir",
-      "highlight": "qué",
-      "part2": "es el producto."
+      "part1": "No pierdas tiempo investigando a mano.",
+      "highlight": "Scrapea sus reseñas en segundos",
+      "part2": "y deja que la IA exponga sus puntos débiles y las funcionalidades que les faltan, para que tú te quedes con sus usuarios."
     },
-    "cta": "Comenzar",
-    "imagePlaceholder": "Reemplazar imagen"
+    "cta": "Espiar Competencia",
+    "imagePlaceholder": "Replace image",
+    "badge": "AI App Analyzer"
   },
   "faq": {
     "title": "FAQ",
@@ -426,8 +427,8 @@
   },
   "header": {
     "greeting": "Hola {name}",
-    "subtitle": "Bienvenido a OpenNextJS",
-    "savedAssetsAria": "Ver recursos guardados",
-    "generateAiAria": "Generar con IA"
+    "subtitle": "Bienvenido a KiritaAI",
+    "savedAssetsAria": "Ver Apps Analizadas",
+    "generateAiAria": "Analizar"
   }
 }

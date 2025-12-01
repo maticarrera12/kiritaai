@@ -305,14 +305,14 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                 {/* 2. Grid Estrategia: 1 col mobile -> 2 col desktop */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                   {/* Monetization */}
-                  <div className="bg-yellow-50 dark:bg-yellow-900/10 border-2 border-yellow-400 rounded-xl md:rounded-2xl p-4 md:p-5 relative overflow-hidden">
+                  <div className="bg-yellow-50 dark:bg-yellow-900/10 border-2 border-yellow-400 rounded-xl md:rounded-2xl p-3 md:p-4 relative overflow-hidden">
                     <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-yellow-400/20 rounded-full blur-xl" />
-                    <div className="relative flex gap-3 items-start">
-                      <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2.5 rounded-full shrink-0 text-yellow-700 dark:text-yellow-400">
-                        <Money03Icon size={24} />
+                    <div className="relative flex gap-2 items-start">
+                      <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded-full shrink-0 text-yellow-700 dark:text-yellow-400">
+                        <Money03Icon size={20} />
                       </div>
                       <div>
-                        <h4 className="text-base font-bold text-yellow-800 dark:text-yellow-200 mb-1">
+                        <h4 className="text-base font-bold text-yellow-800 dark:text-yellow-200 mb-0.5">
                           Monetization Strategy
                         </h4>
                         <p className="text-yellow-900/80 dark:text-yellow-100/80 leading-relaxed text-sm">
@@ -328,11 +328,11 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                       <CheckListIcon className="text-fuchsia-500 w-4 h-4 md:w-[18px] md:h-[18px]" />{" "}
                       Wishlist
                     </h4>
-                    <div className="bg-muted/30 rounded-lg md:rounded-xl border border-border p-3 max-h-[200px] md:max-h-[250px] overflow-y-auto custom-scrollbar">
+                    <div className="bg-muted/30 rounded-lg md:rounded-xl border border-border p-2 max-h-[200px] md:max-h-[250px] overflow-y-auto custom-scrollbar">
                       {data.feature_requests?.map((feat: any, i: number) => (
                         <div
                           key={i}
-                          className="flex gap-2 py-2 border-b border-border/50 last:border-0"
+                          className="flex gap-2 py-1.5 border-b border-border/50 last:border-0"
                         >
                           <div className="mt-0.5 bg-fuchsia-100 dark:bg-fuchsia-900/30 p-1 rounded text-fuchsia-600 shrink-0">
                             <CheckListIcon size={12} />
@@ -359,13 +359,13 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                     {data.pain_points?.map((pain: any, i: number) => (
                       <div
                         key={i}
-                        className={`p-3 md:p-4 rounded-lg md:rounded-xl border-l-4 shadow-sm ${
+                        className={`p-2.5 md:p-3 rounded-lg md:rounded-xl border-l-4 shadow-sm ${
                           pain.severity === "CRITICAL"
                             ? "bg-red-50 dark:bg-red-900/20 border-red-500"
                             : "bg-orange-50 dark:bg-orange-900/10 border-orange-400"
                         }`}
                       >
-                        <div className="flex justify-between items-start mb-2">
+                        <div className="flex justify-between items-start mb-1.5">
                           <h5
                             className={`font-bold text-sm leading-tight ${
                               pain.severity === "CRITICAL"

@@ -7,6 +7,7 @@ import {
   FlashIcon,
   ChartIncreaseIcon,
   ArrowRight01Icon,
+  Target01Icon,
 } from "hugeicons-react";
 import { useEffect, useState } from "react";
 
@@ -14,28 +15,28 @@ import { cn } from "@/lib/utils";
 
 const steps = [
   {
+    id: "Pick a Target",
+    title: "Pick a Targets",
+    desc: "Enter any Google Play App. We'll fetch the metadata instantly.",
+    icon: Target01Icon,
+  },
+  {
+    id: "AI Extraction",
+    title: "AI Extraction",
+    desc: "KiritaAI reads 200+ reviews to understand what users truly feel.",
+    icon: CpuIcon,
+  },
+  {
+    id: "Instant Insight",
+    title: "Instant Insight",
+    desc: "Get your Opportunity Score, Critical Pain Points, and Revenue Strategy.",
+    icon: FlashIcon,
+  },
+  {
     id: "ask",
     title: "Ask",
     desc: "Describe what you need in simple terms.",
     icon: BubbleChatIcon,
-  },
-  {
-    id: "process",
-    title: "Process",
-    desc: "Our AI engine analyzes your request instantly.",
-    icon: CpuIcon,
-  },
-  {
-    id: "instant",
-    title: "Instant",
-    desc: "Get production-ready results immediately.",
-    icon: FlashIcon,
-  },
-  {
-    id: "improve",
-    title: "Improve",
-    desc: "The system learns and adapts over time.",
-    icon: ChartIncreaseIcon,
   },
 ];
 
@@ -185,7 +186,7 @@ function StepVisual({ id }: { id: string }) {
           </div>
         </div>
       );
-    case "process":
+    case "AI Extraction":
       return (
         <div className="relative w-64 h-64 flex items-center justify-center">
           <div
