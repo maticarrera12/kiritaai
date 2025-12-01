@@ -1,14 +1,8 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  BubbleChatIcon,
-  CpuIcon,
-  FlashIcon,
-  ChartIncreaseIcon,
-  ArrowRight01Icon,
-  Target01Icon,
-} from "hugeicons-react";
+import { BubbleChatIcon, CpuIcon, FlashIcon, Target01Icon } from "hugeicons-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -142,9 +136,7 @@ export default function FeatureStepper() {
           })}
         </div>
 
-        <div className="relative h-[400px] md:h-[500px] w-full rounded-[2.5rem] bg-muted/20 border border-border/50 overflow-hidden flex items-center justify-center p-8">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-white/0 via-primary/5 to-white/0 blur-3xl rounded-full pointer-events-none" />
-
+        <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden flex items-center justify-center p-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={current}
@@ -165,27 +157,19 @@ export default function FeatureStepper() {
 
 function StepVisual({ id }: { id: string }) {
   switch (id) {
-    case "ask":
+    case "Pick a Target":
       return (
-        <div className="flex flex-col gap-4 w-full max-w-sm">
-          <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-muted shrink-0" />
-            <div className="bg-white dark:bg-neutral-800 p-4 rounded-2xl rounded-tl-none shadow-sm border border-border/50">
-              <div className="h-2 w-24 bg-muted-foreground/20 rounded-full mb-2" />
-              <div className="h-2 w-32 bg-muted-foreground/20 rounded-full" />
-            </div>
-          </div>
-          <div className="flex gap-3 justify-end">
-            <div className="bg-primary text-white p-4 rounded-2xl rounded-tr-none shadow-lg shadow-primary/20">
-              <div className="h-2 w-32 bg-white/40 rounded-full mb-2" />
-              <div className="h-2 w-20 bg-white/40 rounded-full ml-auto" />
-            </div>
-            <div className="w-8 h-8 rounded-full bg-primary/20 shrink-0 flex items-center justify-center">
-              <div className="w-2 h-2 bg-primary rounded-full" />
-            </div>
-          </div>
+        <div className="w-full h-full overflow-hidden rounded-lg">
+          <Image
+            src="/stepper/search.png"
+            alt="Instant Insight"
+            width={288}
+            height={288}
+            className="w-full h-full object-cover rounded-lg"
+          />
         </div>
       );
+
     case "AI Extraction":
       return (
         <div className="relative w-64 h-64 flex items-center justify-center">
@@ -209,53 +193,36 @@ function StepVisual({ id }: { id: string }) {
           <div className="absolute w-full h-1 bg-primary/50 top-1/2 -translate-y-1/2 blur-sm animate-scan" />
         </div>
       );
-    case "instant":
+    case "Instant Insight":
       return (
-        <div className="bg-white dark:bg-neutral-800 w-72 rounded-3xl shadow-2xl border border-border/50 overflow-hidden">
-          <div className="bg-green-500 p-6 flex flex-col items-center justify-center gap-2">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <FlashIcon className="text-white w-6 h-6" />
-            </div>
-            <div className="text-white font-bold">Done!</div>
-          </div>
-          <div className="p-6 space-y-3">
-            <div className="flex justify-between items-center">
-              <div className="h-2 w-16 bg-muted rounded-full" />
-              <div className="h-2 w-8 bg-muted rounded-full" />
-            </div>
-            <div className="flex justify-between items-center">
-              <div className="h-2 w-24 bg-muted rounded-full" />
-              <div className="h-2 w-12 bg-muted rounded-full" />
-            </div>
-            <div className="w-full h-10 bg-foreground text-background rounded-xl mt-4 flex items-center justify-center text-sm font-medium">
-              View Results <ArrowRight01Icon className="ml-2 w-4 h-4" />
-            </div>
-          </div>
+        <div className="w-full h-full overflow-hidden rounded-lg">
+          <Image
+            src="/stepper/instant-insight.png"
+            alt="Instant Insight"
+            width={288}
+            height={288}
+            className="w-full h-full object-cover rounded-lg"
+          />
         </div>
       );
-    case "improve":
+    case "ask":
       return (
-        <div className="w-full max-w-sm h-64 bg-white dark:bg-neutral-800 rounded-2xl shadow-xl border border-border/50 p-6 flex flex-col relative overflow-hidden">
-          <div className="flex justify-between mb-8">
-            <div>
-              <div className="text-sm text-muted-foreground">Growth</div>
-              <div className="text-2xl font-bold text-foreground">+240%</div>
-            </div>
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-              <ChartIncreaseIcon className="w-5 h-5" />
+        <div className="flex flex-col gap-4 w-full max-w-sm">
+          <div className="flex gap-3">
+            <div className="w-8 h-8 rounded-full bg-muted shrink-0" />
+            <div className=" p-4 rounded-2xl rounded-tl-none shadow-sm border">
+              <div className="h-2 w-24 bg-muted-foreground/20 rounded-full mb-2" />
+              <div className="h-2 w-32 bg-muted-foreground/20 rounded-full" />
             </div>
           </div>
-
-          <div className="flex-1 flex items-end justify-between gap-2">
-            {[40, 65, 45, 80, 60, 90, 100].map((height, i) => (
-              <motion.div
-                key={i}
-                initial={{ height: 0 }}
-                animate={{ height: `${height}%` }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-                className={`w-full rounded-t-md ${i === 6 ? "bg-primary" : "bg-muted"}`}
-              />
-            ))}
+          <div className="flex gap-3 justify-end">
+            <div className="bg-primary text-white p-4 rounded-2xl rounded-tr-none shadow-lg shadow-primary/20">
+              <div className="h-2 w-32 bg-white/40 rounded-full mb-2" />
+              <div className="h-2 w-20 bg-white/40 rounded-full ml-auto" />
+            </div>
+            <div className="w-8 h-8 rounded-full bg-primary/20 shrink-0 flex items-center justify-center">
+              <div className="w-2 h-2 bg-primary rounded-full" />
+            </div>
           </div>
         </div>
       );
