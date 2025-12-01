@@ -6,13 +6,13 @@ import "./legal.css";
 
 const navbar = (
   <Navbar
-    logo={<span className="font-bold">OpenNextJS - Legal</span>}
+    logo={<span className="font-bold">KiritaAI - Legal</span>}
     logoLink="/"
     projectLink="https://github.com/maticarrera12/open_next"
   />
 );
 
-const footer = <Footer>{new Date().getFullYear()} © OpenNextJS.</Footer>;
+const footer = <Footer>{new Date().getFullYear()} © KiritaAI.</Footer>;
 
 export default async function LegalLayout({ children }: { children: React.ReactNode }) {
   const pageMap = await getPageMap("/legal");

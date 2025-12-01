@@ -42,7 +42,7 @@ const formatInstalls = (installs: string | number | undefined | null) => {
 
 async function getAppData(appId: string) {
   try {
-    const res = await fetch(`http://127.0.0.1:8000/android/full?appId=${appId}&max=100`, {
+    const res = await fetch(`http://127.0.0.1:8000/android/full?appId=${appId}&max=200`, {
       cache: "no-store",
     });
     if (!res.ok) return null;

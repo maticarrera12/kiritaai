@@ -356,29 +356,38 @@
     "badge": "AI App Analyzer"
   },
   "faq": {
-    "title": "FAQ",
-    "subtitle": "Preguntas frecuentes",
-    "questions": {
-      "q1": {
-        "question": "¿Qué pregunta podrían tener tus usuarios?",
-        "answer": "Responde las preguntas que tus usuarios puedan tener."
+    "title": "Preguntas Frecuentes",
+    "subtitle": "Todo lo que necesitas saber sobre KiritaAI",
+    "items": {
+      "how_find_opportunities": {
+        "question": "¿Cómo encuentra oportunidades KiritaAI exactamente?",
+        "answer": "Actuamos como un detective digital. Extraemos datos en tiempo real de Google Play Store y usamos IA avanzada (GPT-4) para leer miles de reseñas. Identificamos puntos débiles específicos (como 'demasiados anuncios' o 'inicio de sesión roto') y calculamos un Puntaje de Oportunidad basado en la insatisfacción del usuario vs. la demanda del mercado."
       },
-      "q2": {
-        "question": "¿Qué pregunta podrían tener tus usuarios?",
-        "answer": "Responde las preguntas que tus usuarios puedan tener."
+      "searches_vs_analysis": {
+        "question": "¿Cuál es la diferencia entre 'Búsquedas' y 'Análisis de IA'?",
+        "answer": "Las búsquedas te permiten encontrar apps y ver sus datos básicos (descargas, última actualización, versión). Esto es rápido y barato, por lo que ofrecemos límites diarios altos. 'Análisis de IA' es la magia: lee las reseñas, detecta sentimientos y genera el informe de estrategia. Como esto usa modelos de IA costosos, consume créditos de tu plan."
       },
-      "q3": {
-        "question": "¿Qué pregunta podrían tener tus usuarios?",
-        "answer": "Responde las preguntas que tus usuarios puedan tener."
+      "opportunity_score": {
+        "question": "¿Cómo se calcula el 'Puntaje de Oportunidad'?",
+        "answer": "Es un algoritmo híbrido. Combinamos factores técnicos (¿está la app abandonada? ¿tiene muchas descargas pero baja calificación?) con análisis semántico de IA (¿qué tan enojados están los usuarios?). Un puntaje de 85+ esencialmente significa 'Mina de Oro'."
       },
-      "q4": {
-        "question": "¿Qué pregunta podrían tener tus usuarios?",
-        "answer": "Responde las preguntas que tus usuarios puedan tener."
+      "run_out_credits": {
+        "question": "¿Qué pasa si me quedo sin créditos de IA?",
+        "answer": "No te preocupes. Puedes esperar a tu renovación mensual (los créditos se reinician cada mes) o comprar un 'Paquete de Créditos' (pago único) para seguir analizando inmediatamente sin actualizar toda tu suscripción."
       },
-      "q5": {
-        "question": "¿Qué pregunta podrían tener tus usuarios?",
-        "answer": "Responde las preguntas que tus usuarios puedan tener."
+      "ios_support": {
+        "question": "¿Soportan iOS (App Store)?",
+        "answer": "Actualmente, nos enfocamos exclusivamente en Google Play porque ofrece datos públicos más ricos sobre el sentimiento del usuario y el historial de versiones. El soporte para iOS está en nuestro roadmap para más adelante este año."
+      },
+      "cancel_subscription": {
+        "question": "¿Puedo cancelar mi suscripción en cualquier momento?",
+        "answer": "Sí. Puedes cancelar con un clic desde tu panel. Mantendrás acceso a las funciones de tu plan hasta el final de tu período de facturación actual."
       }
+    },
+    "contact": {
+      "title": "¿Aún tienes preguntas?",
+      "description": "¿No encuentras la respuesta que buscas? Nuestro equipo de soporte está aquí para ayudarte.",
+      "button": "Contactar Soporte"
     }
   },
   "footer": {
@@ -395,7 +404,7 @@
       "terms": "Términos del servicio",
       "privacy": "Política de privacidad"
     },
-    "copyright": "© {year} OpenNextJS, Todos los derechos reservados"
+    "copyright": "© {year} KiritaAI, Todos los derechos reservados"
   },
   "app": {
     "title": "App",

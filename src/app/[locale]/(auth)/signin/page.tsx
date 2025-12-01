@@ -75,10 +75,10 @@ export default function SignInPage() {
 
   return (
     <AuthShell
-      title="Welcome back! Please sign in to your OpenNextJS account"
+      title="Welcome back! Please sign in to your KiritaAI account"
       subtitle="Thank you for registering! Please check your inbox and click the verification link to activate your account."
       cardTitle="Please enter your login details"
-      cardSubtitle="Stay connected with OpenNextJS. Subscribe now for the latest updates and news."
+      cardSubtitle="Stay connected with KiritaAI. Subscribe now for the latest updates and news."
     >
       <div className="flex items-center justify-center bg-background px-4">
         <div className="max-w-md w-full space-y-8">

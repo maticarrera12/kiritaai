@@ -1,6 +1,4 @@
 "use client";
-
-import { ArrowRight02Icon, CreditCardIcon } from "hugeicons-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -76,78 +74,100 @@ const Hero = () => {
             </div>
           </div>
 
-          <div className="relative w-full mt-4 perspective-2000 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-500 fill-mode-backwards">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
-
-            <div
-              className="relative mx-auto max-w-6xl rounded-[2.5rem] border border-white/60 dark:border-white/10 bg-white/40 dark:bg-black/40 backdrop-blur-2xl shadow-2xl overflow-hidden
-              transform transition-transform duration-700 hover:scale-[1.005] hover:-translate-y-1"
-              style={{
-                transform: "rotateX(12deg) scale(0.95)",
-                transformStyle: "preserve-3d",
-                boxShadow: "0 40px 100px -20px rgba(0, 0, 0, 0.15)",
-              }}
-            >
-              <div className="absolute top-0 left-0 right-0 h-14 border-b border-white/20 bg-white/10 flex items-center justify-between px-8 z-20">
-                <div className="flex gap-2">
-                  <div className="w-3 h-3 rounded-full bg-border/80" />
-                  <div className="w-3 h-3 rounded-full bg-border/80" />
-                </div>
-                <div className="h-1.5 w-32 rounded-full bg-border/50" />
-              </div>
-
-              <div className="relative pt-14 w-full">
-                {/* Mobile image */}
-                <div className="relative w-full md:hidden">
-                  <Image
-                    src="/hero/hero_1_mobile.png"
-                    alt="Hero image"
-                    width={800}
-                    height={600}
-                    className="w-full h-auto object-contain"
-                    priority
-                  />
-                </div>
-                {/* Desktop image */}
-                <div className="relative w-full hidden md:block">
-                  <Image
-                    src="/hero/hero_1.png"
-                    alt="Hero image"
-                    width={1200}
-                    height={600}
-                    className="w-full h-auto object-contain"
-                    priority
-                  />
-                </div>
-              </div>
-
-              <div className="absolute inset-0 bg-gradient-to-tr from-white/20 via-transparent to-transparent pointer-events-none" />
+          <div className="relative w-full mt-8 md:mt-12">
+            <div className="relative mx-auto max-w-6xl w-full transition-transform duration-700 hover:scale-[1.005] hover:-translate-y-1">
+              {/* Mobile image */}
+              <Image
+                src="/hero/hero_1_mobile.png"
+                alt="Hero image"
+                width={1000}
+                height={1000}
+                className="w-full h-auto md:hidden rounded-xl"
+                priority
+                quality={100}
+                unoptimized
+              />
+              {/* Desktop image */}
+              <Image
+                src="/hero/hero_1.png"
+                alt="Hero image"
+                width={1000}
+                height={1000}
+                className="w-full h-auto hidden md:block rounded-xl"
+                priority
+                quality={100}
+                unoptimized
+              />
             </div>
 
             <div
-              className="absolute -right-2 md:-right-8 top-20 w-48 h-72 rounded-[1.5rem] bg-gradient-to-bl from-neutral-900 to-neutral-800 dark:from-white dark:to-neutral-200 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.3)] hidden lg:flex flex-col justify-between p-5 animate-bounce-slow"
+              className="absolute bg-background -right-2 md:-right-8 top-20 w-48 h-72 rounded-[1.5rem] hidden lg:flex flex-col justify-between p-5 animate-bounce-slow border border-white/10"
               style={{ animationDuration: "6s" }}
             >
               <div className="flex justify-between items-start">
-                <div className="text-white dark:text-black font-bold text-lg">Revolut</div>
-                <CreditCardIcon className="text-white/50 dark:text-black/50 w-8 h-8" />
+                <div>
+                  <div className="text-foreground font-bold text-lg leading-tight">AI Score</div>
+                  <div className="text-muted-foreground text-xs font-medium">Market Gap</div>
+                </div>
+                {/* Usamos un icono de cerebro o spark */}
+                <div className="w-8 h-8 rounded-full bg-white/10 dark:bg-black/10 flex items-center justify-center">
+                  <span className="text-lg">💎</span>
+                </div>
               </div>
-              <div className="space-y-2">
-                <div className="h-2 w-12 bg-white/20 dark:bg-black/10 rounded-full" />
-                <div className="flex justify-between items-end text-white dark:text-black">
-                  <div className="font-mono text-xs opacity-80">•••• 4242</div>
-                  <div className="w-8 h-5 bg-white/30 dark:bg-black/10 rounded-md" />
+
+              <div className="space-y-4">
+                {/* Simulación de gráfico de barras mini */}
+                <div className="flex gap-1 items-end h-10 mb-2">
+                  <div className="w-2 bg-black/20 dark:bg-white/20 h-4 rounded-sm"></div>
+                  <div className="w-2 bg-black/40 dark:bg-white/40 h-6 rounded-sm"></div>
+                  <div className="w-2 bg-black/60 dark:bg-white/60 h-3 rounded-sm"></div>
+                  <div className="w-2 bg-black dark:bg-white h-8 rounded-sm"></div>
+                </div>
+
+                <div>
+                  <div className="text-5xl font-black text-foreground tracking-tighter">
+                    87<span className="text-2xl text-muted-foreground">/100</span>
+                  </div>
+                  <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-green-500/20 text-green-300 dark:text-green-700 text-[10px] font-bold uppercase tracking-wider">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 dark:bg-green-600 animate-pulse" />
+                    High Potential
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="absolute -left-4 top-1/2 bg-white dark:bg-zinc-900 border border-border/50 py-3 px-5 rounded-2xl shadow-xl flex items-center gap-3 animate-in slide-in-from-left-10 duration-1000 delay-1000 fill-mode-backwards">
-              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                <ArrowRight02Icon className="w-5 h-5 -rotate-45" />
+            <div className="absolute -left-4 top-1/2 bg-background border border-border/50 py-3 px-5 rounded-2xl shadow-xl flex items-center gap-4 animate-in slide-in-from-left-10 duration-1000 delay-1000 fill-mode-backwards z-20">
+              <div className="relative">
+                <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+                  {/* Icono de Alerta o Review Negativa */}
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 9V14M12 17.5V17.51M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                {/* Badge de notificación */}
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white dark:border-zinc-900 rounded-full"></div>
               </div>
+
               <div>
-                <div className="text-xs text-muted-foreground">Income</div>
-                <div className="text-sm font-bold text-foreground">+$4,200.00</div>
+                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Weakness Detected
+                </div>
+                <div className="text-sm font-bold text-foreground">"Login crashes often"</div>
+                <div className="text-[10px] text-red-500 font-medium mt-0.5">
+                  Found in 240+ reviews
+                </div>
               </div>
             </div>
           </div>

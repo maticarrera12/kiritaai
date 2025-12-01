@@ -71,7 +71,6 @@ export default function FeatureStepper() {
           <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-foreground mb-8">
             How it works
           </h2>
-
           {steps.map((step, i) => {
             const isActive = current === i;
 
@@ -166,6 +165,8 @@ function StepVisual({ id }: { id: string }) {
             width={288}
             height={288}
             className="w-full h-full object-cover rounded-lg"
+            quality={100}
+            unoptimized
           />
         </div>
       );
@@ -201,29 +202,24 @@ function StepVisual({ id }: { id: string }) {
             alt="Instant Insight"
             width={288}
             height={288}
-            className="w-full h-full object-cover rounded-lg"
+            className="w-full h-full rounded-lg"
+            quality={100}
+            unoptimized
           />
         </div>
       );
     case "ask":
       return (
-        <div className="flex flex-col gap-4 w-full max-w-sm">
-          <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-muted shrink-0" />
-            <div className=" p-4 rounded-2xl rounded-tl-none shadow-sm border">
-              <div className="h-2 w-24 bg-muted-foreground/20 rounded-full mb-2" />
-              <div className="h-2 w-32 bg-muted-foreground/20 rounded-full" />
-            </div>
-          </div>
-          <div className="flex gap-3 justify-end">
-            <div className="bg-primary text-white p-4 rounded-2xl rounded-tr-none shadow-lg shadow-primary/20">
-              <div className="h-2 w-32 bg-white/40 rounded-full mb-2" />
-              <div className="h-2 w-20 bg-white/40 rounded-full ml-auto" />
-            </div>
-            <div className="w-8 h-8 rounded-full bg-primary/20 shrink-0 flex items-center justify-center">
-              <div className="w-2 h-2 bg-primary rounded-full" />
-            </div>
-          </div>
+        <div className="w-full h-full overflow-hidden rounded-lg">
+          <Image
+            src="/stepper/kirita-chat.png"
+            alt="Instant Insight"
+            width={288}
+            height={288}
+            className="w-full h-full rounded-lg"
+            quality={100}
+            unoptimized
+          />
         </div>
       );
     default:

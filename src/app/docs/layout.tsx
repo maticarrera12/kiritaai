@@ -5,12 +5,12 @@ import "nextra-theme-docs/style.css";
 
 const navbar = (
   <Navbar
-    logo={<span className="font-bold">OpenNextJS</span>}
+    logo={<span className="font-bold">KiritaAI</span>}
     projectLink="https://github.com/maticarrera12/open_next"
   />
 );
 
-const footer = <Footer> {new Date().getFullYear()} © OpenNextJS.</Footer>;
+const footer = <Footer> {new Date().getFullYear()} © KiritaAI.</Footer>;
 
 export default async function DocsLayout({ children }: { children: React.ReactNode }) {
   const pageMap = await getPageMap("/docs");

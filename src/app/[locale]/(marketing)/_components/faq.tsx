@@ -17,23 +17,21 @@ import { cn } from "@/lib/utils";
 const Faq = () => {
   const t = useTranslations("faq");
 
-  const faqs = [
-    {
-      id: "item-1",
-      question: t("questions.q1.question"),
-      answer: t("questions.q1.answer"),
-    },
-    {
-      id: "item-2",
-      question: t("questions.q2.question"),
-      answer: t("questions.q2.answer"),
-    },
-    {
-      id: "item-3",
-      question: t("questions.q3.question"),
-      answer: t("questions.q3.answer"),
-    },
+  // Array de IDs de FAQs para iterar
+  const faqIds = [
+    "how_find_opportunities",
+    "searches_vs_analysis",
+    "opportunity_score",
+    "run_out_credits",
+    "ios_support",
+    "cancel_subscription",
   ];
+
+  const faqs = faqIds.map((id) => ({
+    id,
+    question: t(`items.${id}.question`),
+    answer: t(`items.${id}.answer`),
+  }));
 
   return (
     <section className="w-full py-12 bg-background">
@@ -89,12 +87,10 @@ const Faq = () => {
           <div className="w-12 h-12 bg-background rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4 text-primary">
             <Message01Icon className="w-6 h-6" />
           </div>
-          <h3 className="text-xl font-bold mb-2">Still have questions?</h3>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Can't find the answer you're looking for? Our support team is here to help you.
-          </p>
+          <h3 className="text-xl font-bold mb-2">{t("contact.title")}</h3>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">{t("contact.description")}</p>
           <Button variant="default" className="rounded-full px-8 h-12 font-semibold">
-            Contact Support
+            {t("contact.button")}
           </Button>
         </div>
       </div>

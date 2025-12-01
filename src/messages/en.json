@@ -353,29 +353,38 @@
     }
   },
   "faq": {
-    "title": "FAQ",
-    "subtitle": "Frequently asked questions",
-    "questions": {
-      "q1": {
-        "question": "What question might your users have?",
-        "answer": "Answer questions that your users might have."
+    "title": "Frequently Asked Questions",
+    "subtitle": "Everything you need to know about KiritaAI",
+    "items": {
+      "how_find_opportunities": {
+        "question": "How exactly does KiritaAI find opportunities?",
+        "answer": "We act as a digital detective. We scrape real-time data from the Google Play Store and use advanced AI (GPT-4) to read thousands of reviews. We identify specific pain points (like 'too many ads' or 'broken login') and calculate an Opportunity Score based on user dissatisfaction vs. market demand."
       },
-      "q2": {
-        "question": "What question might your users have?",
-        "answer": "Answer questions that your users might have."
+      "searches_vs_analysis": {
+        "question": "What is the difference between 'Searches' and 'AI Analysis'?",
+        "answer": "Searches allow you to find apps and see their basic data (downloads, last update, version). This is fast and cheap, so we offer high daily limits. 'AI Analysis' is the magic: it reads the reviews, detects sentiments, and generates the strategy report. Since this uses expensive AI models, it consumes credits from your plan."
       },
-      "q3": {
-        "question": "What question might your users have?",
-        "answer": "Answer questions that your users might have."
+      "opportunity_score": {
+        "question": "How is the 'Opportunity Score' calculated?",
+        "answer": "It's a hybrid algorithm. We combine technical factors (is the app abandoned? does it have many downloads but low rating?) with semantic AI analysis (how angry are the users?). A score of 85+ essentially means 'Gold Mine'."
       },
-      "q4": {
-        "question": "What question might your users have?",
-        "answer": "Answer questions that your users might have."
+      "run_out_credits": {
+        "question": "What happens if I run out of AI credits?",
+        "answer": "Don't worry. You can either wait for your monthly renewal (credits reset every month) or purchase a 'Credit Pack' (one-time payment) to keep analyzing immediately without upgrading your entire subscription."
       },
-      "q5": {
-        "question": "What question might your users have?",
-        "answer": "Answer questions that your users might have."
+      "ios_support": {
+        "question": "Do you support iOS (App Store)?",
+        "answer": "Currently, we focus exclusively on Google Play because it offers richer public data regarding user sentiment and version history. iOS support is on our roadmap for later this year."
+      },
+      "cancel_subscription": {
+        "question": "Can I cancel my subscription anytime?",
+        "answer": "Yes. You can cancel with one click from your dashboard. You will keep access to your plan features until the end of your current billing period."
       }
+    },
+    "contact": {
+      "title": "Still have questions?",
+      "description": "Can't find the answer you're looking for? Our support team is here to help you.",
+      "button": "Contact Support"
     }
   },
   "footer": {
@@ -392,7 +401,7 @@
       "terms": "Terms of Service",
       "privacy": "Privacy Policy"
     },
-    "copyright": "© {year} OpenNextJS, All rights reserved"
+    "copyright": "© {year} KiritaAI, All rights reserved"
   },
   "app": {
     "title": "App",
