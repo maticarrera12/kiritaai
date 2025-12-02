@@ -1,8 +1,8 @@
 "use server";
 import { headers } from "next/headers";
 
-import { auth, assignAdminRole } from "../auth";
-import { signInSchema, signUpSchema } from "../schemas";
+import { auth, assignAdminRole } from "../lib/auth";
+import { signInSchema, signUpSchema } from "../lib/schemas";
 
 export const signUp = async (email: string, password: string, name: string) => {
   const validated = signUpSchema.safeParse({ email, password, name });

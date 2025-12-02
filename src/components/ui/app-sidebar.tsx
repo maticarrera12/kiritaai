@@ -5,13 +5,13 @@ import { ArrowLeft02Icon, Logout01Icon } from "hugeicons-react";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 
+import { signOut } from "@/actions/auth-actions";
 import { useSidebar } from "@/app/contexts/sidebar-context";
 import { LanguageSwitcher } from "@/components/navbar/languaje-switcher";
 import ThemeToggle from "@/components/navbar/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useLocaleRouting } from "@/hooks/useLocaleRouting";
 import { Link } from "@/i18n/routing";
-import { signOut } from "@/lib/actions/auth-actions";
 import { cn } from "@/lib/utils";
 export interface SidebarItem {
   name: string;

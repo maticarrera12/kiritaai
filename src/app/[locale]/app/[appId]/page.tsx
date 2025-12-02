@@ -73,7 +73,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
         appId: info.appId,
       },
       orderBy: { createdAt: "desc" },
-      select: { insights: true },
+      select: { insights: true, id: true },
     });
   }
 
@@ -253,6 +253,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
         appName={info.title}
         appIcon={info.icon}
         initialAnalysisData={existingAnalysis?.insights}
+        initialAnalysisId={existingAnalysis?.id}
       />
     </div>
   );

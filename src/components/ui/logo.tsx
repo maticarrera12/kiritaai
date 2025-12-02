@@ -10,15 +10,16 @@ export interface LogoProps {
 }
 
 const Logo: React.FC<LogoProps> = ({ className, width = 33, height = 33 }) => {
+  const isRounded = className?.includes("rounded-full");
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative", className, isRounded && "overflow-hidden")}>
       <Image
         src="/logo/logo.png"
         alt="KiritaAI Logo"
         width={width}
         height={height}
         priority
-        className="w-full h-full object-contain"
+        className={cn("w-full h-full", isRounded ? "object-cover" : "object-contain")}
       />
     </div>
   );

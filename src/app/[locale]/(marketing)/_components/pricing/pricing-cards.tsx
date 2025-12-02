@@ -7,9 +7,9 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 import { PricingSkeleton } from "./pricing-skeleton";
+import { getCheckoutUrl } from "@/actions/lemon-squeezy";
 import { Button } from "@/components/ui/button";
 import { useLocaleRouting } from "@/hooks/useLocaleRouting";
-import { getCheckoutUrl } from "@/lib/actions/lemon-squeezy";
 import { authClient } from "@/lib/auth-client";
 import { PLANS, CREDIT_PACKS } from "@/lib/credits/constants";
 import { cn } from "@/lib/utils";

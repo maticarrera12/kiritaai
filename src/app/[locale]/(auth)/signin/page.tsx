@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { AuthShell } from "../_components/auth-shell";
+import { signIn } from "@/actions/auth-actions";
 import SocialAuthButtons from "@/app/[locale]/(auth)/_components/social-auth-buttons";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +25,6 @@ import { LoadingSwap } from "@/components/ui/loading-swap";
 import { Separator } from "@/components/ui/separator";
 import { useLocaleRouting } from "@/hooks/useLocaleRouting";
 import { Link } from "@/i18n/routing";
-import { signIn } from "@/lib/actions/auth-actions";
 import { authClient } from "@/lib/auth-client";
 import { signInSchema, type SignInInput } from "@/lib/schemas";
 

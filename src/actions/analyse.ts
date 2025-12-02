@@ -11,7 +11,6 @@ import { prisma } from "@/lib/prisma";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Mapeo de prioridad para la DB
 function mapPriority(p: string): FeaturePriority {
   switch (p?.toUpperCase()) {
     case "CRITICAL":
@@ -27,12 +26,10 @@ function mapPriority(p: string): FeaturePriority {
   }
 }
 
-// 1. CÁLCULO TÉCNICO MEJORADO
 function calculateTechnicalFactors(info: any, reviews: any[]) {
   let baseScore = 50;
   const factors = [];
 
-  // A. Abandono (Peso Alto)
   const lastUpdated = new Date(info.lastUpdatedOn || info.updated || new Date());
   const daysSinceUpdate = Math.floor(
     (new Date().getTime() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24)
@@ -49,13 +46,11 @@ function calculateTechnicalFactors(info: any, reviews: any[]) {
     factors.push("Actively maintained");
   }
 
-  // B. Calidad vs Popularidad (El Gap Dorado)
   const rating = info.score || 0;
-  const installsText = info.installs || "0";
-  const installs = parseInt(installsText.replace(/[^0-9]/g, ""));
+  const installs = parseInt((info.installs || "0").replace(/[^0-9]/g, ""));
 
   if (rating < 3.0 && installs > 100000) {
-    baseScore += 25; // Millones odian esto = Oportunidad Masiva
+    baseScore += 25;
     factors.push("High Traffic / Low Quality");
   } else if (rating < 3.8 && installs > 10000) {
     baseScore += 15;
@@ -65,13 +60,10 @@ function calculateTechnicalFactors(info: any, reviews: any[]) {
     factors.push("Loved by users");
   }
 
-  // C. Análisis de Sentimiento Matemático (Pre-IA)
-  // Calculamos el ratio real de 1 estrella en las últimas reviews descargadas
   const oneStarCount = reviews.filter((r: any) => r.score === 1).length;
   const sentimentRatio = oneStarCount / reviews.length;
 
   if (sentimentRatio > 0.4) {
-    // Más del 40% son 1 estrella
     baseScore += 15;
     factors.push("Recent Negative Spike");
   }
@@ -84,16 +76,17 @@ function calculateTechnicalFactors(info: any, reviews: any[]) {
 
 export async function analyzeAppAction(appId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) throw new Error("Unauthorized");
+  if (!session?.user) throw new Error("UNAUTHORIZED");
   const userId = session.user.id;
 
-  // Verificar Créditos
   const cost = AI_COSTS.OPPORTUNITY_ANALYSIS;
   const hasBalance = await CreditService.hasCredits(userId, cost);
-  if (!hasBalance) throw new Error("Insufficient credits.");
 
-  // Scraping
-  const scraperRes = await fetch(`http://127.0.0.1:8000/android/full?appId=${appId}&max=200`, {
+  if (!hasBalance) {
+    throw new Error("INSUFFICIENT_CREDITS");
+  }
+
+  const scraperRes = await fetch(`http://127.0.0.1:8000/android/full?appId=${appId}&max=150`, {
     cache: "no-store",
   });
 
@@ -101,16 +94,13 @@ export async function analyzeAppAction(appId: string) {
   const appData = await scraperRes.json();
   const { info, reviews } = appData;
 
-  // Análisis Técnico Previo
   const techAnalysis = calculateTechnicalFactors(info, reviews);
 
-  // Preparar texto para IA (más denso)
   const reviewsText = reviews
-    .slice(0, 80) // 80 reviews es un buen balance de tokens/calidad
+    .slice(0, 80)
     .map((r: any) => `[${r.score}★] ${r.content}`)
     .join("\n");
 
-  // 2. PROMPT ESTRATÉGICO PROFUNDO
   const prompt = `
     You are an Expert Product Strategist & Venture Capitalist.
     Analyze this mobile app opportunity based on real data.
@@ -166,13 +156,13 @@ export async function analyzeAppAction(appId: string) {
   let aiResponse;
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o", // Recomendado para este nivel de complejidad
+      model: "gpt-4o",
       messages: [
         { role: "system", content: "You are a ruthless business analyst. Output JSON." },
         { role: "user", content: prompt },
       ],
       response_format: { type: "json_object" },
-      temperature: 0.7, // Un poco más creativo para los Marketing Hooks
+      temperature: 0.7,
     });
 
     aiResponse = JSON.parse(completion.choices[0].message.content || "{}");
@@ -181,11 +171,30 @@ export async function analyzeAppAction(appId: string) {
     throw new Error("Failed to generate deep analysis");
   }
 
-  // Guardar en DB (Igual que antes, pero el objeto insights ahora es mucho más rico)
   try {
     const savedAnalysis = await prisma.$transaction(
       async (tx) => {
-        // ... (Lógica de Upsert TrackedApp igual) ...
+        const user = await tx.user.findUnique({ where: { id: userId } });
+        if (!user || user.monthlyCredits + user.extraCredits < cost) {
+          throw new Error("INSUFFICIENT_CREDITS");
+        }
+
+        let newMonthly = user.monthlyCredits;
+        let newExtra = user.extraCredits;
+        let remainingCost = cost;
+
+        if (newMonthly >= remainingCost) {
+          newMonthly -= remainingCost;
+          remainingCost = 0;
+        } else {
+          remainingCost -= newMonthly;
+          newMonthly = 0;
+        }
+
+        if (remainingCost > 0) {
+          newExtra -= remainingCost;
+        }
+
         const trackedApp = await tx.trackedApp.upsert({
           where: { userId_appId: { userId, appId } },
           update: { name: info.title, iconUrl: info.icon, updatedAt: new Date() },
@@ -209,7 +218,7 @@ export async function analyzeAppAction(appId: string) {
             platform: "ANDROID",
             rawReviews: reviews.slice(0, 20),
             reviewCount: reviews.length,
-            insights: aiResponse, // ¡Aquí va toda la data nueva!
+            insights: aiResponse,
             sentiment: aiResponse.sentiment,
             opportunityScore: aiResponse.business_opportunity.score,
             creditsUsed: cost,
@@ -226,18 +235,22 @@ export async function analyzeAppAction(appId: string) {
           },
         });
 
-        // ... (Updates de créditos y transacción igual) ...
         await tx.trackedApp.update({
           where: { id: trackedApp.id },
           data: { lastAnalysisId: analysis.id },
         });
-        await tx.user.update({ where: { id: userId }, data: { credits: { decrement: cost } } });
+
+        await tx.user.update({
+          where: { id: userId },
+          data: { monthlyCredits: newMonthly, extraCredits: newExtra },
+        });
+
         await tx.creditTransaction.create({
           data: {
             userId,
             type: "DEDUCTION",
             amount: -cost,
-            balance: 0,
+            balance: newMonthly + newExtra,
             reason: "ai_analysis",
             description: `Deep Analysis: ${info.title}`,
             metadata: { appId, analysisId: analysis.id },
@@ -247,11 +260,14 @@ export async function analyzeAppAction(appId: string) {
         return analysis;
       },
       { maxWait: 5000, timeout: 25000 }
-    ); // Aumentamos timeout por si acaso
+    );
 
     return { success: true, analysisId: savedAnalysis.id, insights: savedAnalysis.insights };
   } catch (error) {
     console.error("DB Transaction Error:", error);
+    if (error instanceof Error && error.message === "INSUFFICIENT_CREDITS") {
+      throw new Error("INSUFFICIENT_CREDITS");
+    }
     throw new Error("Failed to save analysis.");
   }
 }

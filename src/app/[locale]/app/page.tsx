@@ -3,8 +3,11 @@
 import { motion } from "framer-motion";
 import { Search01Icon, PlayStoreIcon, SparklesIcon, Search02Icon } from "hugeicons-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
+import { useGetCreditsAction } from "./_components/get-credits-button";
 import SearchResultsPanel from "./_components/search-results-panel";
+import { searchAppAction } from "@/actions/search";
 import { cn } from "@/lib/utils";
 
 interface AppData {
@@ -22,23 +25,53 @@ export default function SearchPage() {
   const [results, setResults] = useState<AppData[]>([]);
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const getCreditsActionSearch = useGetCreditsAction(
+    "You've used all your searches for today. Upgrade to PRO for more."
+  );
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  const handleSearch = async (e: React.FormEvent | string) => {
+    // Permitir llamar a la función pasando el evento o el string directo (para los botones de trending)
+    if (typeof e !== "string") e.preventDefault();
+
+    const searchTerm = typeof e === "string" ? e : query;
+    if (!searchTerm.trim()) return;
 
     setLoading(true);
-    setShowResults(true);
-    setResults([]);
+    setResults([]); // Limpiar anterior
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/android/search?query=${query}`);
-      const data = await res.json();
+      // 1. Llamamos a la Server Action en lugar del fetch directo
+      const result = await searchAppAction(searchTerm);
+
+      if (result.error) {
+        // Manejo de errores (Límite alcanzado o No autorizado)
+        if (result.status === 429) {
+          toast.error("Daily Limit Reached", {
+            description: getCreditsActionSearch.description,
+            duration: getCreditsActionSearch.duration,
+          });
+        } else if (result.status === 401) {
+          toast.error("Sign in required", {
+            description: "Please login to search for apps.",
+          });
+          // Aquí podrías redirigir al login: router.push('/auth/signin')
+        } else {
+          toast.error("Search failed", { description: result.error });
+        }
+        setLoading(false);
+        return;
+      }
+
+      // 2. Éxito
+      const data = result.data;
       setResults(Array.isArray(data) ? (data as AppData[]) : []);
+      setShowResults(true);
     } catch (error) {
-      console.error("❌ Error en la búsqueda:", error);
+      console.error("❌ Error inesperado:", error);
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -46,6 +79,8 @@ export default function SearchPage() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-4xl px-4 text-center space-y-10">
+        {/* ... (Header y Título igual que antes) ... */}
+
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 border border-border/50 backdrop-blur-sm mx-auto mb-2">
             <SparklesIcon className="w-3.5 h-3.5 text-primary animate-pulse" />
@@ -108,6 +143,7 @@ export default function SearchPage() {
           </div>
         </motion.form>
 
+        {/* Trending Buttons */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -126,6 +162,7 @@ export default function SearchPage() {
                 key={app.name}
                 onClick={() => {
                   setQuery(app.name);
+                  handleSearch(app.name); // Disparar búsqueda al clickear tag
                 }}
                 className="group flex items-center gap-1.5 px-4 py-2 rounded-full bg-muted/30 border border-transparent hover:border-border hover:bg-white dark:hover:bg-white/5 hover:shadow-sm transition-all duration-200"
               >
