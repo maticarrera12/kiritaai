@@ -414,8 +414,7 @@
     },
     "menu": {
       "search": "Buscar",
-      "createBrand": "Crear Marca",
-      "myBrands": "Mis Marcas",
+      "myAnalysis": "Mis Analisis",
       "favorites": "Favoritos",
       "settings": "Configuración",
       "logout": "Cerrar Sesión"

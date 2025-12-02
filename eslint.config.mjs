@@ -6,6 +6,7 @@ import prettier from "eslint-plugin-prettier";
 import importPlugin from "eslint-plugin-import";
 import unusedImports from "eslint-plugin-unused-imports";
 import reactHooks from "eslint-plugin-react-hooks";
+import globals from "globals"; // <--- 1. IMPORTAR ESTO
 
 export default [
   js.configs.recommended,
@@ -19,29 +20,9 @@ export default [
       },
 
       globals: {
-        window: true,
-        document: true,
-        console: true,
-        fetch: true,
-        alert: true,
-        navigator: true,
-        setTimeout: true,
-        clearTimeout: true,
-        setInterval: true,
-        clearInterval: true,
-        File: true,
-        NodeJS: true,
-        HTMLDivElement: true,
-        HTMLInputElement: true,
-        HTMLAnchorElement: true,
-        HTMLButtonElement: true,
-        Event: true,
-        KeyboardEvent: true,
-        Request: true,
-        URL: true,
-        Buffer: true,
-        process: true,
-        React: true,
+        ...globals.browser,
+        ...globals.node,    
+        React: true,       
       },
     },
     plugins: {
@@ -65,6 +46,8 @@ export default [
           "newlines-between": "always",
         },
       ],
+      "no-undef": "off", 
+      
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": [
         "warn",

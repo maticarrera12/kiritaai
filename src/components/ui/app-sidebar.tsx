@@ -62,7 +62,6 @@ export default function AppSidebar({
     router.refresh();
   };
 
-  // ... (Tu lógica de mouseLeave y variantes se mantiene igual) ...
   const handleMouseLeave = (e: React.MouseEvent) => {
     if (isMobile) return;
     if (isLocked) return;
@@ -109,15 +108,13 @@ export default function AppSidebar({
 
   return (
     <>
-      {/* --- 1. BOTÓN FLOTANTE ANIMADO (BURGHER/CRUZ) --- */}
-      {/* Lo renderizamos solo en mobile. position fixed para que flote sobre todo */}
       {isMobile && (
         <Button
           onClick={() => setIsOpen(!isOpen)}
-          className="fixed top-4 left-4 z-50 group size-10 md:hidden hover:bg-muted/50 rounded-full"
+          className="fixed top-4 left-4 z-[60] group size-10 md:hidden hover:bg-muted/50 rounded-full bg-background/95 backdrop-blur-sm border border-border/60 shadow-lg"
           variant="ghost"
           size="icon"
-          aria-expanded={isOpen} // Esto activa la animación del SVG
+          aria-expanded={isOpen}
         >
           <svg
             className="pointer-events-none stroke-foreground"
@@ -158,7 +155,18 @@ export default function AppSidebar({
         )}
       </AnimatePresence>
 
-      {/* --- 3. SIDEBAR --- */}
+      {/* --- 3. SIDEBAR WRAPPER (mantiene espacio en layout solo en desktop) --- */}
+      {!isMobile && (
+        <motion.div
+          initial={false}
+          animate={sidebarAnimate}
+          variants={sidebarVariants}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="shrink-0 relative"
+        />
+      )}
+
+      {/* --- 4. SIDEBAR --- */}
       <motion.aside
         onMouseEnter={() => !isMobile && setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
@@ -167,14 +175,15 @@ export default function AppSidebar({
         variants={!isMobile ? sidebarVariants : undefined}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className={cn(
-          "z-50 h-screen shrink-0 fixed left-0 top-0 md:sticky md:top-0 md:z-40 border-r",
-          "bg-background/95 backdrop-blur-xl border-border/60 shadow-2xl md:shadow-none",
+          "z-50 shrink-0",
+          "bg-card backdrop-blur-xl  shadow-2xl md:shadow-none",
+          "fixed left-0 top-0 h-screen",
+          "md:fixed md:left-0 md:top-0 md:h-screen md:z-40",
           isMobile ? "block" : "flex flex-col",
           !isOpen && !isHovered && !isLocked ? "-translate-x-full md:translate-x-0" : ""
         )}
       >
         <div className="flex h-full flex-col py-4 w-full">
-          {/* Ajuste de padding top en mobile para que el contenido no quede debajo del botón fixed */}
           <div className={cn("px-3 mb-4", isMobile && "mt-12")}>
             {(isMobile && isOpen) || !isMobile ? (
               <Link
@@ -203,8 +212,6 @@ export default function AppSidebar({
           <div className="flex-1 overflow-y-auto px-2 scrollbar-hide space-y-6">
             {sections.map((section) => (
               <div key={section.label}>
-                {/* ... (El resto del contenido sigue igual) ... */}
-                {/* Copia aquí el contenido de tus secciones */}
                 <div className="px-3 mb-2 h-5 flex items-center">
                   <motion.span
                     variants={!isMobile ? labelVariants : undefined}

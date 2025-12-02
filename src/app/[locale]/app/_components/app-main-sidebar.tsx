@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Archive02Icon,
-  Configuration01Icon,
-  Search02Icon,
-  SparklesIcon,
-  StarIcon,
-} from "hugeicons-react";
+import { Archive02Icon, Configuration01Icon, Search02Icon, StarIcon } from "hugeicons-react";
 import { useTranslations } from "next-intl";
 
 import { CreditBalance } from "@/components/credits/credits-balance";
@@ -25,15 +19,9 @@ export default function AppMainSidebar() {
           icon: Search02Icon,
         },
         {
-          name: t("menu.createBrand"),
-          href: "/app/create-brand",
-          icon: SparklesIcon,
-        },
-        {
-          name: t("menu.myBrands"),
-          href: "/app/brands",
+          name: t("menu.myAnalysis"),
+          href: "/app/my-analysis",
           icon: Archive02Icon,
-          matchPrefixes: ["/app/brands"],
         },
         {
           name: t("menu.favorites"),

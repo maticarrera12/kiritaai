@@ -411,8 +411,7 @@
     },
     "menu": {
       "search": "Search",
-      "createBrand": "Create Brand",
-      "myBrands": "My Brands",
+      "myAnalysis": "My Analysis",
       "favorites": "Favorites",
       "settings": "Settings",
       "logout": "Log Out"
