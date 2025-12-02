@@ -20,11 +20,6 @@ export async function sendMessageAction(
   if (!session?.user) throw new Error("Unauthorized");
   const userId = session.user.id;
 
-  // 2. Verificar Límites (Mensuales)
-  // Usamos trackChatMessage que ya creaste (o deberías tener en UsageService)
-  // Nota: Si solo quieres verificar sin sumar todavía, necesitarías un método 'checkLimit' separado.
-  // Aquí asumimos que trackChatMessage suma 1 si pasa.
-  // Para un chat, lo ideal es sumar AL FINAL si la IA responde, o aquí.
   const usageCheck = await UsageService.trackChatMessage(userId);
   if (!usageCheck.allowed) {
     return { error: "LIMIT_REACHED", message: usageCheck.error };

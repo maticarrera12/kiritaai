@@ -42,7 +42,8 @@ const formatInstalls = (installs: string | number | undefined | null) => {
 
 async function getAppData(appId: string) {
   try {
-    const res = await fetch(`http://127.0.0.1:8000/android/full?appId=${appId}&max=200`, {
+    const pythonUrl = process.env.PYTHON_API_URL || "http://127.0.0.1:8000";
+    const res = await fetch(`${pythonUrl}/android/full?appId=${appId}&max=200`, {
       cache: "no-store",
     });
     if (!res.ok) return null;
@@ -58,7 +59,11 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
   const data = await getAppData(appId);
 
   if (!data || !data.info) {
-    return <div className="p-10 text-center text-muted-foreground">App not found</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[50vh] p-6 text-center text-muted-foreground">
+        <p>App not found or unavailable.</p>
+      </div>
+    );
   }
 
   const { info, reviews } = data;
@@ -85,36 +90,39 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
   const isAbandoned = !isNaN(diffDays) && diffDays > 365;
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans pb-32">
-      <nav className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/40 transition-all">
-        <div className="max-w-5xl mx-auto px-2 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-background text-foreground font-sans pb-32 overflow-x-hidden w-full">
+      {/* --- NAVBAR --- */}
+      <nav className="sticky top-0 z-30 md:z-40 bg-background/80 backdrop-blur-xl border-b border-border/40 transition-all supports-[backdrop-filter]:bg-background/60">
+        <div className="max-w-5xl mx-auto px-2 md:px-4 h-14 md:h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3 overflow-hidden">
             <Link
               href="/app"
-              className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors text-foreground/80 hover:text-foreground"
+              className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors text-foreground/80 hover:text-foreground shrink-0"
             >
-              <ArrowLeft02Icon size={24} />
+              <ArrowLeft02Icon size={22} className="md:w-6 md:h-6" />
             </Link>
-            <div className="flex items-center gap-3 opacity-0 md:opacity-100 transition-opacity">
+
+            {/* Mini header que aparece al hacer scroll (opcional visualmente) */}
+            <div className="flex items-center gap-3 opacity-100 transition-opacity min-w-0">
               <img
                 src={info.icon}
                 alt=""
-                className="w-8 h-8 rounded-lg shadow-sm"
+                className="w-6 h-6 md:w-8 md:h-8 rounded-md md:rounded-lg shadow-sm shrink-0"
                 referrerPolicy="no-referrer"
               />
-              <h1 className="text-sm font-bold truncate max-w-[200px]">{info.title}</h1>
+              <h1 className="text-sm font-bold truncate max-w-[150px] md:max-w-xs">{info.title}</h1>
             </div>
           </div>
-          <button className="p-2 hover:bg-muted rounded-full text-foreground/80 transition-colors">
-            <Share01Icon size={20} />
+          <button className="p-2 hover:bg-muted rounded-full text-foreground/80 transition-colors shrink-0">
+            <Share01Icon size={20} className="md:w-6 md:h-6" />
           </button>
         </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto px-2 md:px-6 pt-8 md:pt-12 overflow-x-hidden">
-        <div className="flex flex-col md:flex-row gap-8 md:gap-12 mb-12">
+      <main className="max-w-5xl mx-auto px-2 md:px-6 pt-4 md:pt-12 w-full">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-12 mb-6 md:mb-12">
           <div className="relative shrink-0 mx-auto md:mx-0">
-            <div className="w-32 h-32 md:w-44 md:h-44 rounded-[2rem] shadow-2xl overflow-hidden border border-border/50 bg-white">
+            <div className="w-28 h-28 md:w-44 md:h-44 rounded-[1.5rem] md:rounded-[2rem] shadow-xl overflow-hidden border border-border/50 bg-white">
               <img
                 src={info.icon}
                 alt={info.title}
@@ -123,64 +131,68 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
               />
             </div>
             {isAbandoned && (
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-200/50 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm whitespace-nowrap flex items-center gap-1">
+              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-200/50 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm whitespace-nowrap flex items-center gap-1 z-10">
                 <Alert01Icon size={12} /> Abandoned
               </div>
             )}
           </div>
 
-          <div className="flex-1 text-center md:text-left flex flex-col justify-center">
-            <h1 className="text-3xl md:text-5xl font-bold tracking-tighter text-foreground mb-2 leading-none">
+          <div className="flex-1 text-center md:text-left flex flex-col justify-center min-w-0">
+            <h1 className="text-2xl md:text-5xl font-bold tracking-tighter text-foreground mb-1 md:mb-2 leading-tight break-words">
               {info.title}
             </h1>
             <Link
               href={info.developerWebsite || "#"}
-              className="text-primary font-semibold hover:underline text-lg mb-6 block"
+              className="text-primary font-semibold hover:underline text-sm md:text-lg mb-6 block truncate"
             >
               {info.developer || info.developerId}
             </Link>
 
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-8 max-w-2xl mx-auto md:mx-0">
-              <div className="grid grid-cols-3 divide-x divide-border/60 flex-1">
-                <div className="flex flex-col items-center px-4 first:pl-0">
-                  <div className="flex items-center gap-1 font-bold text-foreground text-xl">
+            <div className="flex flex-col gap-6 max-w-full">
+              <div className="grid grid-cols-3 divide-x divide-border/60 border-y border-border/30 py-3 md:py-0 md:border-none">
+                <div className="flex flex-col items-center px-2 first:pl-0">
+                  <div className="flex items-center gap-1 font-bold text-foreground text-sm md:text-xl">
                     <span>{info.scoreText || info.score?.toFixed(1)}</span>
-                    <StarIcon size={16} className="text-foreground fill-foreground" />
+                    <StarIcon size={14} className="text-foreground fill-foreground md:w-4 md:h-4" />
                   </div>
-                  <span className="text-xs text-muted-foreground font-medium mt-0.5">
+                  <span className="text-[10px] md:text-xs text-muted-foreground font-medium mt-0.5 text-center">
                     {formatCompactNumber(info.ratings)}
                   </span>
                 </div>
 
                 <div className="flex flex-col items-center px-2">
-                  <span className="font-bold text-foreground text-xl">{info.contentRating}</span>
-                  <span className="text-xs text-muted-foreground font-medium mt-0.5">Age</span>
+                  <span className="font-bold text-foreground text-sm md:text-xl">
+                    {info.contentRating}
+                  </span>
+                  <span className="text-[10px] md:text-xs text-muted-foreground font-medium mt-0.5">
+                    Age
+                  </span>
                 </div>
 
                 <div className="flex flex-col items-center px-2 last:pr-0">
-                  <span className="font-bold text-foreground text-xl">
+                  <span className="font-bold text-foreground text-sm md:text-xl">
                     {formatInstalls(info.installs)}
                   </span>
-                  <span className="text-xs text-muted-foreground font-medium mt-0.5">
+                  <span className="text-[10px] md:text-xs text-muted-foreground font-medium mt-0.5">
                     Downloads
                   </span>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+              <div className="flex flex-col sm:flex-row gap-3 items-center md:items-start w-full md:w-auto">
                 <a
                   href={info.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/25 hover:scale-105 active:scale-95 whitespace-nowrap"
+                  className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3.5 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 w-full md:w-auto"
                 >
-                  <Download01Icon size={20} strokeWidth={2.5} />
-                  Install
+                  <Download01Icon size={18} strokeWidth={2.5} />
+                  Install App
                 </a>
                 {isAbandoned && (
-                  <div className="flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-orange-50 text-orange-700 font-medium text-sm border border-orange-100">
-                    <Calendar01Icon size={18} />
-                    Last update: {diffDays} days ago
+                  <div className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-orange-50 text-orange-700 font-medium text-xs md:text-sm border border-orange-100 w-full md:w-auto">
+                    <Calendar01Icon size={16} />
+                    Update: {diffDays} days ago
                   </div>
                 )}
               </div>
@@ -188,19 +200,21 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
           </div>
         </div>
 
-        <section className="mb-16">
-          <div className="flex items-center gap-2 mb-6 px-1">
+        {/* --- SCREENSHOTS --- */}
+        <section className="mb-8 md:mb-16">
+          <div className="flex items-center gap-2 mb-3 md:mb-4">
             <SmartPhone01Icon className="text-muted-foreground" size={20} />
-            <h2 className="text-xl font-bold tracking-tight">Preview</h2>
+            <h2 className="text-lg md:text-xl font-bold tracking-tight">Preview</h2>
           </div>
-          <div className="relative -mx-4 md:mx-0">
-            <div className="flex overflow-x-auto gap-5 pb-8 px-4 md:px-1 snap-x snap-mandatory scrollbar-hide">
+
+          <div className="relative -mx-2 md:mx-0 w-[calc(100%+1rem)] md:w-full">
+            <div className="flex overflow-x-auto gap-2.5 md:gap-5 pb-4 md:pb-6 px-2 md:px-1 snap-x snap-mandatory custom-scrollbar">
               {info.screenshots?.map((src: string, idx: number) => (
                 <img
                   key={idx}
                   src={src}
                   alt={`Screenshot ${idx}`}
-                  className="h-[400px] md:h-[500px] w-auto rounded-[1.5rem] shadow-xl shadow-black/5 border border-border/50 snap-center object-cover"
+                  className="h-[350px] md:h-[500px] w-auto rounded-2xl md:rounded-[1.5rem] shadow-md border border-border/50 snap-center object-cover bg-muted"
                   loading="lazy"
                   referrerPolicy="no-referrer"
                 />
@@ -209,29 +223,30 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
           </div>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          <div className="lg:col-span-2 space-y-6 min-w-0">
-            <h2 className="text-2xl font-bold tracking-tight">About this app</h2>
-            <div className="prose prose-gray dark:prose-invert max-w-none text-muted-foreground leading-relaxed overflow-hidden">
-              <p className="whitespace-pre-wrap text-base break-words break-all">
-                {info.description}
-              </p>
+        {/* --- INFO GRID --- */}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
+          <div className="lg:col-span-2 space-y-3 md:space-y-6 min-w-0">
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight">About this app</h2>
+            <div className="prose prose-sm md:prose-base prose-gray dark:prose-invert max-w-none text-muted-foreground leading-relaxed">
+              <p className="whitespace-pre-wrap break-words">{info.description}</p>
             </div>
           </div>
 
-          <div className="space-y-8">
-            <div className="bg-muted/20 p-6 rounded-[2rem] border border-border/50">
-              <h3 className="font-bold text-foreground mb-6 flex items-center gap-2 text-lg">
+          <div className="space-y-6 md:space-y-8">
+            <div className="bg-muted/20 p-4 md:p-6 rounded-xl md:rounded-[2rem] border border-border/50">
+              <h3 className="font-bold text-foreground mb-4 md:mb-6 flex items-center gap-2 text-base md:text-lg">
                 <Shield01Icon size={20} className="text-primary" />
                 App Information
               </h3>
-              <div className="space-y-5">
+              <div className="space-y-3 md:space-y-5">
                 <InfoRow label="Version" value={info.version || "Varies with device"} />
                 <InfoRow label="Updated" value={rawUpdatedString} highlight={isAbandoned} />
                 <InfoRow label="Released" value={info.released || "Unknown"} />
                 <InfoRow label="Downloads" value={formatInstalls(info.installs)} />
+
                 <div className="pt-4 border-t border-border/40">
-                  <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider font-bold">
+                  <p className="text-[10px] md:text-xs text-muted-foreground mb-1 uppercase tracking-wider font-bold">
                     Package ID
                   </p>
                   <p className="font-mono text-xs text-foreground break-all bg-background p-2 rounded-lg border border-border/50 select-all">
@@ -243,11 +258,12 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
           </div>
         </div>
 
-        <div className="my-16 h-px w-full bg-border/40" />
+        <div className="my-8 md:my-16 h-px w-full bg-border/40" />
 
         <ReviewsList reviews={reviews} />
       </main>
 
+      {/* --- BOTONES FLOTANTES --- */}
       <AppFloatingActions
         appId={info.appId}
         appName={info.title}
@@ -269,11 +285,11 @@ function InfoRow({
   highlight?: boolean;
 }) {
   return (
-    <div className="flex justify-between items-center text-sm">
+    <div className="flex justify-between items-center text-xs md:text-sm">
       <span className="text-muted-foreground">{label}</span>
       <span
         className={cn(
-          "font-semibold text-right",
+          "font-semibold text-right truncate max-w-[60%]",
           highlight ? "text-orange-600" : "text-foreground"
         )}
       >

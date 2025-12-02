@@ -9,7 +9,6 @@ import {
   Rocket01Icon,
   Camera01Icon,
   Loading03Icon,
-  Xls02Icon,
   ChartBarLineIcon,
   Layers01Icon,
   UserGroupIcon,
@@ -55,18 +54,21 @@ function AnimatedNumber({ value, color }: { value: number; color: string }) {
 
 function SwotCard({ title, items, color }: { title: string; items: string[]; color: string }) {
   return (
-    <div className="p-4 rounded-xl bg-muted/20 border border-border/60">
+    <div className="p-3 md:p-4 rounded-lg md:rounded-xl bg-muted/20 border border-border/60 overflow-hidden">
       <h5
-        className={`text-[10px] font-bold uppercase tracking-wider mb-3 px-2 py-1 rounded w-fit ${color}`}
+        className={`text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2 md:mb-3 px-2 py-1 rounded w-fit ${color}`}
       >
         {title}
       </h5>
-      <ul className="space-y-2">
+      <ul className="space-y-1.5 md:space-y-2">
         {items?.length > 0 ? (
           items.map((item, i) => (
-            <li key={i} className="text-xs md:text-sm text-muted-foreground flex gap-2 items-start">
+            <li
+              key={i}
+              className="text-xs md:text-sm text-muted-foreground flex gap-2 items-start break-words"
+            >
               <span className="mt-1.5 w-1 h-1 rounded-full bg-foreground/40 shrink-0" />
-              {item}
+              <span className="min-w-0">{item}</span>
             </li>
           ))
         ) : (
@@ -100,7 +102,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
   if (!data) return null;
 
   // Extracción de datos (con fallbacks)
-  const { business_opportunity, swot, user_personas, marketing_hooks, mvp_roadmap } = data;
+  const { business_opportunity, swot, user_personas, marketing_hooks } = data;
   const rawScore = business_opportunity?.score || 0;
   const score = Math.min(Math.max(rawScore, 0), 100);
 
@@ -111,107 +113,175 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
   else if (score >= 50) scoreColor = "#ca8a04"; // Yellow
 
   // --- LÓGICA DE SCREENSHOT ---
+  const captureTab = async (node: HTMLDivElement): Promise<string> => {
+    const isDark = document.documentElement.classList.contains("dark");
+    const bgColor = isDark ? "#171717" : "#ffffff";
+    const currentWidth = node.offsetWidth;
+    const captureWidth = currentWidth < 768 ? currentWidth : currentWidth;
+
+    const clone = node.cloneNode(true) as HTMLDivElement;
+
+    clone.style.transform = "none";
+    clone.style.transition = "none";
+    clone.style.maxHeight = "none";
+    clone.style.height = "auto";
+    clone.style.width = `${captureWidth}px`;
+    clone.style.overflow = "visible";
+    clone.style.backgroundColor = bgColor;
+    clone.style.color = isDark ? "#ffffff" : "#09090b";
+    clone.style.position = "absolute";
+    clone.style.top = "0";
+    clone.style.left = "0";
+    clone.style.zIndex = "-9999";
+
+    const allElements = clone.querySelectorAll("*");
+    allElements.forEach((el: any) => {
+      if (!el.style) return;
+      const classNameStr =
+        typeof el.className === "string" ? el.className : el.className?.baseVal || "";
+      const hasOverflow = classNameStr.includes("overflow") || el.style.overflow === "auto";
+      if (hasOverflow) {
+        el.style.overflow = "visible";
+        el.style.height = "auto";
+      }
+    });
+
+    document.body.appendChild(clone);
+
+    const images = clone.querySelectorAll("img");
+    const imagePromises = Array.from(images).map((img) => {
+      img.removeAttribute("srcset");
+      const originalSrc = img.getAttribute("src");
+      if (originalSrc && originalSrc.startsWith("http")) {
+        img.src = `/api/image-proxy?url=${encodeURIComponent(originalSrc)}`;
+        img.crossOrigin = "anonymous";
+      }
+      return new Promise<void>((resolve) => {
+        if (img.complete && img.naturalWidth > 0) return resolve();
+        img.onload = () => resolve();
+        img.onerror = () => {
+          img.style.display = "none";
+          resolve();
+        };
+        setTimeout(() => resolve(), 1500);
+      });
+    });
+
+    await Promise.all(imagePromises);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    const dataUrl = await toPng(clone, {
+      cacheBust: true,
+      pixelRatio: 2,
+      backgroundColor: bgColor,
+      width: captureWidth,
+      height: clone.scrollHeight,
+      filter: (node) => {
+        if (node.tagName === "IMG") {
+          const img = node as any;
+          if (img.src && img.src.startsWith("data:text/html")) return false;
+        }
+        return true;
+      },
+      style: { margin: "0", transform: "none" },
+    });
+
+    document.body.removeChild(clone);
+    return dataUrl;
+  };
+
+  const combineImages = async (imageUrls: string[]): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Could not get canvas context"));
+        return;
+      }
+
+      const images: globalThis.HTMLImageElement[] = [];
+      let loaded = 0;
+      let totalHeight = 0;
+      let maxWidth = 0;
+
+      imageUrls.forEach((url) => {
+        const img = new globalThis.Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          loaded++;
+          maxWidth = Math.max(maxWidth, img.width);
+          totalHeight += img.height;
+          if (loaded === imageUrls.length) {
+            canvas.width = maxWidth;
+            canvas.height = totalHeight;
+
+            let y = 0;
+            images.forEach((image) => {
+              ctx.drawImage(image, 0, y);
+              y += image.height;
+            });
+
+            resolve(canvas.toDataURL("image/png"));
+          }
+        };
+        img.onerror = () => {
+          loaded++;
+          if (loaded === imageUrls.length) {
+            canvas.width = maxWidth;
+            canvas.height = totalHeight;
+
+            let y = 0;
+            images.forEach((image) => {
+              ctx.drawImage(image, 0, y);
+              y += image.height;
+            });
+
+            resolve(canvas.toDataURL("image/png"));
+          }
+        };
+        img.src = url;
+        images.push(img);
+      });
+    });
+  };
+
   const handleScreenshot = async () => {
     if (!modalContentRef.current) return;
 
     setIsCapturing(true);
-    const toastId = toast.loading("Capturing report...");
-
-    let clone: HTMLDivElement | null = null;
+    const toastId = toast.loading("Capturing full report...");
 
     try {
       const node = modalContentRef.current;
-      const currentWidth = node.offsetWidth;
-      // Truco Mobile: Forzar ancho desktop para la captura si es móvil
-      const captureWidth = currentWidth < 768 ? 1024 : currentWidth;
+      const tabs = ["overview", "strategy", "problems"];
+      const originalTab = activeTab;
 
-      const isDark = document.documentElement.classList.contains("dark");
-      const bgColor = isDark ? "#171717" : "#ffffff";
+      const tabImages: string[] = [];
 
-      clone = node.cloneNode(true) as HTMLDivElement;
+      for (const tab of tabs) {
+        setActiveTab(tab);
+        await new Promise((resolve) => setTimeout(resolve, 400));
 
-      // Reset estilos del clon
-      clone.style.transform = "none";
-      clone.style.transition = "none";
-      clone.style.maxHeight = "none";
-      clone.style.height = "auto";
-      clone.style.width = `${captureWidth}px`;
-      clone.style.overflow = "visible";
-      clone.style.backgroundColor = bgColor;
-      clone.style.color = isDark ? "#ffffff" : "#09090b";
-      clone.style.position = "absolute";
-      clone.style.top = "0";
-      clone.style.left = "0";
-      clone.style.zIndex = "-9999";
+        const tabImage = await captureTab(node);
+        tabImages.push(tabImage);
+      }
 
-      // Expandir scrollbars
-      const allElements = clone.querySelectorAll("*");
-      allElements.forEach((el: any) => {
-        if (!el.style) return;
-        const classNameStr =
-          typeof el.className === "string" ? el.className : el.className?.baseVal || "";
-        const hasOverflow = classNameStr.includes("overflow") || el.style.overflow === "auto";
-        if (hasOverflow) {
-          el.style.overflow = "visible";
-          el.style.height = "auto";
-        }
-      });
+      setActiveTab(originalTab);
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
-      document.body.appendChild(clone);
-
-      // Manejo de Imágenes (Proxy)
-      const images = clone.querySelectorAll("img");
-      const imagePromises = Array.from(images).map((img) => {
-        img.removeAttribute("srcset");
-        const originalSrc = img.getAttribute("src");
-        if (originalSrc && originalSrc.startsWith("http")) {
-          img.src = `/api/image-proxy?url=${encodeURIComponent(originalSrc)}`;
-          img.crossOrigin = "anonymous";
-        }
-        return new Promise<void>((resolve) => {
-          if (img.complete && img.naturalWidth > 0) return resolve();
-          img.onload = () => resolve();
-          img.onerror = () => {
-            img.style.display = "none";
-            resolve();
-          };
-          setTimeout(() => resolve(), 1500);
-        });
-      });
-
-      await Promise.all(imagePromises);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const dataUrl = await toPng(clone, {
-        cacheBust: true,
-        pixelRatio: 2,
-        backgroundColor: bgColor,
-        width: captureWidth,
-        height: clone.scrollHeight, // Altura total expandida
-        filter: (node) => {
-          if (node.tagName === "IMG") {
-            const img = node as any;
-            if (img.src && img.src.startsWith("data:text/html")) return false;
-          }
-          return true;
-        },
-        style: { margin: "0", transform: "none" },
-      });
+      const combinedImage = await combineImages(tabImages);
 
       const cleanName = (appName || "report").replace(/[^a-z0-9]/gi, "-").toLowerCase();
       const link = document.createElement("a");
-      link.download = `kirita-analysis-${activeTab}-${cleanName}.png`;
-      link.href = dataUrl;
+      link.download = `kirita-analysis-full-${cleanName}.png`;
+      link.href = combinedImage;
       link.click();
 
-      toast.success("Saved to downloads", { id: toastId });
+      toast.success("Full report saved!", { id: toastId });
     } catch (error) {
       console.error("Screenshot error:", error);
       toast.error("Failed to generate image", { id: toastId });
     } finally {
-      if (clone && document.body.contains(clone)) {
-        document.body.removeChild(clone);
-      }
       setIsCapturing(false);
     }
   };
@@ -232,17 +302,18 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed inset-0 z-[70] flex items-end md:items-center justify-center p-0 md:p-4 pointer-events-none"
+            className="fixed inset-0 z-[70] flex items-end md:items-center justify-center p-0 md:p-4 pointer-events-none overflow-hidden"
           >
             <div
               ref={modalContentRef}
-              className="bg-white dark:bg-neutral-900 w-full md:max-w-6xl h-[95vh] md:h-[90vh] rounded-t-[2rem] md:rounded-[2rem] shadow-2xl overflow-hidden flex flex-col pointer-events-auto border-t md:border border-white/10 max-w-full"
+              className="bg-white dark:bg-neutral-900 w-full max-w-[100vw] md:max-w-6xl h-[95vh] md:h-[90vh] rounded-t-[1.5rem] md:rounded-[2rem] shadow-2xl overflow-hidden flex flex-col pointer-events-auto border-t md:border border-white/10 box-border"
+              style={{ maxWidth: "100vw" }}
             >
               {/* --- HEADER --- */}
-              <div className="flex flex-col border-b border-border/50 bg-muted/30 shrink-0">
-                {/* Top Row */}
-                <div className="flex justify-between items-center p-4 md:p-6 pb-2 gap-2">
-                  <div className="flex items-center gap-2 md:gap-3 overflow-hidden min-w-0">
+              <div className="flex flex-col border-b border-border/50 bg-muted/30 shrink-0 overflow-hidden">
+                {/* Top Row: Icono App + Botones Acción */}
+                <div className="flex justify-between items-center p-3 md:p-6 pb-2 gap-2 min-w-0">
+                  <div className="flex items-center gap-2 md:gap-3 overflow-hidden min-w-0 flex-1">
                     {appIcon && (
                       <img
                         src={appIcon}
@@ -253,49 +324,44 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                         onError={(e) => (e.currentTarget.style.display = "none")}
                       />
                     )}
-                    <div className="min-w-0">
-                      <h2 className="text-base md:text-xl font-bold flex items-center gap-1.5 md:gap-2 text-foreground">
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-sm md:text-xl font-bold flex items-center gap-1.5 md:gap-2 text-foreground">
                         <Rocket01Icon className="text-primary shrink-0 w-4 h-4 md:w-5 md:h-5" />
                         <span className="truncate">AI Analysis</span>
                       </h2>
                       {appName && (
-                        <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                        <p className="text-[10px] md:text-xs text-muted-foreground truncate max-w-[150px] md:max-w-[300px]">
                           {appName}
                         </p>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 md:gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       onClick={handleScreenshot}
                       disabled={isCapturing}
-                      className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
+                      className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50 touch-manipulation"
                       title="Download Screenshot"
                     >
                       {isCapturing ? (
-                        <Loading03Icon className="animate-spin w-5 h-5" />
+                        <Loading03Icon className="animate-spin w-5 h-5 md:w-6 md:h-6" />
                       ) : (
                         <Camera01Icon className="w-5 h-5 md:w-6 md:h-6" />
                       )}
                     </button>
-                    <button
-                      onClick={onClose}
-                      className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
-                    >
-                      <Xls02Icon className="w-5 h-5 md:w-6 md:h-6" />
-                    </button>
                   </div>
                 </div>
 
-                {/* Tabs Navigation */}
-                <div className="flex px-4 md:px-6 gap-4 md:gap-8 overflow-x-auto no-scrollbar mask-gradient-right">
+                {/* Tabs Navigation (Scrollable en Mobile) */}
+                <div className="flex px-3 md:px-6 gap-4 md:gap-8 overflow-x-auto no-scrollbar mask-gradient-right pt-2 min-w-0">
                   {TABS.map((tab) => (
                     <button
                       key={tab.id}
+                      data-tab-button={tab.id}
                       onClick={() => setActiveTab(tab.id)}
                       className={cn(
-                        "pb-3 text-xs md:text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap",
+                        "pb-2.5 md:pb-3 text-xs md:text-sm font-bold flex items-center gap-1.5 md:gap-2 border-b-2 transition-all whitespace-nowrap shrink-0",
                         activeTab === tab.id
                           ? "border-primary text-primary"
                           : "border-transparent text-muted-foreground hover:text-foreground"
@@ -303,7 +369,9 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                     >
                       <tab.icon
                         size={16}
-                        className={activeTab === tab.id ? "text-primary" : "text-muted-foreground"}
+                        className={cn(
+                          activeTab === tab.id ? "text-primary" : "text-muted-foreground"
+                        )}
                       />
                       {tab.label}
                     </button>
@@ -312,219 +380,239 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
               </div>
 
               {/* --- CONTENT SCROLLABLE --- */}
-              <div className="overflow-y-auto p-4 md:p-8 space-y-8 custom-scrollbar bg-white dark:bg-neutral-900 flex-1 min-h-0">
+              <div className="overflow-y-auto overflow-x-hidden p-3 md:p-8 space-y-6 md:space-y-8 custom-scrollbar bg-white dark:bg-neutral-900 flex-1 min-h-0 min-w-0">
                 {/* === TAB 1: OVERVIEW === */}
-                {activeTab === "overview" && (
-                  <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    {/* Score Section */}
-                    <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start text-center md:text-left bg-muted/10 p-6 rounded-2xl border border-border/40">
-                      <div className="relative w-32 h-32 shrink-0">
-                        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                          <circle
-                            cx="50"
-                            cy="50"
-                            r="45"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeOpacity="0.1"
-                            strokeWidth="8"
-                          />
-                          <motion.circle
-                            cx="50"
-                            cy="50"
-                            r="45"
-                            fill="none"
-                            stroke={scoreColor}
-                            strokeWidth="8"
-                            strokeLinecap="round"
-                            initial={{ pathLength: 0 }}
-                            animate={{ pathLength: score / 100 }}
-                            transition={{ duration: 1.5, ease: "easeOut" }}
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <AnimatedNumber value={score} color={scoreColor} />
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase">
-                            Score
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <h3 className="text-xl md:text-2xl font-bold text-foreground">
-                          {score >= 75
-                            ? "💎 Gold Mine Detected"
-                            : score >= 50
-                              ? "⚠️ Moderate Opportunity"
-                              : "🛑 Saturated Market"}
-                        </h3>
-                        <p className="text-muted-foreground text-sm leading-relaxed">
-                          {data.summary}
-                        </p>
-                        <div className="pt-2">
-                          <p className="font-medium text-foreground italic text-sm border-l-2 border-primary/50 pl-3">
-                            "{business_opportunity?.verdict}"
-                          </p>
-                        </div>
+                <div
+                  data-tab-content="overview"
+                  className={cn(
+                    "space-y-4 md:space-y-8 min-w-0",
+                    activeTab === "overview" ? "block" : "hidden"
+                  )}
+                >
+                  {/* Score Section: Stacked en mobile */}
+                  <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center md:items-start text-center md:text-left bg-muted/10 p-4 md:p-6 rounded-xl md:rounded-2xl border border-border/40 min-w-0 overflow-hidden">
+                    <div className="relative w-28 h-28 md:w-32 md:h-32 shrink-0">
+                      <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="45"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeOpacity="0.1"
+                          strokeWidth="8"
+                        />
+                        <motion.circle
+                          cx="50"
+                          cy="50"
+                          r="45"
+                          fill="none"
+                          stroke={scoreColor}
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                          initial={{ pathLength: 0 }}
+                          animate={{ pathLength: score / 100 }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <AnimatedNumber value={score} color={scoreColor} />
+                        <span className="text-[10px] md:text-xs font-bold text-muted-foreground uppercase">
+                          Score
+                        </span>
                       </div>
                     </div>
-
-                    {/* SWOT Grid */}
-                    <div>
-                      <h4 className="text-sm font-bold mb-3 text-muted-foreground uppercase tracking-wider">
-                        SWOT Analysis
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <SwotCard
-                          title="Strengths"
-                          items={swot?.strengths}
-                          color="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                        />
-                        <SwotCard
-                          title="Weaknesses"
-                          items={swot?.weaknesses}
-                          color="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                        />
-                        <SwotCard
-                          title="Opportunities"
-                          items={swot?.opportunities}
-                          color="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                        />
-                        <SwotCard
-                          title="Threats"
-                          items={swot?.threats}
-                          color="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
-                        />
+                    <div className="flex-1 space-y-2 min-w-0">
+                      <h3 className="text-lg md:text-2xl font-bold text-foreground break-words">
+                        {score >= 75
+                          ? "💎 Gold Mine Detected"
+                          : score >= 50
+                            ? "⚠️ Moderate Opportunity"
+                            : "🛑 Saturated Market"}
+                      </h3>
+                      <p className="text-muted-foreground text-xs md:text-sm leading-relaxed break-words">
+                        {data.summary}
+                      </p>
+                      <div className="pt-2">
+                        <p className="font-medium text-foreground italic text-xs md:text-sm border-l-2 border-primary/50 pl-2 md:pl-3 break-words">
+                          "{business_opportunity?.verdict}"
+                        </p>
                       </div>
                     </div>
                   </div>
-                )}
+
+                  {/* SWOT Grid */}
+                  <div>
+                    <h4 className="text-xs md:text-sm font-bold mb-2 md:mb-3 text-muted-foreground uppercase tracking-wider">
+                      SWOT Analysis
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
+                      <SwotCard
+                        title="Strengths"
+                        items={swot?.strengths}
+                        color="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                      />
+                      <SwotCard
+                        title="Weaknesses"
+                        items={swot?.weaknesses}
+                        color="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                      />
+                      <SwotCard
+                        title="Opportunities"
+                        items={swot?.opportunities}
+                        color="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                      />
+                      <SwotCard
+                        title="Threats"
+                        items={swot?.threats}
+                        color="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
+                      />
+                    </div>
+                  </div>
+                </div>
 
                 {/* === TAB 2: STRATEGY === */}
-                {activeTab === "strategy" && (
-                  <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    {/* Monetization Card */}
-                    <div className="bg-yellow-50 dark:bg-yellow-900/10 border-2 border-yellow-400 rounded-xl p-5 relative overflow-hidden">
-                      <div className="relative flex gap-3 items-start">
-                        <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2.5 rounded-full shrink-0 text-yellow-700 dark:text-yellow-400">
-                          <Money03Icon size={24} />
-                        </div>
-                        <div>
-                          <h4 className="text-base font-bold text-yellow-800 dark:text-yellow-200 mb-1">
-                            Monetization Strategy
-                          </h4>
-                          <p className="text-yellow-900/80 dark:text-yellow-100/80 leading-relaxed text-sm">
-                            {business_opportunity?.monetization_analysis}
-                          </p>
-                        </div>
+                <div
+                  data-tab-content="strategy"
+                  className={cn(
+                    "space-y-4 md:space-y-8 min-w-0",
+                    activeTab === "strategy" ? "block" : "hidden"
+                  )}
+                >
+                  {/* Monetization Card */}
+                  <div className="bg-yellow-50 dark:bg-yellow-900/10 border-2 border-yellow-400 rounded-lg md:rounded-xl p-4 md:p-5 relative overflow-hidden">
+                    <div className="relative flex gap-3 items-start">
+                      <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2 md:p-2.5 rounded-full shrink-0 text-yellow-700 dark:text-yellow-400">
+                        <Money03Icon size={20} className="md:w-6 md:h-6" />
                       </div>
-                    </div>
-
-                    {/* Personas & Hooks */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="font-bold mb-3 flex items-center gap-2 text-sm">
-                          <UserGroupIcon size={16} /> Target Personas
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-sm md:text-base font-bold text-yellow-800 dark:text-yellow-200 mb-1 break-words">
+                          Monetization Strategy
                         </h4>
-                        <div className="space-y-3">
-                          {user_personas?.length > 0 ? (
-                            user_personas.map((persona: any, i: number) => (
-                              <div
-                                key={i}
-                                className="p-3 bg-muted/30 rounded-lg border border-border/50"
-                              >
-                                <p className="font-bold text-sm text-foreground">{persona.title}</p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  😤 {persona.pain}
-                                </p>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="text-xs text-muted-foreground">
-                              No persona data generated.
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div>
-                        <h4 className="font-bold mb-3 flex items-center gap-2 text-sm">
-                          <Megaphone01Icon size={16} /> Marketing Hooks
-                        </h4>
-                        <div className="space-y-3">
-                          {marketing_hooks?.length > 0 ? (
-                            marketing_hooks.map((hook: string, i: number) => (
-                              <div
-                                key={i}
-                                className="p-3 bg-primary/5 rounded-lg border border-primary/10 text-xs md:text-sm font-medium italic text-foreground/80"
-                              >
-                                "{hook}"
-                              </div>
-                            ))
-                          ) : (
-                            <p className="text-xs text-muted-foreground">No hooks generated.</p>
-                          )}
-                        </div>
+                        <p className="text-yellow-900/80 dark:text-yellow-100/80 leading-relaxed text-xs md:text-sm break-words">
+                          {business_opportunity?.monetization_analysis}
+                        </p>
                       </div>
                     </div>
                   </div>
-                )}
 
-                {/* === TAB 3: PROBLEMS === */}
-                {activeTab === "problems" && (
-                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    {/* Pain Points */}
+                  {/* Personas & Hooks */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
-                      <h4 className="text-sm font-bold mb-3 flex items-center gap-2 text-red-500">
-                        <Alert02Icon size={16} /> Critical Pain Points
+                      <h4 className="font-bold mb-2 md:mb-3 flex items-center gap-1.5 md:gap-2 text-xs md:text-sm">
+                        <UserGroupIcon size={16} /> Target Personas
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {data.pain_points?.map((pain: any, i: number) => (
-                          <div
-                            key={i}
-                            className={`p-4 rounded-xl border-l-4 shadow-sm bg-background border border-border/50 ${pain.severity === "CRITICAL" ? "border-l-red-500" : "border-l-orange-400"}`}
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <h5 className="font-bold text-sm text-foreground">{pain.title}</h5>
-                              {pain.severity === "CRITICAL" && (
-                                <span className="bg-red-100 text-red-700 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0">
-                                  Crit
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground line-clamp-4">
-                              {pain.description}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Feature Requests */}
-                    <div className="pt-4 border-t border-border/40">
-                      <h4 className="text-sm font-bold mb-3 flex items-center gap-2 text-fuchsia-500">
-                        <CheckListIcon size={16} /> Feature Wishlist
-                      </h4>
-                      <div className="bg-muted/20 rounded-xl border border-border p-1">
-                        {data.feature_requests?.map((feat: any, i: number) => (
-                          <div
-                            key={i}
-                            className="flex gap-3 p-3 border-b border-border/40 last:border-0 hover:bg-muted/30 transition-colors rounded-lg"
-                          >
-                            <div className="mt-0.5 bg-fuchsia-100 dark:bg-fuchsia-900/30 p-1 rounded text-fuchsia-600 shrink-0 h-fit">
-                              <CheckListIcon size={12} />
-                            </div>
-                            <div>
-                              <p className="font-semibold text-sm">{feat.title}</p>
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                {feat.description}
+                      <div className="space-y-2 md:space-y-3">
+                        {user_personas?.length > 0 ? (
+                          user_personas.map((persona: any, i: number) => (
+                            <div
+                              key={i}
+                              className="p-3 bg-muted/30 rounded-lg border border-border/50"
+                            >
+                              <p className="font-bold text-xs md:text-sm text-foreground break-words">
+                                {persona.title}
+                              </p>
+                              <p className="text-[11px] md:text-xs text-muted-foreground mt-1 break-words">
+                                😤 {persona.pain}
                               </p>
                             </div>
-                          </div>
-                        ))}
+                          ))
+                        ) : (
+                          <p className="text-xs text-muted-foreground">No data available</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-bold mb-2 md:mb-3 flex items-center gap-1.5 md:gap-2 text-xs md:text-sm">
+                        <Megaphone01Icon size={16} /> Marketing Hooks
+                      </h4>
+                      <div className="space-y-2 md:space-y-3">
+                        {marketing_hooks?.length > 0 ? (
+                          marketing_hooks.map((hook: string, i: number) => (
+                            <div
+                              key={i}
+                              className="p-3 bg-primary/5 rounded-lg border border-primary/10 text-xs md:text-sm font-medium italic text-foreground/80 break-words"
+                            >
+                              "{hook}"
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-xs text-muted-foreground">No data available</p>
+                        )}
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
+
+                {/* === TAB 3: PROBLEMS === */}
+                <div
+                  data-tab-content="problems"
+                  className={cn(
+                    "space-y-4 md:space-y-6 min-w-0",
+                    activeTab === "problems" ? "block" : "hidden"
+                  )}
+                >
+                  {/* Pain Points */}
+                  <div>
+                    <h4 className="text-xs md:text-sm font-bold mb-2 md:mb-3 flex items-center gap-1.5 md:gap-2 text-red-500">
+                      <Alert02Icon size={16} /> Critical Pain Points
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3">
+                      {data.pain_points?.map((pain: any, i: number) => (
+                        <div
+                          key={i}
+                          className={`p-3 md:p-4 rounded-lg md:rounded-xl border-l-4 shadow-sm bg-background border border-border/50 ${
+                            pain.severity === "CRITICAL"
+                              ? "border-l-red-500"
+                              : "border-l-orange-400"
+                          }`}
+                        >
+                          <div className="flex justify-between items-start mb-1.5 md:mb-2 gap-2">
+                            <h5 className="font-bold text-xs md:text-sm text-foreground break-words min-w-0 flex-1">
+                              {pain.title}
+                            </h5>
+                            {pain.severity === "CRITICAL" && (
+                              <span className="bg-red-100 text-red-700 text-[8px] md:text-[9px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0">
+                                Crit
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] md:text-xs text-muted-foreground line-clamp-4 break-words">
+                            {pain.description}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Feature Requests */}
+                  <div className="pt-3 md:pt-4 border-t border-border/40">
+                    <h4 className="text-xs md:text-sm font-bold mb-2 md:mb-3 flex items-center gap-1.5 md:gap-2 text-fuchsia-500">
+                      <CheckListIcon size={16} /> Feature Wishlist
+                    </h4>
+                    <div className="bg-muted/20 rounded-lg md:rounded-xl border border-border p-0.5 md:p-1">
+                      {data.feature_requests?.map((feat: any, i: number) => (
+                        <div
+                          key={i}
+                          className="flex gap-2 md:gap-3 p-2.5 md:p-3 border-b border-border/40 last:border-0 hover:bg-muted/30 transition-colors rounded-lg"
+                        >
+                          <div className="mt-0.5 bg-fuchsia-100 dark:bg-fuchsia-900/30 p-0.5 md:p-1 rounded text-fuchsia-600 shrink-0 h-fit">
+                            <CheckListIcon size={12} className="md:w-3.5 md:h-3.5" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-xs md:text-sm break-words">
+                              {feat.title}
+                            </p>
+                            <p className="text-[11px] md:text-xs text-muted-foreground mt-0.5 break-words">
+                              {feat.description}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>

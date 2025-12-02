@@ -86,7 +86,8 @@ export async function analyzeAppAction(appId: string) {
     throw new Error("INSUFFICIENT_CREDITS");
   }
 
-  const scraperRes = await fetch(`http://127.0.0.1:8000/android/full?appId=${appId}&max=150`, {
+  const pythonUrl = process.env.PYTHON_API_URL || "http://127.0.0.1:8000";
+  const scraperRes = await fetch(`${pythonUrl}/android/full?appId=${appId}&max=150`, {
     cache: "no-store",
   });
 

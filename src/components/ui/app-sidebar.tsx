@@ -153,7 +153,7 @@ export default function AppSidebar({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsOpen(false)}
-            className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
           />
         )}
       </AnimatePresence>
@@ -167,7 +167,7 @@ export default function AppSidebar({
         variants={!isMobile ? sidebarVariants : undefined}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className={cn(
-          "z-40 h-screen shrink-0 fixed left-0 top-0 md:sticky md:top-0 border-r",
+          "z-50 h-screen shrink-0 fixed left-0 top-0 md:sticky md:top-0 md:z-40 border-r",
           "bg-background/95 backdrop-blur-xl border-border/60 shadow-2xl md:shadow-none",
           isMobile ? "block" : "flex flex-col",
           !isOpen && !isHovered && !isLocked ? "-translate-x-full md:translate-x-0" : ""

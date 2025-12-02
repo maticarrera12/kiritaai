@@ -158,8 +158,14 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 }
 
@@ -170,6 +176,91 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  .scrollbar-visible {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.55 0.23 325) transparent;
+  }
+  .scrollbar-visible::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+  .scrollbar-visible::-webkit-scrollbar-button {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .scrollbar-visible::-webkit-scrollbar-button:start:decrement,
+  .scrollbar-visible::-webkit-scrollbar-button:end:increment {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  .scrollbar-visible::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-visible::-webkit-scrollbar-thumb {
+    background-color: oklch(0.55 0.23 325);
+    border-radius: 4px;
+  }
+  .scrollbar-visible::-webkit-scrollbar-thumb:hover {
+    background-color: oklch(0.5 0.25 325);
+  }
+  .dark .scrollbar-visible {
+    scrollbar-color: oklch(0.65 0.23 325) transparent;
+  }
+  .dark .scrollbar-visible::-webkit-scrollbar-thumb {
+    background-color: oklch(0.65 0.23 325);
+  }
+  .dark .scrollbar-visible::-webkit-scrollbar-thumb:hover {
+    background-color: oklch(0.7 0.25 325);
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin !important;
+    scrollbar-color: oklch(0.55 0.23 325) transparent !important;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    height: 8px !important;
+    width: 8px !important;
+    display: block !important;
+  }
+  .custom-scrollbar::-webkit-scrollbar-button {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+  .custom-scrollbar::-webkit-scrollbar-button:start:decrement,
+  .custom-scrollbar::-webkit-scrollbar-button:end:increment {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent !important;
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: oklch(0.55 0.23 325) !important;
+    border-radius: 4px !important;
+    border: none !important;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: oklch(0.5 0.25 325) !important;
+  }
+  .dark .custom-scrollbar {
+    scrollbar-color: oklch(0.65 0.23 325) transparent !important;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: oklch(0.65 0.23 325) !important;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: oklch(0.7 0.25 325) !important;
   }
 
   .auth-cta-container {

@@ -6,7 +6,6 @@ import { auth } from "@/lib/auth";
 import { UsageService } from "@/lib/usage";
 
 export async function searchAppAction(query: string) {
-  // 1. Verificar Autenticación
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session?.user) {
@@ -15,9 +14,6 @@ export async function searchAppAction(query: string) {
 
   const userId = session.user.id;
 
-  // 2. Verificar y Registrar Uso Diario (Lazy Reset)
-  // Esta función (que creamos antes) reinicia el contador si es un nuevo día
-  // o bloquea si ya se pasó.
   const usageCheck = await UsageService.trackSearch(userId);
 
   if (!usageCheck.allowed) {
