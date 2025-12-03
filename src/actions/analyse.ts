@@ -27,7 +27,6 @@ function mapPriority(p: string): FeaturePriority {
 }
 
 function getSmartReviewsContext(reviews: any[]) {
-  // Filtramos para obtener munición pura: gente enojada y detallista
   const negative = reviews.filter((r: any) => r.score <= 2);
   const positive = reviews.filter((r: any) => r.score >= 4);
 
@@ -36,8 +35,8 @@ function getSmartReviewsContext(reviews: any[]) {
     .sort((a: any, b: any) => b.content.length - a.content.length);
 
   const selectedReviews = [
-    ...detailedNegatives.slice(0, 60), // Prioridad absoluta a las quejas
-    ...positive.slice(0, 10), // Un poco de lo bueno para saber qué copiar
+    ...detailedNegatives.slice(0, 60),
+    ...positive.slice(0, 10),
     ...reviews.slice(0, 10),
   ];
 
@@ -127,15 +126,10 @@ export async function analyzeAppAction(appId: string) {
   const techAnalysis = calculateTechnicalFactors(info, reviews);
   const reviewsText = getSmartReviewsContext(reviews);
 
-  // --- EL PROMPT AGRESIVO ---
   const prompt = `
     You are a ruthless Venture Capitalist and Product Strategist advising an entrepreneur.
     The goal is to build a NEW COMPETITOR app to steal the market share of the app below.
     
-    DO NOT give advice to the current developer. 
-    DO NOT focus on "fixing" this app.
-    FOCUS ON: How to crush this app by building a better alternative.
-
     TARGET APP DATA:
     - Name: ${info.title}
     - Stats: ${info.installs} installs, ${info.score} rating.
@@ -145,50 +139,47 @@ export async function analyzeAppAction(appId: string) {
     USER REVIEWS (Your Weapon):
     ${reviewsText}
 
-    INSTRUCTIONS:
-    1. Look for patterns in 1-star reviews. These are the features the NEW app must have from day one.
-    2. If the current app is expensive/subscription-based, suggest a disruption strategy (e.g. Lifetime deal).
-    3. The 'mvp_roadmap' must be for the NEW APP, not updates for the old one.
-
     OUTPUT JSON:
     {
-      "summary": "Brutal summary of why this app is vulnerable. (e.g. 'Legacy code, users hate the new update. Perfect time to strike.')",
+      "summary": "Brutal summary of why this app is vulnerable.",
       "sentiment": { "positive": %, "neutral": %, "negative": % },
       "business_opportunity": {
-        "score": (0-100. High if users are angry/app is old. Low if users love it),
+        "score": (0-100),
         "verdict": "Strategy to enter the market.",
-        "monetization_analysis": "How to price the NEW app to steal users (e.g. 'Undercut their $10/mo with a $20 lifetime deal').",
-        "market_gap": "The exact niche or feature set the current app is ignoring."
+        "monetization_analysis": "How to price the NEW app to steal users.",
+        "market_gap": "The exact niche the current app is ignoring."
       },
       "swot": {
-        "strengths": ["What we must copy (because users like it)"],
-        "weaknesses": ["The fatal flaws we will fix"],
-        "opportunities": ["Features users are begging for"],
-        "threats": ["Network effects or big budget of the incumbent"]
+        "strengths": ["..."],
+        "weaknesses": ["..."],
+        "opportunities": ["..."],
+        "threats": ["..."]
       },
       "user_personas": [
-        { "title": "The Defector", "pain": "Why they are leaving the current app", "goal": "What they want in OUR app" }
-      ],
-      "marketing_hooks": [
-        "Headlines for ads targeting their frustrated users (e.g. 'Tired of [App Name] crashing? Try this.')"
-      ],
-      "mvp_roadmap": [
-        { "phase": "Phase 1 (The Wedge)", "features": ["The one feature that solves the biggest complaint"] },
-        { "phase": "Phase 2 (Parity)", "features": ["Core features to match functionality"] }
-      ],
-      "pain_points": [
         { 
-          "title": "Major Competitor Weakness", 
-          "description": "Explanation of the failure.", 
-          "frequency": "HIGH/MEDIUM", 
-          "severity": "CRITICAL/HIGH",
-          "quote": "Direct quote from angry user." 
+          "title": "Creative Name (e.g. 'The Frustrated Power User')", 
+          "pain": "Why they are leaving", 
+          "goal": "What they want" 
         }
       ],
+      "marketing_hooks": ["..."],
+      "mvp_roadmap": [
+        { 
+          "phase": "Creative Phase Name (e.g. 'The Wedge', 'Viral Loop')", 
+          "features": ["Feature A", "Feature B"] 
+        }
+      ],
+      "pain_points": [
+        { "title": "Title", "description": "Desc", "frequency": "HIGH/MEDIUM", "severity": "CRITICAL/HIGH", "quote": "User quote" }
+      ],
       "feature_requests": [
-        { "title": "Must-Have Feature", "description": "What we must build to win.", "priority": "HIGH", "sentiment": "demand" }
+        { "title": "Title", "description": "Desc", "priority": "HIGH", "sentiment": "demand" }
       ]
     }
+    
+    INSTRUCTIONS FOR DYNAMIC ARRAYS:
+    1. 'user_personas': Identify between 2 to 4 distinct personas based on the reviews. Do NOT force a fixed number.
+    2. 'mvp_roadmap': Create a roadmap with 2 to 5 phases. Use strategic names for phases, not just 'Phase 1'.
   `;
 
   let aiResponse;
@@ -198,13 +189,12 @@ export async function analyzeAppAction(appId: string) {
       messages: [
         {
           role: "system",
-          content:
-            "You are a startup disruptor. You analyze weaknesses to build better products. Output JSON.",
+          content: "You are a startup disruptor. Output JSON.",
         },
         { role: "user", content: prompt },
       ],
       response_format: { type: "json_object" },
-      temperature: 0.7, // Un poco de creatividad para los ganchos de marketing
+      temperature: 0.7,
     });
 
     aiResponse = JSON.parse(completion.choices[0].message.content || "{}");

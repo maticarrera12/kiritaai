@@ -25,7 +25,8 @@ export type UserColumn = {
   role: "user" | "admin";
   plan: "FREE" | "PRO" | "BUSINESS";
   status: "ACTIVE" | "PAST_DUE" | "CANCELED" | "TRIALING" | "PAUSED";
-  credits: number;
+  monthlyCredits: number;
+  extraCredits: number;
   image: string | null;
 };
 
@@ -128,9 +129,14 @@ export const columns: ColumnDef<UserColumn>[] = [
     },
   },
   {
-    accessorKey: "credits",
+    accessorKey: "monthlyCredits",
     header: "Créditos",
-    cell: ({ row }) => <div className="font-mono">{row.original.credits}</div>,
+    cell: ({ row }) => <div className="font-mono">{row.original.monthlyCredits}</div>,
+  },
+  {
+    accessorKey: "extraCredits",
+    header: "Créditos Extra",
+    cell: ({ row }) => <div className="font-mono">{row.original.extraCredits}</div>,
   },
   {
     id: "actions",
