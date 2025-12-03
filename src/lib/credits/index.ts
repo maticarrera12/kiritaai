@@ -4,7 +4,6 @@ import { PLANS, type PlanType } from "./constants";
 import { prisma } from "@/lib/prisma";
 
 export class CreditService {
-  // 1. CALCULAR SALDO TOTAL (Suma de ambos bolsillos)
   static async getBalance(userId: string): Promise<number> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -13,14 +12,11 @@ export class CreditService {
     return (user?.monthlyCredits ?? 0) + (user?.extraCredits ?? 0);
   }
 
-  // 2. VERIFICAR SI ALCANZA
   static async hasCredits(userId: string, amount: number = 1): Promise<boolean> {
     const balance = await this.getBalance(userId);
     return balance >= amount;
   }
 
-  // 3. GASTAR CRÉDITOS (Lógica de prioridad)
-  // Primero gastamos los mensuales (que caducan), luego los extra.
   static async deduct(params: {
     userId: string;
     amount: number;
@@ -41,28 +37,23 @@ export class CreditService {
           throw new Error("Insufficient credits.");
         }
 
-        // --- LÓGICA DE LOS DOS BOLSILLOS ---
         let newMonthly = user.monthlyCredits;
         let newExtra = user.extraCredits;
         let remainingToDeduct = amount;
 
-        // A. Intentar pagar con créditos mensuales
         if (newMonthly >= remainingToDeduct) {
           newMonthly -= remainingToDeduct;
           remainingToDeduct = 0;
         } else {
-          // Si no alcanza, gastamos todos los mensuales y pasamos al extra
           remainingToDeduct -= newMonthly;
           newMonthly = 0;
         }
 
-        // B. Si falta, pagar con créditos extra
         if (remainingToDeduct > 0) {
           newExtra -= remainingToDeduct;
         }
 
-        // Actualizar Usuario
-        const updatedUser = await tx.user.update({
+        await tx.user.update({
           where: { id: userId },
           data: {
             monthlyCredits: newMonthly,
@@ -70,13 +61,12 @@ export class CreditService {
           },
         });
 
-        // Registrar Transacción (Guardamos el desglose en metadata si quieres)
         await tx.creditTransaction.create({
           data: {
             userId,
             type: "DEDUCTION",
             amount: -amount,
-            balance: newMonthly + newExtra, // Saldo total resultante
+            balance: newMonthly + newExtra,
             reason,
             description: description || `AI consumption: ${reason}`,
             metadata: {
@@ -96,12 +86,11 @@ export class CreditService {
     }
   }
 
-  // 4. AÑADIR CRÉDITOS (PACKS) -> Van al bolsillo EXTRA
   static async addPackCredits(userId: string, amount: number, description: string) {
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.update({
         where: { id: userId },
-        data: { extraCredits: { increment: amount } }, // Sumar a EXTRA
+        data: { extraCredits: { increment: amount } },
       });
 
       await tx.creditTransaction.create({
@@ -117,27 +106,24 @@ export class CreditService {
     });
   }
 
-  // 5. REINICIO MENSUAL (SUBSCRIPCIÓN) -> Toca solo el bolsillo MENSUAL
   static async resetMonthlyCredits(userId: string) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.plan === "FREE") return;
 
     const planLimit = PLANS[user.plan as PlanType].limits.aiCredits;
 
-    // Simplemente reseteamos monthlyCredits al límite del plan.
-    // Los extraCredits quedan INTACTOS (¡Esa es la clave!).
     if (user.monthlyCredits !== planLimit) {
       await prisma.$transaction(async (tx) => {
         const updatedUser = await tx.user.update({
           where: { id: userId },
-          data: { monthlyCredits: planLimit }, // Reset forzado a 30 (o 100)
+          data: { monthlyCredits: planLimit },
         });
 
         await tx.creditTransaction.create({
           data: {
             userId,
             type: "SUBSCRIPTION",
-            amount: planLimit - user.monthlyCredits, // Solo para registro
+            amount: planLimit - user.monthlyCredits,
             balance: updatedUser.monthlyCredits + updatedUser.extraCredits,
             reason: "monthly_reset",
             description: `Monthly plan refresh (${planLimit} credits)`,
@@ -145,5 +131,42 @@ export class CreditService {
         });
       });
     }
+  }
+
+  static async getUsageStats(userId: string, days: number = 30) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const transactions = await prisma.creditTransaction.findMany({
+      where: {
+        userId,
+        type: "DEDUCTION",
+        createdAt: { gte: startDate },
+      },
+      select: {
+        amount: true,
+        reason: true,
+        createdAt: true,
+      },
+    });
+
+    let totalUsed = 0;
+    const byFeature: Record<string, number> = {};
+
+    for (const tx of transactions) {
+      const val = Math.abs(tx.amount);
+      totalUsed += val;
+
+      if (!byFeature[tx.reason]) {
+        byFeature[tx.reason] = 0;
+      }
+      byFeature[tx.reason] += val;
+    }
+
+    return {
+      totalUsed,
+      byFeature,
+      periodDays: days,
+    };
   }
 }

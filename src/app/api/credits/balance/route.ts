@@ -3,9 +3,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
-import { CreditService } from "@/lib/credits";
 import { PLANS } from "@/lib/credits/constants";
 import { prisma } from "@/lib/prisma";
+import { UsageService } from "@/lib/usage";
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,12 +21,14 @@ export async function GET(req: NextRequest) {
     const user = (await prisma.user.findUnique({
       where: { id: userId },
       select: {
-        credits: true,
+        monthlyCredits: true,
+        extraCredits: true,
         plan: true,
         currentPeriodEnd: true,
       },
     })) as {
-      credits: number;
+      monthlyCredits: number;
+      extraCredits: number;
       plan: keyof typeof PLANS;
       currentPeriodEnd: Date | null;
     } | null;
@@ -38,10 +40,10 @@ export async function GET(req: NextRequest) {
     const planConfig = PLANS[user.plan];
 
     // Get usage this month
-    const stats = await CreditService.getUsageStats(userId, 30);
+    const stats = await UsageService.getUsageStats(userId, 30);
 
     return NextResponse.json({
-      balance: user.credits,
+      balance: user.monthlyCredits + user.extraCredits,
       plan: user.plan,
       monthlyAllocation: planConfig.limits.aiCredits,
       usedThisMonth: stats.totalUsed,

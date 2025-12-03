@@ -1,230 +1,338 @@
+import {
+  ChartBarLineIcon,
+  CreditCardIcon,
+  Invoice01Icon,
+  MessageMultiple01Icon,
+  Rocket01Icon,
+  Search01Icon,
+  Settings02Icon,
+} from "hugeicons-react";
 import { headers } from "next/headers";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
+import { CreditService } from "@/lib/credits";
 import { PLANS, type PlanType } from "@/lib/credits/constants";
 import { prisma } from "@/lib/prisma";
+import { UsageService } from "@/lib/usage";
 import { cn } from "@/lib/utils";
 
+// --- HELPERS ---
 function formatCurrency(amount: number, currency = "USD") {
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount);
 }
 
-function startOfMonth(date = new Date()) {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
-}
-
 function formatDateSafe(date?: Date | string | null) {
-  if (!date) return "-";
+  if (!date) return "N/A";
   try {
-    const d = new Date(date);
-    return d.toISOString().split("T")[0];
+    return new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   } catch {
-    return "-";
+    return "N/A";
   }
 }
 
 const BillingPage = async () => {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) {
-    return (
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-muted-foreground">You must be signed in to view billing.</p>
-      </div>
-    );
-  }
+  if (!session?.user) return <div>Unauthorized</div>;
 
   const userId = session.user.id;
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { plan: true, planStatus: true, currentPeriodEnd: true, credits: true },
-  });
 
-  const [{ _sum }, purchases] = await Promise.all([
-    prisma.creditTransaction.aggregate({
-      _sum: { amount: true },
-      where: { userId, type: "DEDUCTION", createdAt: { gte: startOfMonth() } },
+  const [user, purchases, creditStats, limitsUsage] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        plan: true,
+        planStatus: true,
+        currentPeriodEnd: true,
+        monthlyCredits: true,
+        extraCredits: true,
+        email: true,
+      },
     }),
     prisma.purchase.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
       take: 6,
-      select: {
-        id: true,
-        amount: true,
-        currency: true,
-        status: true,
-        createdAt: true,
-        provider: true,
-        type: true,
-      },
     }),
+    CreditService.getUsageStats(userId, 30),
+    UsageService.getCurrentUsage(userId),
   ]);
 
-  // Obtener créditos mensuales del plan desde las constantes
-  const monthlyRecharge =
-    user?.plan && user.plan in PLANS ? PLANS[user.plan as PlanType].limits.aiCredits : 0;
-  const currentCredits = user?.credits ?? 0; // Créditos actuales disponibles
-  const usedThisMonth = Math.abs(_sum.amount ?? 0); // Créditos usados este mes (siempre positivo)
+  const planKey = (user?.plan as PlanType) || "FREE";
+  const planConfig = PLANS[planKey];
 
-  // TODO: Agregar metadata al modelo Purchase si se necesita información de tarjeta
-  const lastPayment = purchases.find((p) => p.status === "COMPLETED");
+  const planName = planConfig.name;
+  const planPrice = planConfig.price.monthly;
+  const planLimit = planConfig.limits.aiCredits;
+  const searchLimit = planConfig.limits.dailySearches;
+  const chatLimit = planConfig.limits.maxChatMessages;
+
+  const totalCredits = (user?.monthlyCredits || 0) + (user?.extraCredits || 0);
+  const monthly = user?.monthlyCredits || 0;
+  const extra = user?.extraCredits || 0;
+
+  const monthlyPercent = totalCredits > 0 ? (monthly / totalCredits) * 100 : 0;
+  const extraPercent = totalCredits > 0 ? (extra / totalCredits) * 100 : 0;
 
   return (
-    <div className="mx-auto max-w-7xl px-8 py-12">
-      <div className="space-y-10">
-        <header>
-          <h1 className="mb-2 text-4xl font-bold text-foreground">Billing & Subscription</h1>
-          <p className="text-base text-muted-foreground">Manage your plan, usage, and invoices.</p>
-        </header>
+    <div className="mx-auto max-w-6xl px-6 py-12">
+      <div className="flex flex-col gap-2 mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">Billing & Usage</h1>
+        <p className="text-muted-foreground">
+          Manage your subscription, credit balance and invoices.
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[2fr,1fr]">
-          {/* Current Plan */}
-          <Card className="p-8">
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold text-foreground">Current Plan</h2>
-                <p className="text-sm text-muted-foreground">Active subscription details</p>
-              </div>
-              <span
-                className={cn(
-                  "rounded-full px-4 py-1 text-sm font-medium whitespace-nowrap",
-                  user?.planStatus === "ACTIVE"
-                    ? "bg-primary/10 text-primary"
-                    : "bg-muted text-foreground"
-                )}
-              >
-                {user?.planStatus ?? "UNKNOWN"}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <Card className="p-6">
-                <p className="text-sm text-muted-foreground mb-1">Plan</p>
-                <p className="text-xl font-semibold text-foreground">{String(user?.plan ?? "-")}</p>
-                <p className="text-xs text-muted-foreground mt-1">Billed monthly</p>
-              </Card>
-
-              <Card className="p-6">
-                <p className="text-sm text-muted-foreground mb-1">Price</p>
-                <p className="text-xl font-semibold text-foreground">{formatCurrency(19)} / mo</p>
-                <p className="text-xs text-muted-foreground mt-1">USD</p>
-              </Card>
-
-              <Card className="p-6">
-                <p className="text-sm text-muted-foreground mb-1">Next renewal</p>
-                <p className="text-xl font-semibold text-foreground">
-                  {formatDateSafe(user?.currentPeriodEnd)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">Auto-renews</p>
-              </Card>
-            </div>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button variant="outline">Manage plan</Button>
-              <Button variant="outline">Change payment method</Button>
-              <Button
-                className="border border-destructive/40 bg-transparent text-destructive hover:bg-destructive/10"
-                variant="outline"
-              >
-                Cancel subscription
-              </Button>
-            </div>
-          </Card>
-
-          {/* Usage */}
-          <Card className="p-8">
-            <h2 className="mb-4 text-2xl font-semibold text-foreground">Credits</h2>
-            <div className="mb-3 flex items-baseline justify-between">
-              <p className="text-3xl font-semibold text-foreground">{currentCredits}</p>
-              <p className="text-sm text-muted-foreground">available</p>
-            </div>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>Used this month: {usedThisMonth} credits</p>
-              {monthlyRecharge > 0 && <p>Monthly recharge: {monthlyRecharge} credits</p>}
-            </div>
-            <p className="mt-4 text-xs text-muted-foreground">
-              Next recharge on{" "}
-              {formatDateSafe(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1))}
-            </p>
-            <div className="mt-4 flex gap-3">
-              <Button className="flex-1 text-sm">Buy credits</Button>
-              <Button variant="outline" className="text-sm">
-                View usage
-              </Button>
-            </div>
-          </Card>
-        </div>
-
-        {/* Payment + Invoices */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr,2fr]">
-          {/* Payment Method */}
-          <Card className="p-8">
-            <h2 className="mb-4 text-2xl font-semibold text-foreground">Payment Method</h2>
-            {lastPayment ? (
-              <div className="flex items-center justify-between rounded-md border border-border p-5">
+      <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
+        {/* === COLUMNA IZQUIERDA: SUSCRIPCIÓN Y FACTURAS === */}
+        <div className="space-y-8">
+          {/* Tarjeta de Plan */}
+          <Card>
+            <CardHeader className="pb-4">
+              <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-base font-medium text-foreground">
-                    {lastPayment.provider} • {lastPayment.type}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Last used on {formatDateSafe(lastPayment.createdAt)}
+                  <CardTitle>Current Plan</CardTitle>
+                  <CardDescription className="mt-1.5">
+                    Renews on {formatDateSafe(user?.currentPeriodEnd)}
+                  </CardDescription>
+                </div>
+                <div
+                  className={cn(
+                    "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
+                    user?.planStatus === "ACTIVE"
+                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                      : "bg-yellow-100 text-yellow-700"
+                  )}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                  {user?.planStatus || "FREE"}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-5 p-5 bg-muted/40 rounded-xl border border-border/60">
+                <div className="h-14 w-14 rounded-xl bg-background border border-border flex items-center justify-center shadow-sm">
+                  <Rocket01Icon size={28} className="text-primary" />
+                </div>
+                <div>
+                  <p className="font-bold text-xl">{planName}</p>
+                  <p className="text-sm text-muted-foreground font-medium">
+                    {planPrice > 0 ? `${formatCurrency(planPrice)} / month` : "Free Forever"}
                   </p>
                 </div>
-                <Button variant="outline" className="text-xs">
-                  Update
-                </Button>
+                <div className="ml-auto">
+                  {/* Este botón debería llevar al Customer Portal de LemonSqueezy/Stripe */}
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Settings02Icon size={16} />
+                    Manage
+                  </Button>
+                </div>
               </div>
-            ) : (
-              <div className="rounded-md border border-border p-5 text-sm text-muted-foreground">
-                No payment method available.
-              </div>
-            )}
+            </CardContent>
           </Card>
 
-          {/* Invoices */}
-          <Card className="p-8">
-            <h2 className="mb-4 text-2xl font-semibold text-foreground">Invoices</h2>
-            {purchases.length === 0 ? (
-              <div className="rounded-md border border-border p-5 text-sm text-muted-foreground">
-                No invoices yet.
+          {/* Historial de Facturas */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Invoice01Icon size={20} className="text-muted-foreground" />
+                Invoices
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {purchases.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm bg-muted/20 rounded-lg border border-dashed">
+                    No invoices found.
+                  </div>
+                ) : (
+                  purchases.map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex justify-between items-center py-4 border-b border-border/40 last:border-0 text-sm group hover:bg-muted/20 px-2 -mx-2 rounded-lg transition-colors"
+                    >
+                      <div className="flex flex-col gap-0.5">
+                        <p className="font-medium text-foreground">
+                          {p.type === "SUBSCRIPTION" ? "Monthly Subscription" : "Credit Pack"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDateSafe(p.createdAt)}
+                        </p>
+                      </div>
+                      <div className="text-right flex items-center gap-4">
+                        <div className="flex flex-col items-end">
+                          <p className="font-mono font-medium">
+                            {formatCurrency((p.amount || 0) / 100)}
+                          </p>
+                          <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                            {p.status}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
-            ) : (
-              <div className="overflow-x-auto rounded-md border border-border">
-                <table className="min-w-full text-base">
-                  <thead className="bg-muted/50 text-muted-foreground">
-                    <tr>
-                      <th className="px-6 py-3 text-left">Date</th>
-                      <th className="px-6 py-3 text-left">Type</th>
-                      <th className="px-6 py-3 text-left">Provider</th>
-                      <th className="px-6 py-3 text-left">Amount</th>
-                      <th className="px-6 py-3 text-left">Payment</th>
-                      <th className="px-6 py-3 text-left">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {purchases.map((p) => (
-                      <tr key={p.id} className="border-t border-border">
-                        <td className="px-6 py-3">{formatDateSafe(p.createdAt)}</td>
-                        <td className="px-6 py-3">{p.type}</td>
-                        <td className="px-6 py-3">{p.provider}</td>
-                        <td className="px-6 py-3">
-                          {formatCurrency(
-                            (p.amount || 0) / 100,
-                            p.currency?.toUpperCase() || "USD"
-                          )}
-                        </td>
-                        <td className="px-6 py-3">—</td>
-                        <td className="px-6 py-3">{p.status}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            </CardContent>
           </Card>
         </div>
+
+        {/* === COLUMNA DERECHA: USO DE CRÉDITOS === */}
+        <div className="space-y-6">
+          <Card className="bg-gradient-to-b from-background to-muted/20 border-primary/20 shadow-sm overflow-hidden relative">
+            {/* Decoración de fondo */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
+
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCardIcon size={20} className="text-primary" />
+                Credit Balance
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              {/* Gran Número Total */}
+              <div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-5xl font-black text-foreground tracking-tight">
+                    {totalCredits}
+                  </span>
+                  <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                    Credits
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Available for AI analysis</p>
+              </div>
+
+              {/* Barra de Progreso Segmentada */}
+              <div className="space-y-2">
+                <div className="w-full h-4 bg-muted rounded-full overflow-hidden flex border border-border/50">
+                  {/* Segmento Mensual (Azul/Primary) */}
+                  <div
+                    className="bg-primary h-full transition-all duration-500"
+                    style={{ width: `${monthlyPercent}%` }}
+                  />
+                  {/* Segmento Extra (Verde) */}
+                  <div
+                    className="bg-emerald-500 h-full transition-all duration-500"
+                    style={{ width: `${extraPercent}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Leyenda */}
+              <div className="space-y-3 pt-2">
+                <div className="flex justify-between items-center text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-3 h-3 rounded-full bg-primary shadow-sm" />
+                    <span className="font-medium text-muted-foreground">Monthly Plan</span>
+                  </div>
+                  <span className="font-mono font-bold">
+                    {monthly}{" "}
+                    <span className="text-muted-foreground/50 font-normal">/ {planLimit}</span>
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm" />
+                    <div>
+                      <span className="font-medium text-muted-foreground block leading-none">
+                        Extra Packs
+                      </span>
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 leading-none">
+                        Never expire
+                      </span>
+                    </div>
+                  </div>
+                  <span className="font-mono font-bold">{extra}</span>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <div className="pt-6 mt-2 border-t border-border/50">
+                <Button className="w-full font-bold shadow-lg shadow-primary/10" asChild>
+                  <Link href="/pricing">Buy More Credits</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Usage Stats Card */}
+        </div>
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="flex flex-row items-center gap-2">
+              <ChartBarLineIcon size={20} className="text-muted-foreground" />
+              Usage Stats
+            </CardTitle>
+            <CardDescription>Last 30 days activity</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5 flex gap-4">
+            {/* AI Credits Used */}
+            <div className="p-4 bg-muted/30 rounded-xl border border-border/50">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-sm font-medium text-muted-foreground">AI Credits Used</span>
+                <span className="text-2xl font-bold">{creditStats.totalUsed}</span>
+              </div>
+              {Object.keys(creditStats.byFeature).length > 0 && (
+                <div className="space-y-2 pt-2 border-t border-border/40">
+                  {Object.entries(creditStats.byFeature).map(([feature, count]) => (
+                    <div key={feature} className="flex justify-between items-center text-xs">
+                      <span className="text-muted-foreground capitalize">
+                        {feature.replace(/_/g, " ")}
+                      </span>
+                      <span className="font-mono font-medium">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Daily Searches */}
+            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <Search01Icon size={18} className="text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Searches Today</p>
+                  <p className="text-xs text-muted-foreground">Daily limit</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="font-mono font-bold text-lg">{limitsUsage.dailySearches}</span>
+                <span className="text-muted-foreground text-sm"> / {searchLimit}</span>
+              </div>
+            </div>
+
+            {/* Monthly Chats */}
+            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                  <MessageMultiple01Icon
+                    size={18}
+                    className="text-purple-600 dark:text-purple-400"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Chats This Month</p>
+                  <p className="text-xs text-muted-foreground">Monthly limit</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="font-mono font-bold text-lg">{limitsUsage.monthlyChats}</span>
+                <span className="text-muted-foreground text-sm"> / {chatLimit}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
