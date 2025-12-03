@@ -2,11 +2,11 @@
 import {
   CreditCardPosIcon,
   SquareLockPasswordIcon,
-  UserAdd02Icon,
-  UserGroupIcon,
+  // UserAdd02Icon,
+  // UserGroupIcon,
   UserIcon,
 } from "hugeicons-react";
-import { KeyIcon } from "lucide-react";
+// import { KeyIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import AppSidebar, { SidebarSection } from "@/components/ui/app-sidebar";
@@ -40,25 +40,25 @@ export default function SettingsSidebar() {
         },
       ],
     },
-    {
-      label: t("sections.developers"),
-      items: [{ name: t("menu.apiKeys"), href: "/app/settings/api", icon: KeyIcon }],
-    },
-    {
-      label: t("sections.organization"),
-      items: [
-        {
-          name: t("menu.members"),
-          href: "/settings/organization/members",
-          icon: UserGroupIcon,
-        },
-        {
-          name: t("menu.invitations"),
-          href: "/settings/organization/invites",
-          icon: UserAdd02Icon,
-        },
-      ],
-    },
+    // {
+    //   label: t("sections.developers"),
+    //   items: [{ name: t("menu.apiKeys"), href: "/app/settings/api", icon: KeyIcon }],
+    // },
+    // {
+    //   label: t("sections.organization"),
+    //   items: [
+    //     {
+    //       name: t("menu.members"),
+    //       href: "/settings/organization/members",
+    //       icon: UserGroupIcon,
+    //     },
+    //     {
+    //       name: t("menu.invitations"),
+    //       href: "/settings/organization/invites",
+    //       icon: UserAdd02Icon,
+    //     },
+    //   ],
+    // },
   ];
 
   return (
