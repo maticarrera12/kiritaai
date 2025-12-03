@@ -26,6 +26,24 @@ function mapPriority(p: string): FeaturePriority {
   }
 }
 
+function getSmartReviewsContext(reviews: any[]) {
+  // Filtramos para obtener munición pura: gente enojada y detallista
+  const negative = reviews.filter((r: any) => r.score <= 2);
+  const positive = reviews.filter((r: any) => r.score >= 4);
+
+  const detailedNegatives = negative
+    .filter((r: any) => r.content.length > 15)
+    .sort((a: any, b: any) => b.content.length - a.content.length);
+
+  const selectedReviews = [
+    ...detailedNegatives.slice(0, 60), // Prioridad absoluta a las quejas
+    ...positive.slice(0, 10), // Un poco de lo bueno para saber qué copiar
+    ...reviews.slice(0, 10),
+  ];
+
+  return selectedReviews.map((r: any) => `[${r.score}★] "${r.content}"`).join("\n");
+}
+
 function calculateTechnicalFactors(info: any, reviews: any[]) {
   let baseScore = 50;
   const factors = [];
@@ -42,30 +60,41 @@ function calculateTechnicalFactors(info: any, reviews: any[]) {
     baseScore += 20;
     factors.push("Abandoned (>1 year)");
   } else if (daysSinceUpdate < 60) {
-    baseScore -= 15;
+    baseScore -= 5;
     factors.push("Actively maintained");
   }
 
   const rating = info.score || 0;
   const installs = parseInt((info.installs || "0").replace(/[^0-9]/g, ""));
 
-  if (rating < 3.0 && installs > 100000) {
-    baseScore += 25;
-    factors.push("High Traffic / Low Quality");
-  } else if (rating < 3.8 && installs > 10000) {
+  if (installs > 1000000) {
+    if (rating < 4.0) {
+      baseScore += 25;
+      factors.push("Huge Market / Low Satisfaction");
+    } else if (rating > 4.6) {
+      baseScore -= 20;
+      factors.push("Dominant Market Leader");
+    } else {
+      baseScore += 5;
+      factors.push("Massive Market");
+    }
+  } else if (installs > 100000 && rating < 4.2) {
     baseScore += 15;
-    factors.push("Validation with Dissatisfaction");
-  } else if (rating > 4.7) {
-    baseScore -= 20;
-    factors.push("Loved by users");
+    factors.push("Established but Vulnerable");
+  } else if (installs < 1000) {
+    baseScore -= 10;
+    factors.push("Unproven Market");
   }
 
-  const oneStarCount = reviews.filter((r: any) => r.score === 1).length;
-  const sentimentRatio = oneStarCount / reviews.length;
+  const angryReviews = reviews.filter((r: any) => r.score <= 2).length;
+  const angryRatio = angryReviews / reviews.length;
 
-  if (sentimentRatio > 0.4) {
-    baseScore += 15;
-    factors.push("Recent Negative Spike");
+  if (angryRatio > 0.5) {
+    baseScore += 35;
+    factors.push("Users are FURIOUS (>50% negative)");
+  } else if (angryRatio > 0.25) {
+    baseScore += 20;
+    factors.push("Significant Dissatisfaction");
   }
 
   return {
@@ -87,7 +116,7 @@ export async function analyzeAppAction(appId: string) {
   }
 
   const pythonUrl = process.env.PYTHON_API_URL || "http://127.0.0.1:8000";
-  const scraperRes = await fetch(`${pythonUrl}/android/full?appId=${appId}&max=150`, {
+  const scraperRes = await fetch(`${pythonUrl}/android/full?appId=${appId}&max=200`, {
     cache: "no-store",
   });
 
@@ -96,60 +125,68 @@ export async function analyzeAppAction(appId: string) {
   const { info, reviews } = appData;
 
   const techAnalysis = calculateTechnicalFactors(info, reviews);
+  const reviewsText = getSmartReviewsContext(reviews);
 
-  const reviewsText = reviews
-    .slice(0, 80)
-    .map((r: any) => `[${r.score}★] ${r.content}`)
-    .join("\n");
-
+  // --- EL PROMPT AGRESIVO ---
   const prompt = `
-    You are an Expert Product Strategist & Venture Capitalist.
-    Analyze this mobile app opportunity based on real data.
+    You are a ruthless Venture Capitalist and Product Strategist advising an entrepreneur.
+    The goal is to build a NEW COMPETITOR app to steal the market share of the app below.
+    
+    DO NOT give advice to the current developer. 
+    DO NOT focus on "fixing" this app.
+    FOCUS ON: How to crush this app by building a better alternative.
 
-    CONTEXT:
-    - App: ${info.title} (${info.developer})
-    - Installs: ${info.installs} | Rating: ${info.score}
+    TARGET APP DATA:
+    - Name: ${info.title}
+    - Stats: ${info.installs} installs, ${info.score} rating.
     - Last Update: ${info.updated}
-    - Calculated Technical Score: ${techAnalysis.score}/100 (${techAnalysis.factors})
+    - Technical Score: ${techAnalysis.score}/100 (${techAnalysis.factors})
 
-    USER REVIEWS (The Truth):
+    USER REVIEWS (Your Weapon):
     ${reviewsText}
 
-    GOAL:
-    Identify if there is a profitable gap in the market to build a competitor.
+    INSTRUCTIONS:
+    1. Look for patterns in 1-star reviews. These are the features the NEW app must have from day one.
+    2. If the current app is expensive/subscription-based, suggest a disruption strategy (e.g. Lifetime deal).
+    3. The 'mvp_roadmap' must be for the NEW APP, not updates for the old one.
 
-    OUTPUT JSON (Strictly this structure):
+    OUTPUT JSON:
     {
-      "summary": "Direct, no-fluff executive summary (2 sentences).",
+      "summary": "Brutal summary of why this app is vulnerable. (e.g. 'Legacy code, users hate the new update. Perfect time to strike.')",
       "sentiment": { "positive": %, "neutral": %, "negative": % },
       "business_opportunity": {
-        "score": (Adjust the Technical Score based on review sentiment. 0-100),
-        "verdict": "One distinct, powerful sentence on WHY to build or avoid.",
-        "monetization_analysis": "Critique current pricing. Suggest specific model (e.g. 'Switch from Sub to Lifetime $19').",
-        "market_gap": "What is the ONE specific thing this app fails at that users want?"
+        "score": (0-100. High if users are angry/app is old. Low if users love it),
+        "verdict": "Strategy to enter the market.",
+        "monetization_analysis": "How to price the NEW app to steal users (e.g. 'Undercut their $10/mo with a $20 lifetime deal').",
+        "market_gap": "The exact niche or feature set the current app is ignoring."
       },
       "swot": {
-        "strengths": ["What are they actually doing well?"],
-        "weaknesses": ["Critical flaws."],
-        "opportunities": ["External trends or features to exploit."],
-        "threats": ["Network effects, big budget, etc."]
+        "strengths": ["What we must copy (because users like it)"],
+        "weaknesses": ["The fatal flaws we will fix"],
+        "opportunities": ["Features users are begging for"],
+        "threats": ["Network effects or big budget of the incumbent"]
       },
       "user_personas": [
-        { "title": "e.g. The Frustrated Professional", "pain": "Hates ads during work", "goal": "Efficiency" },
-        { "title": "e.g. The Student", "pain": "Can't afford sub", "goal": "Free basic usage" }
+        { "title": "The Defector", "pain": "Why they are leaving the current app", "goal": "What they want in OUR app" }
       ],
       "marketing_hooks": [
-        "3 Punchy headlines to use in Landing Page/Ads that target the pain points."
+        "Headlines for ads targeting their frustrated users (e.g. 'Tired of [App Name] crashing? Try this.')"
       ],
       "mvp_roadmap": [
-        { "phase": "Phase 1 (Core)", "features": ["Feature A", "Feature B"] },
-        { "phase": "Phase 2 (Growth)", "features": ["Feature C"] }
+        { "phase": "Phase 1 (The Wedge)", "features": ["The one feature that solves the biggest complaint"] },
+        { "phase": "Phase 2 (Parity)", "features": ["Core features to match functionality"] }
       ],
       "pain_points": [
-        { "title": "Short Title", "description": "Detail", "frequency": "HIGH/MEDIUM", "severity": "CRITICAL/HIGH" }
+        { 
+          "title": "Major Competitor Weakness", 
+          "description": "Explanation of the failure.", 
+          "frequency": "HIGH/MEDIUM", 
+          "severity": "CRITICAL/HIGH",
+          "quote": "Direct quote from angry user." 
+        }
       ],
       "feature_requests": [
-        { "title": "Feature", "description": "Context", "priority": "HIGH", "sentiment": "demand" }
+        { "title": "Must-Have Feature", "description": "What we must build to win.", "priority": "HIGH", "sentiment": "demand" }
       ]
     }
   `;
@@ -159,11 +196,15 @@ export async function analyzeAppAction(appId: string) {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: "You are a ruthless business analyst. Output JSON." },
+        {
+          role: "system",
+          content:
+            "You are a startup disruptor. You analyze weaknesses to build better products. Output JSON.",
+        },
         { role: "user", content: prompt },
       ],
       response_format: { type: "json_object" },
-      temperature: 0.7,
+      temperature: 0.7, // Un poco de creatividad para los ganchos de marketing
     });
 
     aiResponse = JSON.parse(completion.choices[0].message.content || "{}");
@@ -176,12 +217,17 @@ export async function analyzeAppAction(appId: string) {
     const savedAnalysis = await prisma.$transaction(
       async (tx) => {
         const user = await tx.user.findUnique({ where: { id: userId } });
-        if (!user || user.monthlyCredits + user.extraCredits < cost) {
+
+        const currentMonthly = user?.monthlyCredits || 0;
+        const currentExtra = user?.extraCredits || 0;
+        const totalCredits = currentMonthly + currentExtra;
+
+        if (!user || totalCredits < cost) {
           throw new Error("INSUFFICIENT_CREDITS");
         }
 
-        let newMonthly = user.monthlyCredits;
-        let newExtra = user.extraCredits;
+        let newMonthly = currentMonthly;
+        let newExtra = currentExtra;
         let remainingCost = cost;
 
         if (newMonthly >= remainingCost) {

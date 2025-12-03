@@ -13,12 +13,12 @@ import {
 import { useRouter, usePathname } from "@/i18n/routing";
 
 const sortOptions = [
-  { value: "date_desc", label: "Newest First" },
-  { value: "date_asc", label: "Oldest First" },
-  { value: "score_desc", label: "Highest Score" },
-  { value: "score_asc", label: "Lowest Score" },
-  { value: "name_asc", label: "Name (A-Z)" },
-  { value: "name_desc", label: "Name (Z-A)" },
+  { value: "date_desc", label: "Newest" },
+  { value: "date_asc", label: "Oldest" },
+  { value: "score_desc", label: "Highest" },
+  { value: "score_asc", label: "Lowest" },
+  { value: "name_asc", label: "A-Z" },
+  { value: "name_desc", label: "Z-A" },
 ];
 
 export function AnalysisFilters() {
