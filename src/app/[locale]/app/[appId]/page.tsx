@@ -9,6 +9,7 @@ import {
   Alert01Icon,
 } from "hugeicons-react";
 import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 
 import { AppFloatingActions } from "../_components/app-floatings-actions";
 import ReviewsList from "../_components/reviews-list";
@@ -18,15 +19,13 @@ import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 
 const formatCompactNumber = (num: string | number | undefined | null) => {
-  if (!num) return "No Ratings";
+  if (!num) return null;
   const value = typeof num === "string" ? parseInt(num.replace(/,/g, "")) : num;
-  if (isNaN(value)) return "No Ratings";
-  return (
-    new Intl.NumberFormat("en-US", {
-      notation: "compact",
-      maximumFractionDigits: 1,
-    }).format(value) + " Ratings"
-  );
+  if (isNaN(value)) return null;
+  return new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value);
 };
 
 const formatInstalls = (installs: string | number | undefined | null) => {
@@ -48,20 +47,21 @@ async function getAppData(appId: string) {
     });
     if (!res.ok) return null;
     return await res.json();
-  } catch (error) {
+  } catch {
     return null;
   }
 }
 
 export default async function AppDetailPage({ params }: { params: Promise<{ appId: string }> }) {
   const { appId } = await params;
+  const t = await getTranslations("appDetailPage");
 
   const data = await getAppData(appId);
 
   if (!data || !data.info) {
     return (
       <div className="flex items-center justify-center min-h-[50vh] p-6 text-center text-muted-foreground">
-        <p>App not found or unavailable.</p>
+        <p>{t("notFound")}</p>
       </div>
     );
   }
@@ -132,7 +132,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
             </div>
             {isAbandoned && (
               <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-200/50 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm whitespace-nowrap flex items-center gap-1 z-10">
-                <Alert01Icon size={12} /> Abandoned
+                <Alert01Icon size={12} /> {t("abandoned")}
               </div>
             )}
           </div>
@@ -156,7 +156,10 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
                     <StarIcon size={14} className="text-foreground fill-foreground md:w-4 md:h-4" />
                   </div>
                   <span className="text-[10px] md:text-xs text-muted-foreground font-medium mt-0.5 text-center">
-                    {formatCompactNumber(info.ratings)}
+                    {(() => {
+                      const count = formatCompactNumber(info.ratings);
+                      return count ? t("ratings", { count }) : t("noRatings");
+                    })()}
                   </span>
                 </div>
 
@@ -165,7 +168,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
                     {info.contentRating}
                   </span>
                   <span className="text-[10px] md:text-xs text-muted-foreground font-medium mt-0.5">
-                    Age
+                    {t("age")}
                   </span>
                 </div>
 
@@ -174,7 +177,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
                     {formatInstalls(info.installs)}
                   </span>
                   <span className="text-[10px] md:text-xs text-muted-foreground font-medium mt-0.5">
-                    Downloads
+                    {t("downloads")}
                   </span>
                 </div>
               </div>
@@ -187,12 +190,12 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
                   className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3.5 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 w-full md:w-auto"
                 >
                   <Download01Icon size={18} strokeWidth={2.5} />
-                  Install App
+                  {t("installApp")}
                 </a>
                 {isAbandoned && (
                   <div className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-orange-50 text-orange-700 font-medium text-xs md:text-sm border border-orange-100 w-full md:w-auto">
                     <Calendar01Icon size={16} />
-                    Update: {diffDays} days ago
+                    {t("lastUpdate", { days: diffDays })}
                   </div>
                 )}
               </div>
@@ -200,11 +203,10 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
           </div>
         </div>
 
-        {/* --- SCREENSHOTS --- */}
         <section className="mb-8 md:mb-16">
           <div className="flex items-center gap-2 mb-3 md:mb-4">
             <SmartPhone01Icon className="text-muted-foreground" size={20} />
-            <h2 className="text-lg md:text-xl font-bold tracking-tight">Preview</h2>
+            <h2 className="text-lg md:text-xl font-bold tracking-tight">{t("preview")}</h2>
           </div>
 
           <div className="relative -mx-2 md:mx-0 w-[calc(100%+1rem)] md:w-full">
@@ -213,7 +215,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
                 <img
                   key={idx}
                   src={src}
-                  alt={`Screenshot ${idx}`}
+                  alt={t("screenshotAlt", { index: idx + 1 })}
                   className="h-[350px] md:h-[500px] w-auto rounded-2xl md:rounded-[1.5rem] shadow-md border border-border/50 snap-center object-cover bg-muted"
                   loading="lazy"
                   referrerPolicy="no-referrer"
@@ -223,11 +225,9 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
           </div>
         </section>
 
-        {/* --- INFO GRID --- */}
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
           <div className="lg:col-span-2 space-y-3 md:space-y-6 min-w-0">
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight">About this app</h2>
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight">{t("aboutApp")}</h2>
             <div className="prose prose-sm md:prose-base prose-gray dark:prose-invert max-w-none text-muted-foreground leading-relaxed">
               <p className="whitespace-pre-wrap break-words">{info.description}</p>
             </div>
@@ -237,17 +237,17 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
             <div className="bg-muted/20 p-4 md:p-6 rounded-xl md:rounded-[2rem] border border-border/50">
               <h3 className="font-bold text-foreground mb-4 md:mb-6 flex items-center gap-2 text-base md:text-lg">
                 <Shield01Icon size={20} className="text-primary" />
-                App Information
+                {t("appInfo")}
               </h3>
               <div className="space-y-3 md:space-y-5">
-                <InfoRow label="Version" value={info.version || "Varies with device"} />
-                <InfoRow label="Updated" value={rawUpdatedString} highlight={isAbandoned} />
-                <InfoRow label="Released" value={info.released || "Unknown"} />
-                <InfoRow label="Downloads" value={formatInstalls(info.installs)} />
+                <InfoRow label={t("version")} value={info.version || t("variesWithDevice")} />
+                <InfoRow label={t("updated")} value={rawUpdatedString} highlight={isAbandoned} />
+                <InfoRow label={t("released")} value={info.released || t("unknown")} />
+                <InfoRow label={t("downloads")} value={formatInstalls(info.installs)} />
 
                 <div className="pt-4 border-t border-border/40">
                   <p className="text-[10px] md:text-xs text-muted-foreground mb-1 uppercase tracking-wider font-bold">
-                    Package ID
+                    {t("packageId")}
                   </p>
                   <p className="font-mono text-xs text-foreground break-all bg-background p-2 rounded-lg border border-border/50 select-all">
                     {info.appId}

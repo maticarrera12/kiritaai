@@ -15,16 +15,18 @@ import {
   UserGroupIcon,
   Megaphone01Icon,
 } from "hugeicons-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-const TABS = [
-  { id: "overview", label: "Overview", icon: ChartBarLineIcon },
-  { id: "strategy", label: "Strategy", icon: Layers01Icon },
-  { id: "problems", label: "Deep Dive", icon: Alert02Icon },
-];
+const TAB_IDS = ["overview", "strategy", "problems"] as const;
+const TAB_ICONS = {
+  overview: ChartBarLineIcon,
+  strategy: Layers01Icon,
+  problems: Alert02Icon,
+};
 
 interface AnalysisModalProps {
   isOpen: boolean;
@@ -50,7 +52,17 @@ function AnimatedNumber({ value, color }: { value: number; color: string }) {
   );
 }
 
-function SwotCard({ title, items, color }: { title: string; items: string[]; color: string }) {
+function SwotCard({
+  title,
+  items,
+  color,
+  noDataText,
+}: {
+  title: string;
+  items: string[];
+  color: string;
+  noDataText: string;
+}) {
   return (
     <div className="p-4 rounded-xl bg-muted/20 border border-border/60">
       <h5
@@ -67,7 +79,7 @@ function SwotCard({ title, items, color }: { title: string; items: string[]; col
             </li>
           ))
         ) : (
-          <li className="text-xs text-muted-foreground/50 italic">No data available</li>
+          <li className="text-xs text-muted-foreground/50 italic">{noDataText}</li>
         )}
       </ul>
     </div>
@@ -75,6 +87,7 @@ function SwotCard({ title, items, color }: { title: string; items: string[]; col
 }
 
 export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: AnalysisModalProps) {
+  const t = useTranslations("analysisModal");
   const modalContentRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
@@ -237,7 +250,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
     if (!modalContentRef.current) return;
 
     setIsCapturing(true);
-    const toastId = toast.loading("Capturing full report...");
+    const toastId = toast.loading(t("toast.capturing"));
 
     try {
       const node = modalContentRef.current;
@@ -265,9 +278,9 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
       link.href = combinedImage;
       link.click();
 
-      toast.success("Full report saved!", { id: toastId });
+      toast.success(t("toast.success"), { id: toastId });
     } catch {
-      toast.error("Failed to generate image", { id: toastId });
+      toast.error(t("toast.error"), { id: toastId });
     } finally {
       setIsCapturing(false);
     }
@@ -311,7 +324,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                     <div className="min-w-0">
                       <h2 className="text-base md:text-xl font-bold flex items-center gap-1.5 md:gap-2 text-foreground">
                         <Rocket01Icon className="text-primary shrink-0 w-4 h-4 md:w-5 md:h-5" />
-                        <span className="truncate text-sm md:text-xl">Opportunity Report</span>
+                        <span className="truncate text-sm md:text-xl">{t("header.title")}</span>
                       </h2>
                       {appName && (
                         <p className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -326,7 +339,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                       onClick={handleScreenshot}
                       disabled={isCapturing}
                       className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50 touch-manipulation"
-                      title="Download Screenshot"
+                      title={t("header.screenshot")}
                     >
                       {isCapturing ? (
                         <Loading03Icon className="animate-spin w-5 h-5" />
@@ -344,24 +357,27 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                 </div>
 
                 <div className="flex px-4 md:px-6 gap-4 md:gap-8 overflow-x-auto no-scrollbar mask-gradient-right">
-                  {TABS.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={cn(
-                        "pb-3 text-xs md:text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap",
-                        activeTab === tab.id
-                          ? "border-primary text-primary"
-                          : "border-transparent text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <tab.icon
-                        size={16}
-                        className={activeTab === tab.id ? "text-primary" : "text-muted-foreground"}
-                      />
-                      {tab.label}
-                    </button>
-                  ))}
+                  {TAB_IDS.map((tabId) => {
+                    const TabIcon = TAB_ICONS[tabId];
+                    return (
+                      <button
+                        key={tabId}
+                        onClick={() => setActiveTab(tabId)}
+                        className={cn(
+                          "pb-3 text-xs md:text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap",
+                          activeTab === tabId
+                            ? "border-primary text-primary"
+                            : "border-transparent text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <TabIcon
+                          size={16}
+                          className={activeTab === tabId ? "text-primary" : "text-muted-foreground"}
+                        />
+                        {t(`tabs.${tabId}`)}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -396,17 +412,17 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
                           <AnimatedNumber value={score} color={scoreColor} />
                           <span className="text-[10px] font-bold text-muted-foreground uppercase">
-                            Score
+                            {t("overview.score")}
                           </span>
                         </div>
                       </div>
                       <div className="flex-1 space-y-2">
                         <h3 className="text-xl md:text-2xl font-bold text-foreground">
                           {score >= 75
-                            ? "💎 Gold Mine Detected"
+                            ? t("overview.goldMine")
                             : score >= 50
-                              ? "⚠️ Moderate Opportunity"
-                              : "🛑 Saturated Market"}
+                              ? t("overview.moderate")
+                              : t("overview.saturated")}
                         </h3>
                         <p className="text-muted-foreground text-sm leading-relaxed">
                           {data.summary}
@@ -421,28 +437,32 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
 
                     <div>
                       <h4 className="text-sm font-bold mb-3 text-muted-foreground uppercase tracking-wider">
-                        SWOT Analysis
+                        {t("overview.swotTitle")}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <SwotCard
-                          title="Strengths"
+                          title={t("overview.strengths")}
                           items={swot?.strengths}
                           color="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                          noDataText={t("overview.noData")}
                         />
                         <SwotCard
-                          title="Weaknesses"
+                          title={t("overview.weaknesses")}
                           items={swot?.weaknesses}
                           color="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                          noDataText={t("overview.noData")}
                         />
                         <SwotCard
-                          title="Opportunities"
+                          title={t("overview.opportunities")}
                           items={swot?.opportunities}
                           color="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                          noDataText={t("overview.noData")}
                         />
                         <SwotCard
-                          title="Threats"
+                          title={t("overview.threats")}
                           items={swot?.threats}
                           color="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
+                          noDataText={t("overview.noData")}
                         />
                       </div>
                     </div>
@@ -458,7 +478,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                         </div>
                         <div>
                           <h4 className="text-base font-bold text-yellow-800 dark:text-yellow-200 mb-1">
-                            Monetization Strategy
+                            {t("strategy.monetization")}
                           </h4>
                           <p className="text-yellow-900/80 dark:text-yellow-100/80 leading-relaxed text-sm">
                             {business_opportunity?.monetization_analysis}
@@ -470,7 +490,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <h4 className="font-bold mb-3 flex items-center gap-2 text-sm">
-                          <UserGroupIcon size={16} /> Target Personas
+                          <UserGroupIcon size={16} /> {t("strategy.personas")}
                         </h4>
                         <div className="space-y-3">
                           {user_personas?.map((persona: any, i: number) => (
@@ -490,7 +510,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
 
                       <div>
                         <h4 className="font-bold mb-3 flex items-center gap-2 text-sm">
-                          <Megaphone01Icon size={16} /> Marketing Hooks
+                          <Megaphone01Icon size={16} /> {t("strategy.hooks")}
                         </h4>
                         <div className="space-y-3">
                           {marketing_hooks?.map((hook: string, i: number) => (
@@ -507,7 +527,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
 
                     <div>
                       <h4 className="font-bold mb-4 flex items-center gap-2 text-sm">
-                        <Rocket01Icon size={16} /> MVP Roadmap
+                        <Rocket01Icon size={16} /> {t("strategy.roadmap")}
                       </h4>
                       <div className="space-y-4">
                         {mvp_roadmap?.map((step: any, i: number) => (
@@ -535,13 +555,11 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                   </div>
                 )}
 
-                {/* === TAB 3: PROBLEMS === */}
                 {activeTab === "problems" && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    {/* Critical Pain Points (Expanded Design) */}
                     <div>
                       <h4 className="text-sm font-bold mb-4 flex items-center gap-2 text-red-500 uppercase tracking-wide">
-                        <Alert02Icon size={16} /> Why Users Leave (Pain Points)
+                        <Alert02Icon size={16} /> {t("problems.painPoints")}
                       </h4>
                       <div className="grid grid-cols-1 gap-4">
                         {data.pain_points?.map((pain: any, i: number) => (
@@ -574,10 +592,9 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                                 </p>
                               </div>
 
-                              {/* Frequency Indicator */}
                               <div className="flex flex-col items-end shrink-0">
                                 <span className="text-[10px] font-bold text-muted-foreground uppercase mb-1">
-                                  Frequency
+                                  {t("problems.frequency")}
                                 </span>
                                 <div className="flex gap-1">
                                   {[1, 2, 3].map((bar) => (
@@ -598,7 +615,6 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                               </div>
                             </div>
 
-                            {/* User Quote Section */}
                             {pain.quote && (
                               <div className="mt-3 pt-3 border-t border-border/40">
                                 <p className="text-xs md:text-sm text-foreground/70 italic flex gap-2">
@@ -617,10 +633,9 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                       </div>
                     </div>
 
-                    {/* Feature Requests (Grid Compacto) */}
                     <div className="pt-6 border-t border-border/40">
                       <h4 className="text-sm font-bold mb-4 flex items-center gap-2 text-fuchsia-500 uppercase tracking-wide">
-                        <CheckListIcon size={16} /> What They Want (Feature Requests)
+                        <CheckListIcon size={16} /> {t("problems.featureRequests")}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {data.feature_requests?.map((feat: any, i: number) => (
@@ -637,7 +652,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                                 {feat.priority === "HIGH" && (
                                   <span
                                     className="w-2 h-2 rounded-full bg-fuchsia-500 animate-pulse"
-                                    title="High Priority"
+                                    title={t("problems.highPriority")}
                                   />
                                 )}
                               </div>

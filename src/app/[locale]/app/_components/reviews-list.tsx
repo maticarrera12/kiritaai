@@ -11,11 +11,13 @@ import {
   UserIcon,
   ArrowDown01Icon,
 } from "hugeicons-react";
+import { useTranslations } from "next-intl";
 import { useState, useMemo, useRef, useEffect } from "react";
 
 import { cn } from "@/lib/utils";
 
 export default function ReviewsList({ reviews }: { reviews: any[] }) {
+  const t = useTranslations("reviewsList");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -72,7 +74,7 @@ export default function ReviewsList({ reviews }: { reviews: any[] }) {
 
   const getFilterLabel = () => {
     if (selectedRating === null) {
-      return `All (${reviews.length})`;
+      return `${t("filter.all")} (${reviews.length})`;
     }
     return `${selectedRating}★ (${counts[selectedRating] || 0})`;
   };
@@ -86,11 +88,9 @@ export default function ReviewsList({ reviews }: { reviews: any[] }) {
           </div>
           <div>
             <h2 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
-              User Reviews
+              {t("title")}
             </h2>
-            <p className="text-xs md:text-sm text-muted-foreground font-medium">
-              Market sentiment analysis
-            </p>
+            <p className="text-xs md:text-sm text-muted-foreground font-medium">{t("subtitle")}</p>
           </div>
         </div>
 
@@ -132,7 +132,7 @@ export default function ReviewsList({ reviews }: { reviews: any[] }) {
                         : "hover:bg-muted text-foreground"
                     )}
                   >
-                    <span>All</span>
+                    <span>{t("filter.all")}</span>
                     <span className="text-xs text-muted-foreground">({reviews.length})</span>
                   </button>
 
@@ -183,7 +183,7 @@ export default function ReviewsList({ reviews }: { reviews: any[] }) {
                 : "bg-transparent text-muted-foreground border-border hover:border-foreground/50 hover:text-foreground"
             )}
           >
-            All <span className="opacity-60">({reviews.length})</span>
+            {t("filter.all")} <span className="opacity-60">({reviews.length})</span>
           </button>
 
           {[5, 4, 3, 2, 1].map((star) => {
@@ -221,13 +221,13 @@ export default function ReviewsList({ reviews }: { reviews: any[] }) {
         {filteredReviews.length === 0 ? (
           <div className="text-center py-12 md:py-20 bg-muted/10 rounded-xl md:rounded-[2rem] border border-border/50 border-dashed">
             <p className="text-sm md:text-base text-muted-foreground font-medium">
-              No reviews match this filter.
+              {t("empty.title")}
             </p>
             <button
               onClick={() => handleFilterChange(null)}
               className="mt-2 text-primary text-xs md:text-sm font-bold hover:underline"
             >
-              Clear filters
+              {t("empty.clearFilters")}
             </button>
           </div>
         ) : (
@@ -270,7 +270,7 @@ export default function ReviewsList({ reviews }: { reviews: any[] }) {
 
                         <div className="min-w-0 flex-1">
                           <p className="text-xs md:text-sm font-bold text-foreground truncate">
-                            {review.userName || "Anonymous User"}
+                            {review.userName || t("card.anonymousUser")}
                           </p>
                           <div className="flex items-center gap-0.5 mt-0.5">
                             {[...Array(5)].map((_, starIndex) => (
@@ -306,13 +306,13 @@ export default function ReviewsList({ reviews }: { reviews: any[] }) {
                       {isOpportunity ? (
                         <div className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-orange-200/50">
                           <Alert01Icon size={10} className="md:w-3 md:h-3" />
-                          Pain Point Detected
+                          {t("card.painPoint")}
                         </div>
                       ) : (
                         review.thumbsUpCount > 0 && (
                           <div className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-full bg-muted/50 text-muted-foreground text-[9px] md:text-[10px] font-bold uppercase tracking-wider">
                             <ThumbsUpIcon size={10} className="md:w-3 md:h-3" />
-                            {review.thumbsUpCount} found helpful
+                            {t("card.helpful", { count: review.thumbsUpCount })}
                           </div>
                         )
                       )}
@@ -333,12 +333,14 @@ export default function ReviewsList({ reviews }: { reviews: any[] }) {
             className="flex items-center gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold text-foreground bg-transparent hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent transition-all"
           >
             <ArrowLeft01Icon size={16} className="md:w-[18px] md:h-[18px]" />
-            <span className="hidden sm:inline">Previous</span>
+            <span className="hidden sm:inline">{t("pagination.previous")}</span>
           </button>
 
           <div className="flex items-center gap-1">
             <span className="text-xs md:text-sm font-medium text-muted-foreground">
-              Page <span className="text-foreground font-bold">{currentPage}</span> of {totalPages}
+              {t("pagination.page")}{" "}
+              <span className="text-foreground font-bold">{currentPage}</span> {t("pagination.of")}{" "}
+              {totalPages}
             </span>
           </div>
 
@@ -347,7 +349,7 @@ export default function ReviewsList({ reviews }: { reviews: any[] }) {
             disabled={currentPage === totalPages}
             className="flex items-center gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold text-foreground bg-transparent hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent transition-all"
           >
-            <span className="hidden sm:inline">Next</span>
+            <span className="hidden sm:inline">{t("pagination.next")}</span>
             <ArrowRight01Icon size={16} className="md:w-[18px] md:h-[18px]" />
           </button>
         </div>

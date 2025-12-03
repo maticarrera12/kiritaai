@@ -10,42 +10,27 @@ import {
   SparklesIcon,
   AlertCircleIcon,
 } from "hugeicons-react";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 
 import { cn } from "@/lib/utils";
 
-const items = [
-  {
-    id: "ai_score",
-    title: "Deep AI Analysis",
-    desc: "Stop guessing. Our AI reads thousands of reviews to calculate a precise Opportunity Score.",
-    icon: Brain02Icon,
-    colSpan: "md:col-span-6",
-  },
-  {
-    id: "chatbot",
-    title: "Interrogate Data",
-    desc: "Chat with KiritaAI.",
-    icon: Message01Icon,
-    colSpan: "md:col-span-4",
-  },
-  {
-    id: "pain_points",
-    title: "Pain Point Detector",
-    desc: "We spot critical weaknesses. Turn 1-star reviews into your roadmap.",
-    icon: Alert02Icon,
-    colSpan: "md:col-span-4",
-  },
-  {
-    id: "strategy",
-    title: "Monetization Strategy",
-    desc: "Get actionable advice on how to price your app to steal market share.",
-    icon: Money03Icon,
-    colSpan: "md:col-span-6",
-  },
+const itemsConfig = [
+  { id: "ai_score", icon: Brain02Icon, colSpan: "md:col-span-6" },
+  { id: "chatbot", icon: Message01Icon, colSpan: "md:col-span-4" },
+  { id: "pain_points", icon: Alert02Icon, colSpan: "md:col-span-4" },
+  { id: "strategy", icon: Money03Icon, colSpan: "md:col-span-6" },
 ];
 
 export default function BentoShowcase() {
+  const t = useTranslations("bentoShowcase");
+
+  const items = itemsConfig.map((item) => ({
+    ...item,
+    title: t(`items.${item.id}.title`),
+    desc: t(`items.${item.id}.desc`),
+  }));
+
   return (
     <div className="w-full max-w-6xl mx-auto px-4 md:px-6 py-12 bg-background">
       <div className="mb-8 md:mb-12 text-center max-w-3xl mx-auto space-y-6">
@@ -56,31 +41,28 @@ export default function BentoShowcase() {
           className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-2"
         >
           <SparklesIcon size={14} className="fill-primary" />
-          <span>The Unfair Advantage</span>
+          <span>{t("badge")}</span>
         </motion.div>
 
         <h2 className="text-4xl md:text-6xl font-bold tracking-tighter text-foreground leading-tight">
-          Turn user complaints into <br />
+          {t("title.part1")} <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">
-            profitable products.
+            {t("title.highlight")}
           </span>
         </h2>
-        <p className="text-muted-foreground text-xl leading-relaxed">
-          Don't build blind. Let AI analyze the market for you and discover hidden gold mines in
-          seconds.
-        </p>
+        <p className="text-muted-foreground text-xl leading-relaxed">{t("subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-10 gap-5 w-full auto-rows-[minmax(280px,auto)]">
         {items.map((item, i) => (
-          <BentoCard key={i} {...item} delay={i * 0.1} />
+          <BentoCard key={i} {...item} delay={i * 0.1} t={t} />
         ))}
       </div>
     </div>
   );
 }
 
-function BentoCard({ title, desc, icon: Icon, colSpan, id, delay }: any) {
+function BentoCard({ title, desc, icon: Icon, colSpan, id, delay, t }: any) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -113,7 +95,7 @@ function BentoCard({ title, desc, icon: Icon, colSpan, id, delay }: any) {
 
       <div className="relative w-full flex-grow min-h-[160px] flex items-end justify-center mt-2">
         <div className="w-full h-full absolute inset-0 overflow-hidden rounded-b-[2.5rem]">
-          <CardVisual id={id} />
+          <CardVisual id={id} t={t} />
         </div>
       </div>
 
@@ -124,37 +106,37 @@ function BentoCard({ title, desc, icon: Icon, colSpan, id, delay }: any) {
 
 // --- SUBCOMPONENTES VISUALES ---
 
-const DataStream = () => {
+const DataStream = ({ t }: { t: any }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const reviews = [
     {
-      text: "Too expensive",
+      text: t("reviews.tooExpensive"),
       cardClass: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300",
       dotColor: "bg-red-500",
     },
     {
-      text: "Great UI design",
+      text: t("reviews.greatUI"),
       cardClass: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-300",
       dotColor: "bg-green-500",
     },
     {
-      text: "Crashes a lot",
+      text: t("reviews.crashes"),
       cardClass: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300",
       dotColor: "bg-orange-500",
     },
     {
-      text: "Missing dark mode",
+      text: t("reviews.darkMode"),
       cardClass: "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-300",
       dotColor: "bg-yellow-500",
     },
     {
-      text: "Support is slow",
+      text: t("reviews.slowSupport"),
       cardClass: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300",
       dotColor: "bg-red-500",
     },
     {
-      text: "Best analytics app",
+      text: t("reviews.bestAnalytics"),
       cardClass: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-300",
       dotColor: "bg-green-500",
     },
@@ -231,13 +213,13 @@ const DataStream = () => {
   );
 };
 
-const PainPointsStack = () => {
+const PainPointsStack = ({ t }: { t: any }) => {
   const [index, setIndex] = useState(0);
   const issues = [
-    { type: "CRITICAL", text: "App crashes on login", count: "400+" },
-    { type: "HIGH", text: "Too many ads", count: "250+" },
-    { type: "MEDIUM", text: "No dark mode", count: "120+" },
-    { type: "HIGH", text: "Battery drain", count: "180+" },
+    { type: "CRITICAL", text: t("painPoints.crashLogin"), count: "400+" },
+    { type: "HIGH", text: t("painPoints.tooManyAds"), count: "250+" },
+    { type: "MEDIUM", text: t("painPoints.noDarkMode"), count: "120+" },
+    { type: "HIGH", text: t("painPoints.batteryDrain"), count: "180+" },
   ];
 
   useEffect(() => {
@@ -299,13 +281,13 @@ const PainPointsStack = () => {
   );
 };
 
-const CardVisual = ({ id }: { id: string }) => {
+const CardVisual = ({ id, t }: { id: string; t: any }) => {
   switch (id) {
     case "ai_score":
       return (
         <div className="w-full h-full relative overflow-hidden">
           {/* Lado Izquierdo: Data Stream */}
-          <DataStream />
+          <DataStream t={t} />
 
           {/* Lado Derecho: Score Circle */}
           <div className="absolute right-6 md:right-12 top-1/2 -translate-y-1/2">
@@ -339,7 +321,7 @@ const CardVisual = ({ id }: { id: string }) => {
               <div className="text-center">
                 <span className="text-4xl font-black text-green-600">85</span>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Score
+                  {t("score")}
                 </p>
               </div>
 
@@ -349,7 +331,7 @@ const CardVisual = ({ id }: { id: string }) => {
                 animate={{ y: [0, -5, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
-                <span>🚀</span> High
+                <span>🚀</span> {t("high")}
               </motion.div>
             </motion.div>
           </div>
@@ -359,36 +341,35 @@ const CardVisual = ({ id }: { id: string }) => {
     case "chatbot":
       return (
         <div className="w-full h-full flex flex-col justify-end gap-2 pb-4 px-4 md:px-6">
-          {/* 1. Kirita confirma análisis */}
           <motion.div
             className="self-start bg-white dark:bg-neutral-800 border border-border px-3 py-2 rounded-2xl rounded-tl-sm text-xs md:text-sm font-medium shadow-sm max-w-[90%]"
             initial={{ opacity: 0, x: -10, y: 10 }}
             whileInView={{ opacity: 1, x: 0, y: 0 }}
             transition={{ delay: 0.2, duration: 0.4 }}
           >
-            <span className="text-primary font-bold">KiritaAI:</span> I've analyzed this app. Ask me
-            anything.
+            <span className="text-primary font-bold">KiritaAI:</span> {t("chat.kiritaIntro")}
           </motion.div>
 
-          {/* 2. Usuario pregunta por debilidad específica */}
           <motion.div
             className="self-end bg-primary text-primary-foreground px-3 py-2 rounded-2xl rounded-tr-sm text-xs md:text-sm font-medium shadow-md max-w-[85%]"
             initial={{ opacity: 0, x: 10, y: 10 }}
             whileInView={{ opacity: 1, x: 0, y: 0 }}
             transition={{ delay: 0.9, duration: 0.4 }}
           >
-            What is their biggest weakness?
+            {t("chat.userQuestion")}
           </motion.div>
 
-          {/* 3. Kirita da un insight accionable sobre ESA app */}
           <motion.div
             className="self-start bg-white dark:bg-neutral-800 border border-border px-3 py-2 rounded-2xl rounded-tl-sm text-xs md:text-sm font-medium shadow-sm max-w-[95%]"
             initial={{ opacity: 0, x: -10, y: 10 }}
             whileInView={{ opacity: 1, x: 0, y: 0 }}
             transition={{ delay: 1.6, duration: 0.4 }}
           >
-            Users hate the <span className="text-red-500 font-bold">intrusive ads</span>. Fix that
-            and you win.
+            {t.rich("chat.kiritaAnswer", {
+              highlight: () => (
+                <span className="text-red-500 font-bold">{t("chat.highlight")}</span>
+              ),
+            })}
           </motion.div>
         </div>
       );
@@ -396,8 +377,7 @@ const CardVisual = ({ id }: { id: string }) => {
     case "pain_points":
       return (
         <div className="w-full h-full flex items-end justify-center pb-2">
-          {/* Componente de Stack Animado */}
-          <PainPointsStack />
+          <PainPointsStack t={t} />
         </div>
       );
 

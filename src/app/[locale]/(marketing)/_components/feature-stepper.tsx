@@ -3,40 +3,28 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { BubbleChatIcon, CpuIcon, FlashIcon, Target01Icon } from "hugeicons-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-const steps = [
-  {
-    id: "Pick a Target",
-    title: "Pick a Targets",
-    desc: "Enter any Google Play App. We'll fetch the metadata instantly.",
-    icon: Target01Icon,
-  },
-  {
-    id: "AI Extraction",
-    title: "AI Extraction",
-    desc: "KiritaAI reads 200+ reviews to understand what users truly feel.",
-    icon: CpuIcon,
-  },
-  {
-    id: "Instant Insight",
-    title: "Instant Insight",
-    desc: "Get your Opportunity Score, Critical Pain Points, and Revenue Strategy.",
-    icon: FlashIcon,
-  },
-  {
-    id: "ask",
-    title: "Ask",
-    desc: "Describe what you need in simple terms.",
-    icon: BubbleChatIcon,
-  },
+const stepsConfig = [
+  { id: "pickTarget", icon: Target01Icon },
+  { id: "aiExtraction", icon: CpuIcon },
+  { id: "instantInsight", icon: FlashIcon },
+  { id: "ask", icon: BubbleChatIcon },
 ];
 
 export default function FeatureStepper() {
+  const t = useTranslations("featureStepper");
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState(0);
+
+  const steps = stepsConfig.map((step) => ({
+    ...step,
+    title: t(`steps.${step.id}.title`),
+    desc: t(`steps.${step.id}.desc`),
+  }));
 
   const DURATION = 5000;
 
@@ -57,7 +45,7 @@ export default function FeatureStepper() {
     }, 30);
 
     return () => clearInterval(interval);
-  }, [current]);
+  }, [current, steps.length]);
 
   const handleClick = (i: number) => {
     setCurrent(i);
@@ -69,7 +57,7 @@ export default function FeatureStepper() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         <div className="space-y-4">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-foreground mb-8">
-            How it works
+            {t("title")}
           </h2>
           {steps.map((step, i) => {
             const isActive = current === i;
@@ -156,12 +144,12 @@ export default function FeatureStepper() {
 
 function StepVisual({ id }: { id: string }) {
   switch (id) {
-    case "Pick a Target":
+    case "pickTarget":
       return (
         <div className="w-full h-full overflow-hidden rounded-lg">
           <Image
             src="/stepper/search.png"
-            alt="Instant Insight"
+            alt="Search Target"
             width={288}
             height={288}
             className="w-full h-full object-cover rounded-lg"
@@ -171,7 +159,7 @@ function StepVisual({ id }: { id: string }) {
         </div>
       );
 
-    case "AI Extraction":
+    case "aiExtraction":
       return (
         <div className="relative w-64 h-64 flex items-center justify-center">
           <div
@@ -194,7 +182,8 @@ function StepVisual({ id }: { id: string }) {
           <div className="absolute w-full h-1 bg-primary/50 top-1/2 -translate-y-1/2 blur-sm animate-scan" />
         </div>
       );
-    case "Instant Insight":
+
+    case "instantInsight":
       return (
         <div className="w-full h-full overflow-hidden rounded-lg">
           <Image
@@ -208,12 +197,13 @@ function StepVisual({ id }: { id: string }) {
           />
         </div>
       );
+
     case "ask":
       return (
         <div className="w-full h-full overflow-hidden rounded-lg">
           <Image
             src="/stepper/kirita-chat.png"
-            alt="Instant Insight"
+            alt="Chat with KiritaAI"
             width={288}
             height={288}
             className="w-full h-full rounded-lg"
@@ -222,6 +212,7 @@ function StepVisual({ id }: { id: string }) {
           />
         </div>
       );
+
     default:
       return null;
   }

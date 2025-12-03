@@ -8,6 +8,7 @@ import {
 } from "hugeicons-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { AnalysisFilters } from "./_components/analysis-filters";
 import { Link } from "@/i18n/routing";
@@ -33,6 +34,7 @@ interface PageProps {
 }
 
 export default async function MyAnalysisPage({ searchParams }: PageProps) {
+  const t = await getTranslations("myAnalysisPage");
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session?.user) {
@@ -88,16 +90,13 @@ export default async function MyAnalysisPage({ searchParams }: PageProps) {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* HEADER */}
       <div className="border-b border-border/40">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-16">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 flex items-center gap-3">
             <ChartBarLineIcon className="text-primary h-8 w-8 md:h-10 md:w-10" />
-            My Analysis History
+            {t("title")}
           </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl">
-            Access your past reports, track opportunities, and monitor potential competitors.
-          </p>
+          <p className="text-muted-foreground text-lg max-w-2xl">{t("description")}</p>
         </div>
       </div>
 
@@ -105,28 +104,25 @@ export default async function MyAnalysisPage({ searchParams }: PageProps) {
         <div className="flex justify-end">
           <AnalysisFilters />
         </div>
-        {/* GRID PRINCIPAL */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {/* CARD 1: SIEMPRE FIJA (NEW ANALYSIS) */}
-          <NewAnalysisCard />
+          <NewAnalysisCard
+            title={t("newAnalysis.title")}
+            description={t("newAnalysis.description")}
+          />
 
-          {/* EL RESTO: LISTA DE ANÁLISIS PAGINADA */}
           {analyses.map((item) => (
-            <AnalysisCard key={item.id} analysis={item} />
+            <AnalysisCard key={item.id} analysis={item} scoreLabel={t("card.score")} />
           ))}
 
-          {/* Relleno visual si no hay análisis (opcional, pero ayuda si está vacío) */}
           {analyses.length === 0 && totalItems === 0 && (
             <div className="col-span-1 md:col-span-2 lg:col-span-2 flex items-center justify-center p-6 text-muted-foreground italic bg-muted/5 rounded-[1.5rem] border border-dashed border-border/50">
-              No analyses found yet. Start your first one! 🚀
+              {t("empty")}
             </div>
           )}
         </div>
 
-        {/* --- PAGINACIÓN --- */}
         {totalPages > 1 && (
           <div className="flex justify-center items-center gap-4">
-            {/* Botón Anterior */}
             <Link
               href={`/my-analysis?page=${currentPage - 1}${sortParam ? `&sort=${sortParam}` : ""}`}
               className={cn(
@@ -138,14 +134,15 @@ export default async function MyAnalysisPage({ searchParams }: PageProps) {
               aria-disabled={currentPage <= 1}
             >
               <ArrowLeft01Icon size={18} />
-              Previous
+              {t("pagination.previous")}
             </Link>
 
             <span className="text-sm font-medium text-muted-foreground">
-              Page <span className="text-foreground font-bold">{currentPage}</span> of {totalPages}
+              {t("pagination.page")}{" "}
+              <span className="text-foreground font-bold">{currentPage}</span> {t("pagination.of")}{" "}
+              {totalPages}
             </span>
 
-            {/* Botón Siguiente */}
             <Link
               href={`/my-analysis?page=${currentPage + 1}${sortParam ? `&sort=${sortParam}` : ""}`}
               className={cn(
@@ -156,7 +153,7 @@ export default async function MyAnalysisPage({ searchParams }: PageProps) {
               )}
               aria-disabled={currentPage >= totalPages}
             >
-              Next
+              {t("pagination.next")}
               <ArrowRight01Icon size={18} />
             </Link>
           </div>
@@ -166,8 +163,7 @@ export default async function MyAnalysisPage({ searchParams }: PageProps) {
   );
 }
 
-// --- COMPONENTE: TARJETA DE "NUEVO ANÁLISIS" ---
-function NewAnalysisCard() {
+function NewAnalysisCard({ title, description }: { title: string; description: string }) {
   return (
     <Link
       href="/app"
@@ -176,19 +172,15 @@ function NewAnalysisCard() {
       <div className="w-16 h-16 rounded-full bg-background shadow-sm border border-border flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-md transition-all">
         <PlusSignIcon className="w-8 h-8 text-primary" />
       </div>
-      <h3 className="font-bold text-lg text-primary">Analyze New App</h3>
-      <p className="text-sm text-muted-foreground mt-2 text-center max-w-[200px]">
-        Discover your next opportunity in seconds.
-      </p>
+      <h3 className="font-bold text-lg text-primary">{title}</h3>
+      <p className="text-sm text-muted-foreground mt-2 text-center max-w-[200px]">{description}</p>
     </Link>
   );
 }
 
-// --- COMPONENTE: TARJETA DE ANÁLISIS EXISTENTE ---
-function AnalysisCard({ analysis }: { analysis: any }) {
+function AnalysisCard({ analysis, scoreLabel }: { analysis: any; scoreLabel: string }) {
   const score = analysis.opportunityScore || 0;
 
-  // Colores dinámicos
   let scoreColor =
     "text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-900";
   if (score >= 75) {
@@ -226,7 +218,7 @@ function AnalysisCard({ analysis }: { analysis: any }) {
             scoreColor
           )}
         >
-          <span className="text-[10px] uppercase tracking-wider opacity-80">Score</span>
+          <span className="text-[10px] uppercase tracking-wider opacity-80">{scoreLabel}</span>
           <span className="text-sm">{score}</span>
         </div>
       </div>

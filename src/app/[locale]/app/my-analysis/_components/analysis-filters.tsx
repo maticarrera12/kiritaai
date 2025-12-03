@@ -3,6 +3,7 @@
 import { FilterHorizontalIcon, ArrowDown01Icon } from "hugeicons-react";
 import { CheckIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import {
   DropdownMenu,
@@ -12,23 +13,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter, usePathname } from "@/i18n/routing";
 
-const sortOptions = [
-  { value: "date_desc", label: "Newest" },
-  { value: "date_asc", label: "Oldest" },
-  { value: "score_desc", label: "Highest" },
-  { value: "score_asc", label: "Lowest" },
-  { value: "name_asc", label: "A-Z" },
-  { value: "name_desc", label: "Z-A" },
-];
-
 export function AnalysisFilters() {
+  const t = useTranslations("analysisFilters");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const sortOptions = [
+    { value: "date_desc", label: t("newest") },
+    { value: "date_asc", label: t("oldest") },
+    { value: "score_desc", label: t("highest") },
+    { value: "score_asc", label: t("lowest") },
+    { value: "name_asc", label: t("aToZ") },
+    { value: "name_desc", label: t("zToA") },
+  ];
+
   const currentSort = searchParams.get("sort") || "date_desc";
-  const currentLabel =
-    sortOptions.find((opt) => opt.value === currentSort)?.label || "Newest First";
+  const currentLabel = sortOptions.find((opt) => opt.value === currentSort)?.label || t("newest");
 
   const handleSortChange = (newSort: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -43,7 +44,7 @@ export function AnalysisFilters() {
     <div className="flex items-center gap-3 mb-8">
       <div className="flex items-center gap-2 px-4 py-2 bg-card border border-border/60 rounded-full shadow-sm">
         <FilterHorizontalIcon size={16} className="text-muted-foreground" />
-        <span className="text-sm font-medium text-muted-foreground">Sort by:</span>
+        <span className="text-sm font-medium text-muted-foreground">{t("sortBy")}</span>
 
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-1.5 px-2 py-1 text-sm font-bold text-foreground hover:bg-muted/50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20">

@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Xls02Icon, SentIcon, Message01Icon, UserIcon, Loading03Icon } from "hugeicons-react";
+import { useTranslations } from "next-intl";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
@@ -22,6 +23,7 @@ type Message = {
 };
 
 export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSidebarProps) {
+  const t = useTranslations("chatSidebar");
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,16 +45,15 @@ export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSideba
           if (history.length > 0) {
             setMessages(history as Message[]);
           } else {
-            // Si no hay historial previo, mostramos el saludo inicial
             setMessages([
               {
                 role: "assistant",
-                content: `Hi! I've analyzed **${appName}**. What would you like to know about its strategy or weaknesses?`,
+                content: t("greeting", { appName }),
               },
             ]);
           }
-        } catch (e) {
-          console.error("Failed to load history");
+        } catch {
+          // History load failed silently
         } finally {
           setIsLoading(false);
         }
@@ -60,7 +61,7 @@ export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSideba
 
       loadHistory();
     }
-  }, [isOpen, analysisId, appName]);
+  }, [isOpen, analysisId, appName, t]);
   // Scroll al fondo al recibir mensajes
   useEffect(() => {
     if (scrollRef.current) {
@@ -84,8 +85,7 @@ export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSideba
       const result = await sendMessageAction(userMsg, analysisId, newHistory);
 
       if (result.error === "LIMIT_REACHED") {
-        toast.error("Monthly chat limit reached.");
-        // Revertir mensaje usuario visualmente o mostrar error inline
+        toast.error(t("errors.limitReached"));
         return;
       }
 
@@ -94,7 +94,7 @@ export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSideba
         setRemainingMsgs((prev) => (prev ? prev - 1 : 0));
       }
     } catch (error) {
-      toast.error("Failed to send message.", { description: error as string });
+      toast.error(t("errors.sendFailed"), { description: error as string });
     } finally {
       setIsLoading(false);
     }
@@ -126,9 +126,9 @@ export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSideba
               <div className="flex items-center gap-2">
                 <Logo className="w-9 h-9 rounded-full" />
                 <div>
-                  <h3 className="font-bold text-sm">Ask KiritaAI</h3>
+                  <h3 className="font-bold text-sm">{t("header.title")}</h3>
                   <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                    Context: {appName}
+                    {t("header.context", { appName })}
                   </p>
                 </div>
               </div>
@@ -145,11 +145,10 @@ export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSideba
               ref={scrollRef}
               className="flex-1 overflow-y-auto p-4 space-y-6 bg-muted/5 custom-scrollbar"
             >
-              {/* Mensaje de Créditos Centrado */}
               {remainingMsgs !== null && (
                 <div className="flex justify-center mb-6">
                   <span className="text-[10px] font-medium bg-muted text-muted-foreground px-3 py-1 rounded-full border border-border">
-                    ⚡ {remainingMsgs} messages remaining this month
+                    {t("remaining", { count: remainingMsgs })}
                   </span>
                 </div>
               )}
@@ -207,7 +206,7 @@ export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSideba
                     <Loading03Icon className="animate-spin w-4 h-4 text-primary" />
                   </div>
                   <div className="p-3 rounded-2xl bg-muted/30 text-xs text-muted-foreground flex items-center">
-                    Thinking...
+                    {t("thinking")}
                   </div>
                 </div>
               )}
@@ -226,7 +225,7 @@ export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSideba
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask about pricing, features..."
+                  placeholder={t("placeholder")}
                   className="w-full pl-4 pr-12 py-3 rounded-full bg-muted/30 border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                   disabled={isLoading}
                 />
@@ -239,9 +238,7 @@ export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSideba
                 </button>
               </form>
               <div className="text-center mt-2">
-                <span className="text-[10px] text-muted-foreground">
-                  KiritaAI can make mistakes. Check important info.
-                </span>
+                <span className="text-[10px] text-muted-foreground">{t("disclaimer")}</span>
               </div>
             </div>
           </motion.div>

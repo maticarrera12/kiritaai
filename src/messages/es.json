@@ -420,6 +420,168 @@
       "logout": "Cerrar Sesión"
     }
   },
+  "myAnalysisPage": {
+    "title": "Mi Historial de Análisis",
+    "description": "Accede a tus reportes anteriores, rastrea oportunidades y monitorea competidores potenciales.",
+    "empty": "Aún no tienes análisis. ¡Comienza tu primero! 🚀",
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "page": "Página",
+      "of": "de"
+    },
+    "newAnalysis": {
+      "title": "Analizar Nueva App",
+      "description": "Descubre tu próxima oportunidad en segundos."
+    },
+    "card": {
+      "score": "Puntaje"
+    }
+  },
+  "analysisFilters": {
+    "sortBy": "Ordenar por:",
+    "newest": "Más Recientes",
+    "oldest": "Más Antiguos",
+    "highest": "Mayor Puntaje",
+    "lowest": "Menor Puntaje",
+    "aToZ": "A-Z",
+    "zToA": "Z-A"
+  },
+  "appDetailPage": {
+    "notFound": "App no encontrada o no disponible.",
+    "noRatings": "Sin Valoraciones",
+    "ratings": "{count} Valoraciones",
+    "abandoned": "Abandonada",
+    "age": "Edad",
+    "downloads": "Descargas",
+    "installApp": "Instalar App",
+    "lastUpdate": "Actualización: hace {days} días",
+    "preview": "Vista Previa",
+    "screenshotAlt": "Captura {index}",
+    "aboutApp": "Acerca de esta app",
+    "appInfo": "Información de la App",
+    "version": "Versión",
+    "variesWithDevice": "Varía según el dispositivo",
+    "updated": "Actualizada",
+    "released": "Lanzamiento",
+    "unknown": "Desconocido",
+    "packageId": "ID del Paquete"
+  },
+  "chatSidebar": {
+    "header": {
+      "title": "Pregunta a KiritaAI",
+      "context": "Contexto: {appName}"
+    },
+    "greeting": "¡Hola! He analizado **{appName}**. ¿Qué te gustaría saber sobre su estrategia o debilidades?",
+    "remaining": "⚡ {count} mensajes restantes este mes",
+    "thinking": "Pensando...",
+    "placeholder": "Pregunta sobre precios, funciones...",
+    "disclaimer": "KiritaAI puede cometer errores. Verifica la información importante.",
+    "errors": {
+      "limitReached": "Límite de chat mensual alcanzado.",
+      "sendFailed": "Error al enviar mensaje."
+    }
+  },
+  "analysisModal": {
+    "tabs": {
+      "overview": "Resumen",
+      "strategy": "Estrategia",
+      "problems": "Análisis Profundo"
+    },
+    "header": {
+      "title": "Reporte de Oportunidad",
+      "screenshot": "Descargar Captura"
+    },
+    "toast": {
+      "capturing": "Capturando reporte completo...",
+      "success": "¡Reporte guardado!",
+      "error": "Error al generar imagen"
+    },
+    "overview": {
+      "score": "Puntaje",
+      "goldMine": "💎 Mina de Oro Detectada",
+      "moderate": "⚠️ Oportunidad Moderada",
+      "saturated": "🛑 Mercado Saturado",
+      "swotTitle": "Análisis FODA",
+      "strengths": "Fortalezas",
+      "weaknesses": "Debilidades",
+      "opportunities": "Oportunidades",
+      "threats": "Amenazas",
+      "noData": "Sin datos disponibles"
+    },
+    "strategy": {
+      "monetization": "Estrategia de Monetización",
+      "personas": "Perfiles Objetivo",
+      "hooks": "Ganchos de Marketing",
+      "roadmap": "Hoja de Ruta MVP"
+    },
+    "problems": {
+      "painPoints": "Por Qué Se Van (Puntos de Dolor)",
+      "frequency": "Frecuencia",
+      "featureRequests": "Lo Que Quieren (Solicitudes)",
+      "highPriority": "Alta Prioridad"
+    }
+  },
+  "reviewsList": {
+    "title": "Reseñas de Usuarios",
+    "subtitle": "Análisis de sentimiento del mercado",
+    "filter": {
+      "all": "Todas"
+    },
+    "empty": {
+      "title": "No hay reseñas que coincidan con este filtro.",
+      "clearFilters": "Limpiar filtros"
+    },
+    "card": {
+      "anonymousUser": "Usuario Anónimo",
+      "painPoint": "Punto Débil Detectado",
+      "helpful": "{count} lo encontraron útil"
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "page": "Página",
+      "of": "de"
+    }
+  },
+  "searchResults": {
+    "title": "Resultados",
+    "searching": "Buscando...",
+    "appsFound": "{count} apps encontradas",
+    "loading": {
+      "title": "Analizando Mercado",
+      "subtitle": "Obteniendo datos de Play Store..."
+    },
+    "bestMatch": "Mejor Coincidencia",
+    "relatedApps": "Apps Relacionadas",
+    "empty": {
+      "title": "Sin resultados",
+      "description": "No encontramos ninguna app que coincida. Intenta buscar el Package ID exacto."
+    },
+    "footer": "Selecciona una app para ver el análisis detallado",
+    "card": {
+      "untitled": "App Sin Título",
+      "unknownDeveloper": "Desarrollador Desconocido",
+      "idUnavailable": "ID No Disponible"
+    }
+  },
+  "searchPage": {
+    "badge": "Inteligencia de Mercado",
+    "title": "KiritaAI",
+    "subtitle": "Descubre oportunidades de negocio ocultas en las reseñas de {highlight} con precisión de IA.",
+    "subtitleHighlight": "Google Play",
+    "placeholder": "Analiza una app (ej. Tinder, Uber...)",
+    "searchButton": "Buscar",
+    "trending": "Tendencias:",
+    "toast": {
+      "dailyLimitReached": "Límite Diario Alcanzado",
+      "dailyLimitDescription": "Usaste todas tus búsquedas de hoy. Actualiza a PRO para más.",
+      "signInRequired": "Inicio de sesión requerido",
+      "signInDescription": "Inicia sesión para buscar apps.",
+      "searchFailed": "Búsqueda fallida",
+      "somethingWrong": "Algo salió mal"
+    }
+  },
   "admin": {
     "title": "Panel de Administración",
     "sections": {
@@ -438,5 +600,74 @@
     "subtitle": "Bienvenido a KiritaAI",
     "savedAssetsAria": "Ver Apps Analizadas",
     "generateAiAria": "Analizar"
+  },
+  "featureStepper": {
+    "title": "Cómo Funciona",
+    "steps": {
+      "pickTarget": {
+        "title": "Elige Tu Objetivo",
+        "desc": "Ingresa cualquier app de Google Play. Obtenemos cada detalle en segundos."
+      },
+      "aiExtraction": {
+        "title": "Análisis Profundo con IA",
+        "desc": "KiritaAI escanea +200 reseñas reales para descubrir frustraciones ocultas."
+      },
+      "instantInsight": {
+        "title": "Obtén Tu Plan de Batalla",
+        "desc": "Recibe tu Puntaje de Oportunidad, Puntos Débiles Críticos y una Estrategia de Ingresos lista para ejecutar."
+      },
+      "ask": {
+        "title": "Chatea con KiritaAI",
+        "desc": "Haz preguntas de seguimiento. Profundiza. Obtén insights personalizados para tu idea específica."
+      }
+    }
+  },
+  "bentoShowcase": {
+    "badge": "La Ventaja Injusta",
+    "title": {
+      "part1": "Convierte las quejas de usuarios en",
+      "highlight": "productos rentables."
+    },
+    "subtitle": "No construyas a ciegas. Deja que la IA analice el mercado por ti y descubre minas de oro ocultas en segundos.",
+    "items": {
+      "ai_score": {
+        "title": "Análisis Profundo con IA",
+        "desc": "Deja de adivinar. Nuestra IA lee miles de reseñas para calcular un Puntaje de Oportunidad preciso."
+      },
+      "chatbot": {
+        "title": "Interroga los Datos",
+        "desc": "Chatea con KiritaAI."
+      },
+      "pain_points": {
+        "title": "Detector de Puntos Débiles",
+        "desc": "Detectamos debilidades críticas. Convierte reseñas de 1 estrella en tu hoja de ruta."
+      },
+      "strategy": {
+        "title": "Estrategia de Monetización",
+        "desc": "Obtén consejos accionables sobre cómo fijar precios para robar cuota de mercado."
+      }
+    },
+    "reviews": {
+      "tooExpensive": "Muy caro",
+      "greatUI": "Gran diseño UI",
+      "crashes": "Se cuelga mucho",
+      "darkMode": "Falta modo oscuro",
+      "slowSupport": "Soporte lento",
+      "bestAnalytics": "Mejor app de analytics"
+    },
+    "painPoints": {
+      "crashLogin": "App se cuelga al iniciar",
+      "tooManyAds": "Demasiados anuncios",
+      "noDarkMode": "Sin modo oscuro",
+      "batteryDrain": "Gasta batería"
+    },
+    "chat": {
+      "kiritaIntro": "Analicé esta app. Pregúntame lo que quieras.",
+      "userQuestion": "¿Cuál es su mayor debilidad?",
+      "kiritaAnswer": "Los usuarios odian los {highlight}. Arregla eso y ganas.",
+      "highlight": "anuncios intrusivos"
+    },
+    "score": "Puntaje",
+    "high": "Alto"
   }
 }

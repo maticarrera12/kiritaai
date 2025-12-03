@@ -417,6 +417,168 @@
       "logout": "Log Out"
     }
   },
+  "myAnalysisPage": {
+    "title": "My Analysis History",
+    "description": "Access your past reports, track opportunities, and monitor potential competitors.",
+    "empty": "No analyses found yet. Start your first one! 🚀",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "of": "of"
+    },
+    "newAnalysis": {
+      "title": "Analyze New App",
+      "description": "Discover your next opportunity in seconds."
+    },
+    "card": {
+      "score": "Score"
+    }
+  },
+  "analysisFilters": {
+    "sortBy": "Sort by:",
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "highest": "Highest Score",
+    "lowest": "Lowest Score",
+    "aToZ": "A-Z",
+    "zToA": "Z-A"
+  },
+  "appDetailPage": {
+    "notFound": "App not found or unavailable.",
+    "noRatings": "No Ratings",
+    "ratings": "{count} Ratings",
+    "abandoned": "Abandoned",
+    "age": "Age",
+    "downloads": "Downloads",
+    "installApp": "Install App",
+    "lastUpdate": "Update: {days} days ago",
+    "preview": "Preview",
+    "screenshotAlt": "Screenshot {index}",
+    "aboutApp": "About this app",
+    "appInfo": "App Information",
+    "version": "Version",
+    "variesWithDevice": "Varies with device",
+    "updated": "Updated",
+    "released": "Released",
+    "unknown": "Unknown",
+    "packageId": "Package ID"
+  },
+  "chatSidebar": {
+    "header": {
+      "title": "Ask KiritaAI",
+      "context": "Context: {appName}"
+    },
+    "greeting": "Hi! I've analyzed **{appName}**. What would you like to know about its strategy or weaknesses?",
+    "remaining": "⚡ {count} messages remaining this month",
+    "thinking": "Thinking...",
+    "placeholder": "Ask about pricing, features...",
+    "disclaimer": "KiritaAI can make mistakes. Check important info.",
+    "errors": {
+      "limitReached": "Monthly chat limit reached.",
+      "sendFailed": "Failed to send message."
+    }
+  },
+  "analysisModal": {
+    "tabs": {
+      "overview": "Overview",
+      "strategy": "Strategy",
+      "problems": "Deep Dive"
+    },
+    "header": {
+      "title": "Opportunity Report",
+      "screenshot": "Download Screenshot"
+    },
+    "toast": {
+      "capturing": "Capturing full report...",
+      "success": "Full report saved!",
+      "error": "Failed to generate image"
+    },
+    "overview": {
+      "score": "Score",
+      "goldMine": "💎 Gold Mine Detected",
+      "moderate": "⚠️ Moderate Opportunity",
+      "saturated": "🛑 Saturated Market",
+      "swotTitle": "SWOT Analysis",
+      "strengths": "Strengths",
+      "weaknesses": "Weaknesses",
+      "opportunities": "Opportunities",
+      "threats": "Threats",
+      "noData": "No data available"
+    },
+    "strategy": {
+      "monetization": "Monetization Strategy",
+      "personas": "Target Personas",
+      "hooks": "Marketing Hooks",
+      "roadmap": "MVP Roadmap"
+    },
+    "problems": {
+      "painPoints": "Why Users Leave (Pain Points)",
+      "frequency": "Frequency",
+      "featureRequests": "What They Want (Feature Requests)",
+      "highPriority": "High Priority"
+    }
+  },
+  "reviewsList": {
+    "title": "User Reviews",
+    "subtitle": "Market sentiment analysis",
+    "filter": {
+      "all": "All"
+    },
+    "empty": {
+      "title": "No reviews match this filter.",
+      "clearFilters": "Clear filters"
+    },
+    "card": {
+      "anonymousUser": "Anonymous User",
+      "painPoint": "Pain Point Detected",
+      "helpful": "{count} found helpful"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "of": "of"
+    }
+  },
+  "searchResults": {
+    "title": "Results",
+    "searching": "Searching...",
+    "appsFound": "{count} apps found",
+    "loading": {
+      "title": "Analyzing Market",
+      "subtitle": "Fetching data from Play Store..."
+    },
+    "bestMatch": "Best Match",
+    "relatedApps": "Related Apps",
+    "empty": {
+      "title": "No results found",
+      "description": "We couldn't find any app matching your query. Try searching for the exact Package ID."
+    },
+    "footer": "Select an app to view detailed analysis",
+    "card": {
+      "untitled": "Untitled App",
+      "unknownDeveloper": "Unknown Developer",
+      "idUnavailable": "ID Unavailable"
+    }
+  },
+  "searchPage": {
+    "badge": "Market Intelligence",
+    "title": "KiritaAI",
+    "subtitle": "Unlock hidden business opportunities in {highlight} reviews with AI precision.",
+    "subtitleHighlight": "Google Play",
+    "placeholder": "Analyze an app (e.g. Tinder, Uber...)",
+    "searchButton": "Search",
+    "trending": "Trending:",
+    "toast": {
+      "dailyLimitReached": "Daily Limit Reached",
+      "dailyLimitDescription": "You've used all your searches for today. Upgrade to PRO for more.",
+      "signInRequired": "Sign in required",
+      "signInDescription": "Please login to search for apps.",
+      "searchFailed": "Search failed",
+      "somethingWrong": "Something went wrong"
+    }
+  },
   "admin": {
     "title": "Admin Panel",
     "sections": {
@@ -435,5 +597,74 @@
     "subtitle": "Welcome to KiritaAI",
     "savedAssetsAria": "View Analyzed Apps",
     "generateAiAria": "Analyze"
+  },
+  "featureStepper": {
+    "title": "How It Works",
+    "steps": {
+      "pickTarget": {
+        "title": "Pick Your Target",
+        "desc": "Enter any app from Google Play. We fetch every detail in seconds."
+      },
+      "aiExtraction": {
+        "title": "AI Deep Dive",
+        "desc": "KiritaAI scans 200+ real user reviews to uncover hidden frustrations."
+      },
+      "instantInsight": {
+        "title": "Get Your Battle Plan",
+        "desc": "Receive your Opportunity Score, Critical Pain Points, and a Revenue Strategy ready to execute."
+      },
+      "ask": {
+        "title": "Chat with KiritaAI",
+        "desc": "Ask follow-up questions. Dig deeper. Get custom insights for your specific idea."
+      }
+    }
+  },
+  "bentoShowcase": {
+    "badge": "The Unfair Advantage",
+    "title": {
+      "part1": "Turn user complaints into",
+      "highlight": "profitable products."
+    },
+    "subtitle": "Don't build blind. Let AI analyze the market for you and discover hidden gold mines in seconds.",
+    "items": {
+      "ai_score": {
+        "title": "Deep AI Analysis",
+        "desc": "Stop guessing. Our AI reads thousands of reviews to calculate a precise Opportunity Score."
+      },
+      "chatbot": {
+        "title": "Interrogate Data",
+        "desc": "Chat with KiritaAI."
+      },
+      "pain_points": {
+        "title": "Pain Point Detector",
+        "desc": "We spot critical weaknesses. Turn 1-star reviews into your roadmap."
+      },
+      "strategy": {
+        "title": "Monetization Strategy",
+        "desc": "Get actionable advice on how to price your app to steal market share."
+      }
+    },
+    "reviews": {
+      "tooExpensive": "Too expensive",
+      "greatUI": "Great UI design",
+      "crashes": "Crashes a lot",
+      "darkMode": "Missing dark mode",
+      "slowSupport": "Support is slow",
+      "bestAnalytics": "Best analytics app"
+    },
+    "painPoints": {
+      "crashLogin": "App crashes on login",
+      "tooManyAds": "Too many ads",
+      "noDarkMode": "No dark mode",
+      "batteryDrain": "Battery drain"
+    },
+    "chat": {
+      "kiritaIntro": "I've analyzed this app. Ask me anything.",
+      "userQuestion": "What is their biggest weakness?",
+      "kiritaAnswer": "Users hate the {highlight}. Fix that and you win.",
+      "highlight": "intrusive ads"
+    },
+    "score": "Score",
+    "high": "High"
   }
 }

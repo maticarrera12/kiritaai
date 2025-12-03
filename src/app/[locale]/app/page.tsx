@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Search01Icon, PlayStoreIcon, SparklesIcon, Search02Icon } from "hugeicons-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -21,54 +22,47 @@ interface AppData {
 }
 
 export default function SearchPage() {
+  const t = useTranslations("searchPage");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<AppData[]>([]);
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const getCreditsActionSearch = useGetCreditsAction(
-    "You've used all your searches for today. Upgrade to PRO for more."
-  );
+  const getCreditsActionSearch = useGetCreditsAction(t("toast.dailyLimitDescription"));
 
   const handleSearch = async (e: React.FormEvent | string) => {
-    // Permitir llamar a la función pasando el evento o el string directo (para los botones de trending)
     if (typeof e !== "string") e.preventDefault();
 
     const searchTerm = typeof e === "string" ? e : query;
     if (!searchTerm.trim()) return;
 
     setLoading(true);
-    setResults([]); // Limpiar anterior
+    setResults([]);
 
     try {
-      // 1. Llamamos a la Server Action en lugar del fetch directo
       const result = await searchAppAction(searchTerm);
 
       if (result.error) {
-        // Manejo de errores (Límite alcanzado o No autorizado)
         if (result.status === 429) {
-          toast.error("Daily Limit Reached", {
+          toast.error(t("toast.dailyLimitReached"), {
             description: getCreditsActionSearch.description,
             duration: getCreditsActionSearch.duration,
           });
         } else if (result.status === 401) {
-          toast.error("Sign in required", {
-            description: "Please login to search for apps.",
+          toast.error(t("toast.signInRequired"), {
+            description: t("toast.signInDescription"),
           });
-          // Aquí podrías redirigir al login: router.push('/auth/signin')
         } else {
-          toast.error("Search failed", { description: result.error });
+          toast.error(t("toast.searchFailed"), { description: result.error });
         }
         setLoading(false);
         return;
       }
 
-      // 2. Éxito
       const data = result.data;
       setResults(Array.isArray(data) ? (data as AppData[]) : []);
       setShowResults(true);
-    } catch (error) {
-      console.error("❌ Error inesperado:", error);
-      toast.error("Something went wrong");
+    } catch {
+      toast.error(t("toast.somethingWrong"));
     } finally {
       setLoading(false);
     }
@@ -85,17 +79,19 @@ export default function SearchPage() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 border border-border/50 backdrop-blur-sm mx-auto mb-2">
             <SparklesIcon className="w-3.5 h-3.5 text-primary animate-pulse" />
             <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Market Intelligence
+              {t("badge")}
             </span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold text-foreground tracking-tighter leading-[1.1]">
-            KiritaAI
+            {t("title")}
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
-            Unlock hidden business opportunities in{" "}
-            <span className="text-foreground font-medium">Google Play</span> reviews with AI
-            precision.
+            {t.rich("subtitle", {
+              highlight: () => (
+                <span className="text-foreground font-medium">{t("subtitleHighlight")}</span>
+              ),
+            })}
           </p>
         </div>
 
@@ -115,7 +111,7 @@ export default function SearchPage() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Analyze an app (e.g. Tinder, Uber...)"
+              placeholder={t("placeholder")}
               className="w-full h-16 pl-14 pr-36 text-lg font-medium bg-white dark:bg-white/5 border border-border/60 dark:border-white/10 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground/50"
             />
 
@@ -134,7 +130,7 @@ export default function SearchPage() {
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    <span className="hidden md:block">Search</span>
+                    <span className="hidden md:block">{t("searchButton")}</span>
                     <Search02Icon className="w-4 h-4" />
                   </>
                 )}
@@ -150,7 +146,7 @@ export default function SearchPage() {
           transition={{ delay: 0.2, duration: 0.5 }}
           className="flex flex-wrap justify-center items-center gap-3"
         >
-          <span className="text-sm text-muted-foreground font-medium mr-2">Trending:</span>
+          <span className="text-sm text-muted-foreground font-medium mr-2">{t("trending")}</span>
           {[
             { name: "WhatsApp", icon: PlayStoreIcon },
             { name: "Spotify", icon: PlayStoreIcon },
