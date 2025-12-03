@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
-import { PLANS, type PlanId } from "@/lib/credits/constants";
+import { PLANS, type PlanType } from "@/lib/credits/constants";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 
@@ -64,7 +64,7 @@ const BillingPage = async () => {
 
   // Obtener créditos mensuales del plan desde las constantes
   const monthlyRecharge =
-    user?.plan && user.plan in PLANS ? PLANS[user.plan as PlanId].limits.aiCredits : 0;
+    user?.plan && user.plan in PLANS ? PLANS[user.plan as PlanType].limits.aiCredits : 0;
   const currentCredits = user?.credits ?? 0; // Créditos actuales disponibles
   const usedThisMonth = Math.abs(_sum.amount ?? 0); // Créditos usados este mes (siempre positivo)
 
