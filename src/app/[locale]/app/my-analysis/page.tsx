@@ -3,8 +3,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
-import { AnalysisCardClient } from "./_components/analysis-card";
 import { AnalysisFilters } from "./_components/analysis-filters";
+import { AnalysisList } from "./_components/analysis-list";
 import { getFavoriteStatusAction } from "@/actions/favorites";
 import { Link } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
@@ -106,9 +106,7 @@ export default async function MyAnalysisPage({ searchParams }: PageProps) {
             description={t("newAnalysis.description")}
           />
 
-          {analysesWithFavorites.map((item) => (
-            <AnalysisCard key={item.id} analysis={item} scoreLabel={t("card.score")} />
-          ))}
+          <AnalysisList analyses={analysesWithFavorites} scoreLabel={t("card.score")} />
 
           {analysesWithFavorites.length === 0 && totalItems === 0 && (
             <div className="col-span-1 md:col-span-2 lg:col-span-2 flex items-center justify-center p-6 text-muted-foreground italic bg-muted/5 rounded-[1.5rem] border border-dashed border-border/50">
@@ -172,8 +170,4 @@ function NewAnalysisCard({ title, description }: { title: string; description: s
       <p className="text-sm text-muted-foreground mt-2 text-center max-w-[200px]">{description}</p>
     </Link>
   );
-}
-
-function AnalysisCard({ analysis, scoreLabel }: { analysis: any; scoreLabel: string }) {
-  return <AnalysisCardClient analysis={analysis} scoreLabel={scoreLabel} />;
 }

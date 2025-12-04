@@ -9,7 +9,6 @@ import {
   Rocket01Icon,
   Camera01Icon,
   Loading03Icon,
-  Xls02Icon,
   ChartBarLineIcon,
   Layers01Icon,
   UserGroupIcon,
@@ -346,12 +345,6 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                       ) : (
                         <Camera01Icon className="w-5 h-5 md:w-6 md:h-6" />
                       )}
-                    </button>
-                    <button
-                      onClick={onClose}
-                      className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors touch-manipulation"
-                    >
-                      <Xls02Icon className="w-5 h-5 md:w-6 md:h-6" />
                     </button>
                   </div>
                 </div>

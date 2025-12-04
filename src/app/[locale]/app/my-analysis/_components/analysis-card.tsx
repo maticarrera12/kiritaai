@@ -1,8 +1,22 @@
 "use client";
 
-import { Rocket01Icon, Calendar01Icon, ArrowRight01Icon } from "hugeicons-react";
+import { Rocket01Icon, Calendar01Icon, ArrowRight01Icon, Delete01Icon } from "hugeicons-react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { FavoriteButton } from "../../[appId]/_components/favorite-button";
+import { deleteAnalysisAction } from "@/actions/analysis";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
@@ -18,12 +32,16 @@ export function AnalysisCardClient({
   analysis,
   scoreLabel,
   onFavoriteToggle,
+  onDelete,
 }: {
   analysis: any;
   scoreLabel: string;
   onFavoriteToggle?: (isFavorite: boolean) => void;
+  onDelete?: () => void;
 }) {
   const score = analysis.opportunityScore || 0;
+  const [isDeleting, startDeleteTransition] = useTransition();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   let scoreColor =
     "text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-900";
@@ -35,11 +53,21 @@ export function AnalysisCardClient({
       "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200 dark:border-yellow-900";
   }
 
+  const handleDelete = () => {
+    startDeleteTransition(async () => {
+      const result = await deleteAnalysisAction(analysis.id);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Analysis deleted successfully");
+        setIsDeleteDialogOpen(false);
+        onDelete?.();
+      }
+    });
+  };
+
   return (
-    <Link
-      href={`/app/${analysis.appId}`}
-      className="group relative flex flex-col p-6 bg-card rounded-[1.5rem] border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full"
-    >
+    <div className="group relative flex flex-col p-6 bg-card rounded-[1.5rem] border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full">
       <div className="flex items-start justify-between mb-4">
         <div className="relative">
           {analysis.appIcon ? (
@@ -66,7 +94,7 @@ export function AnalysisCardClient({
             <span className="text-[10px] uppercase tracking-wider opacity-80">{scoreLabel}</span>
             <span className="text-sm">{score}</span>
           </div>
-          <div className="relative z-10">
+          <div className="flex items-center gap-1 relative z-10">
             <FavoriteButton
               appId={analysis.appId}
               appName={analysis.appName}
@@ -75,6 +103,43 @@ export function AnalysisCardClient({
               initialIsFavorite={analysis.isFavorite}
               onToggle={onFavoriteToggle}
             />
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <AlertDialogTrigger asChild>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsDeleteDialogOpen(true);
+                  }}
+                  className="p-2 hover:bg-muted rounded-full transition-colors shrink-0 text-destructive hover:text-destructive/80"
+                  aria-label="Delete analysis"
+                >
+                  <Delete01Icon size={20} className="md:w-5 md:h-5" />
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Analysis</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this analysis? This action cannot be undone and
+                    will permanently remove all data associated with this analysis.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDelete();
+                    }}
+                    disabled={isDeleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {isDeleting ? "Deleting..." : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>
@@ -94,10 +159,14 @@ export function AnalysisCardClient({
           <span>{formatDate(analysis.createdAt)}</span>
         </div>
 
-        <div className="w-8 h-8 rounded-full bg-muted/50 group-hover:bg-primary group-hover:text-white flex items-center justify-center transition-colors">
+        <Link
+          href={`/app/${analysis.appId}`}
+          className="w-8 h-8 rounded-full bg-muted/50 group-hover:bg-primary group-hover:text-white flex items-center justify-center transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
           <ArrowRight01Icon size={16} />
-        </div>
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 }

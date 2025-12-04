@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Xls02Icon, SentIcon, Message01Icon, UserIcon, Loading03Icon } from "hugeicons-react";
+import { SentIcon, Message01Icon, UserIcon, Loading03Icon } from "hugeicons-react";
 import { useTranslations } from "next-intl";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -132,12 +132,6 @@ export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSideba
                   </p>
                 </div>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-muted rounded-full transition-colors"
-              >
-                <Xls02Icon size={20} />
-              </button>
             </div>
 
             {/* Messages Area */}
