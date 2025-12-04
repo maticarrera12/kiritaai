@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive02Icon, Configuration01Icon, Search02Icon, StarIcon } from "hugeicons-react";
+import { Archive02Icon, Configuration01Icon, FavouriteIcon, Search02Icon } from "hugeicons-react";
 import { useTranslations } from "next-intl";
 
 import { CreditBalance } from "@/components/credits/credits-balance";
@@ -26,7 +26,7 @@ export default function AppMainSidebar() {
         {
           name: t("menu.favorites"),
           href: "/app/favorites",
-          icon: StarIcon,
+          icon: FavouriteIcon,
         },
       ],
     },

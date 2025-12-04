@@ -438,6 +438,20 @@
       "score": "Puntaje"
     }
   },
+  "favoritesPage": {
+    "title": "Mis Favoritos",
+    "description": "Acceso rápido a tus apps favoritas y sus reportes de análisis.",
+    "empty": "Aún no tienes favoritos. ¡Comienza agregando apps a tus favoritos! ⭐",
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "page": "Página",
+      "of": "de"
+    },
+    "card": {
+      "score": "Puntaje"
+    }
+  },
   "analysisFilters": {
     "sortBy": "Ordenar por:",
     "newest": "Más Recientes",

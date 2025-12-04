@@ -134,7 +134,8 @@ model User {
   purchases     Purchase[]
   trackedApps   TrackedApp[]
   analyses      Analysis[]
-  chatMessages  ChatMessage[]   
+  chatMessages  ChatMessage[]
+  favorites     Favorite[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -382,6 +383,29 @@ model ChatMessage {
 
   @@index([userId])
   @@index([analysisId])
+}
+
+// ============================================
+// FAVORITES
+// ============================================
+
+model Favorite {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  appId    String   // com.example.app
+  appName  String?  // Nombre de la app para mostrar
+  appIcon  String?  // URL del icono
+  platform Platform @default(ANDROID)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, appId]) // Un usuario solo puede tener una app una vez en favoritos
+  @@index([userId])
+  @@index([appId])
+  @@map("favorite")
 }
 
 // ============================================

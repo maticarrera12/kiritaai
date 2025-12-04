@@ -435,6 +435,20 @@
       "score": "Score"
     }
   },
+  "favoritesPage": {
+    "title": "My Favorites",
+    "description": "Quick access to your favorite apps and their analysis reports.",
+    "empty": "No favorites yet. Start adding apps to your favorites! ⭐",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "of": "of"
+    },
+    "card": {
+      "score": "Score"
+    }
+  },
   "analysisFilters": {
     "sortBy": "Sort by:",
     "newest": "Newest",

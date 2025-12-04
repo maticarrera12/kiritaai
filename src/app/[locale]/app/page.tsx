@@ -70,11 +70,8 @@ export default function SearchPage() {
 
   return (
     <div className="relative flex flex-col items-center justify-center bg-background overflow-hidden w-full h-full">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
-
+      <div className="absolute top-0 left-0 w-full h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="relative z-10 w-full max-w-4xl px-4 text-center space-y-10">
-        {/* ... (Header y Título igual que antes) ... */}
-
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 border border-border/50 backdrop-blur-sm mx-auto mb-2">
             <SparklesIcon className="w-3.5 h-3.5 text-primary animate-pulse" />

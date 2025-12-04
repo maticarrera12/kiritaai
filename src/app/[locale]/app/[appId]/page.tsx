@@ -5,7 +5,6 @@ import {
   Shield01Icon,
   SmartPhone01Icon,
   ArrowLeft02Icon,
-  Share01Icon,
   Alert01Icon,
 } from "hugeicons-react";
 import { headers } from "next/headers";
@@ -13,6 +12,8 @@ import { getTranslations } from "next-intl/server";
 
 import { AppFloatingActions } from "../_components/app-floatings-actions";
 import ReviewsList from "../_components/reviews-list";
+import { FavoriteButton } from "./_components/favorite-button";
+import { getFavoriteStatusAction } from "@/actions/favorites";
 import { Link } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -70,6 +71,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
 
   const session = await auth.api.getSession({ headers: await headers() });
   let existingAnalysis = null;
+  let isFavorite = false;
 
   if (session?.user?.id) {
     existingAnalysis = await prisma.analysis.findFirst({
@@ -80,6 +82,10 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
       orderBy: { createdAt: "desc" },
       select: { insights: true, id: true },
     });
+
+    // Obtener el estado de favorito
+    const favoriteStatus = await getFavoriteStatusAction(info.appId);
+    isFavorite = favoriteStatus.isFavorite;
   }
 
   const rawUpdatedString = info.lastUpdatedOn || info.updated || "Unknown";
@@ -113,9 +119,13 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
               <h1 className="text-sm font-bold truncate max-w-[150px] md:max-w-xs">{info.title}</h1>
             </div>
           </div>
-          <button className="p-2 hover:bg-muted rounded-full text-foreground/80 transition-colors shrink-0">
-            <Share01Icon size={20} className="md:w-6 md:h-6" />
-          </button>
+          <FavoriteButton
+            appId={info.appId}
+            appName={info.title}
+            appIcon={info.icon}
+            platform="ANDROID"
+            initialIsFavorite={isFavorite}
+          />
         </div>
       </nav>
 
