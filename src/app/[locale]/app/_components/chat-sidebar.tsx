@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 import { sendMessageAction, getRemainingMessagesAction, getChatHistory } from "@/actions/chat";
+import { ChatMarkdown } from "@/components/ui/chat-markdown";
 import Logo from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 
@@ -119,7 +120,7 @@ export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSideba
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 bottom-0 w-full md:w-[450px] bg-background border-l border-border shadow-2xl z-[90] flex flex-col"
+            className="fixed right-0 top-0 bottom-0 w-full md:w-[850px] bg-background border-l border-border shadow-2xl z-[90] flex flex-col"
           >
             {/* Header */}
             <div className="flex justify-between items-center p-4 border-b border-border bg-muted/20">
@@ -178,18 +179,15 @@ export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSideba
                     className={cn(
                       "p-3 rounded-2xl text-sm leading-relaxed shadow-sm",
                       msg.role === "assistant"
-                        ? "bg-white dark:bg-neutral-800 border border-border text-foreground rounded-tl-sm"
+                        ? "bg-white dark:bg-neutral-800 border border-border text-foreground rounded-tl-sm max-w-full overflow-hidden"
                         : "bg-primary text-primary-foreground rounded-tr-sm"
                     )}
                   >
-                    {/* Renderizamos Markdown básico simple (negritas) */}
-                    <p
-                      dangerouslySetInnerHTML={{
-                        __html: msg.content
-                          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                          .replace(/\n/g, "<br/>"),
-                      }}
-                    />
+                    {msg.role === "assistant" ? (
+                      <ChatMarkdown content={msg.content} />
+                    ) : (
+                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                    )}
                   </div>
                 </motion.div>
               ))}

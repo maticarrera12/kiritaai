@@ -55,6 +55,18 @@ export async function sendMessageAction(
     - Focus on: market gaps, competitive advantages, MVP features for the new app, and monetization strategies.
     - Be friendly but professional.
     - Use formatting (bold, lists) to make it readable.
+
+    CODE GENERATION RULES (IMPORTANT):
+    - When the user asks for code, ALWAYS write it in **TSX (React + TypeScript)** with **TailwindCSS** for styling.
+    - Use modern React patterns: functional components, hooks (useState, useEffect, etc.).
+    - Use TailwindCSS classes for all styling, never inline styles or CSS files.
+    - For terminal/shell commands, use bash code blocks with proper formatting.
+    - ALWAYS wrap code in proper markdown code blocks with the language specified:
+      - Use \`\`\`tsx for React/TypeScript code
+      - Use \`\`\`bash for terminal commands
+      - Use \`\`\`json for JSON data
+    - Make the code well-formatted, properly indented, and production-ready.
+    - Include helpful comments in the code explaining key parts.
   `;
 
   try {
