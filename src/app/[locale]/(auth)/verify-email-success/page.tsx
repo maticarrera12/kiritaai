@@ -13,7 +13,7 @@ export default function VerifyEmailSuccessPage() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
 
-  const callbackURL = searchParams.get("callbackURL") || "/";
+  const callbackURL = searchParams?.get("callbackURL") || "/";
   const isChangeEmail = callbackURL.includes("/profile") || callbackURL.includes("/settings");
   const redirectPath = isChangeEmail ? "/app/settings/account/profile" : "/";
 

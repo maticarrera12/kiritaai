@@ -60,7 +60,7 @@ function EmailVerification({ email }: { email: string }) {
 
 export default function VerificationEmailPage() {
   const searchParams = useSearchParams();
-  const email = searchParams.get("email") || "";
+  const email = searchParams?.get("email") || "";
   const t = useTranslations("auth.verification");
 
   return (

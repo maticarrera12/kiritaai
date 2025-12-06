@@ -26,7 +26,7 @@ type WaitlistForm = z.infer<typeof waitlistSchema>;
 
 export default function WaitlistPage() {
   const searchParams = useSearchParams();
-  const referralParam = searchParams.get("ref");
+  const referralParam = searchParams?.get("ref");
   const locale = useLocale();
 
   const [isSubmitted, setIsSubmitted] = useState(false);

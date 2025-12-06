@@ -19,8 +19,8 @@ import { ResetPasswordInput, resetPasswordSchema } from "@/lib/schemas";
 export default function ResetPasswordPage() {
   const { push } = useLocaleRouting();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
-  const error = searchParams.get("error");
+  const token = searchParams?.get("token");
+  const error = searchParams?.get("error");
   const t = useTranslations("auth.resetPassword");
 
   const form = useForm<ResetPasswordInput>({

@@ -1,4 +1,3 @@
-import { Head } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
 import { Layout, Navbar, Footer } from "nextra-theme-docs";
 import "nextra-theme-docs/style.css";
@@ -16,18 +15,13 @@ export default async function DocsLayout({ children }: { children: React.ReactNo
   const pageMap = await getPageMap("/docs");
 
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
-      <Head />
-      <body>
-        <Layout
-          navbar={navbar}
-          pageMap={pageMap}
-          docsRepositoryBase="https://github.com/maticarrera12/open_next"
-          footer={footer}
-        >
-          {children}
-        </Layout>
-      </body>
-    </html>
+    <Layout
+      navbar={navbar}
+      pageMap={pageMap}
+      docsRepositoryBase="https://github.com/maticarrera12/open_next"
+      footer={footer}
+    >
+      {children}
+    </Layout>
   );
 }

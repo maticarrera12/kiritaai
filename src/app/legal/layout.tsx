@@ -1,4 +1,3 @@
-import { Head } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
 import { Layout, Navbar, Footer } from "nextra-theme-docs";
 import "nextra-theme-docs/style.css";
@@ -18,18 +17,13 @@ export default async function LegalLayout({ children }: { children: React.ReactN
   const pageMap = await getPageMap("/legal");
 
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
-      <Head />
-      <body>
-        <Layout
-          navbar={navbar}
-          pageMap={pageMap}
-          docsRepositoryBase="https://github.com/maticarrera12/open_next"
-          footer={footer}
-        >
-          {children}
-        </Layout>
-      </body>
-    </html>
+    <Layout
+      navbar={navbar}
+      pageMap={pageMap}
+      docsRepositoryBase="https://github.com/maticarrera12/open_next"
+      footer={footer}
+    >
+      {children}
+    </Layout>
   );
 }
