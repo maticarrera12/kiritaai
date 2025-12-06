@@ -97,6 +97,7 @@ export const auth = betterAuth({
       adminRoles: ["admin"],
     }),
   ],
+  trustedOrigins: ["https://kiritaai.com", "http://localhost:3000"],
 });
 
 // Exportar prisma y helper para uso manual
