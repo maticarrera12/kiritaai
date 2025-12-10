@@ -1,6 +1,5 @@
 "use client";
 
-import { Howl } from "howler";
 import {
   Rocket01Icon,
   Diamond01Icon,
@@ -9,7 +8,7 @@ import {
   Message01Icon,
   FireIcon,
 } from "hugeicons-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 import { pusherClient } from "@/lib/pusher";
@@ -25,18 +24,25 @@ const ICON_MAP: Record<string, any> = {
 };
 
 export function AchievementListener({ userId }: { userId: string }) {
+  const howlerRef = useRef<typeof import("howler") | null>(null);
+
   useEffect(() => {
     if (!userId) return;
+
+    // Dynamically import howler to avoid SSR issues
+    import("howler").then((module) => {
+      howlerRef.current = module;
+    });
 
     // Suscribirse al canal privado del usuario
     const channel = pusherClient.subscribe(`user-${userId}`);
 
-    // Sonido de éxito (opcional pero recomendado)
-    const sound = new Howl({ src: ["/sounds/achievement.mp3"] });
-
     channel.bind("achievement-unlocked", (data: any) => {
-      // 1. Reproducir sonido
-      sound.play();
+      // 1. Reproducir sonido (only if howler is loaded)
+      if (howlerRef.current) {
+        const sound = new howlerRef.current.Howl({ src: ["/sounds/achievement.mp3"] });
+        sound.play();
+      }
 
       // 2. Renderizar Toast Customizado "Xbox Style"
       const IconComponent = ICON_MAP[data.id] || Rocket01Icon;
@@ -67,8 +73,10 @@ export function AchievementListener({ userId }: { userId: string }) {
 
     // Listener para Level Up
     channel.bind("level-up", (data: any) => {
-      const levelSound = new Howl({ src: ["/sounds/levelup.mp3"] });
-      levelSound.play();
+      if (howlerRef.current) {
+        const levelSound = new howlerRef.current.Howl({ src: ["/sounds/levelup.mp3"] });
+        levelSound.play();
+      }
 
       toast.custom(
         () => (

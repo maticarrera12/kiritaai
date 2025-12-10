@@ -79,15 +79,18 @@ export class GamificationEngine {
       if (data.opportunityScore >= 90) stats["score_90_plus"] = (stats["score_90_plus"] || 0) + 1;
       if (data.opportunityScore >= 98) stats["score_98_plus"] = (stats["score_98_plus"] || 0) + 1;
 
-      const genre = (data.genreId || "UNKNOWN").toUpperCase();
-      if (genre.includes("FINANCE")) stats["cat_finance"] = (stats["cat_finance"] || 0) + 1;
-      if (genre.includes("PRODUCTIVITY"))
+      const genreId = (data.genreId || "UNKNOWN").toUpperCase();
+
+      // Coincidencia exacta para categorías específicas
+      if (genreId === "FINANCE") stats["cat_finance"] = (stats["cat_finance"] || 0) + 1;
+      if (genreId === "PRODUCTIVITY")
         stats["cat_productivity"] = (stats["cat_productivity"] || 0) + 1;
-      if (genre.includes("HEALTH") || genre.includes("FITNESS"))
-        stats["cat_health"] = (stats["cat_health"] || 0) + 1;
-      if (genre.includes("GAME")) stats["cat_game"] = (stats["cat_game"] || 0) + 1;
-      if (genre.includes("SOCIAL")) stats["cat_social"] = (stats["cat_social"] || 0) + 1;
-      if (genre.includes("TRAVEL")) stats["cat_travel"] = (stats["cat_travel"] || 0) + 1;
+      if (genreId === "HEALTH_AND_FITNESS") stats["cat_health"] = (stats["cat_health"] || 0) + 1;
+      if (genreId === "SOCIAL") stats["cat_social"] = (stats["cat_social"] || 0) + 1;
+      if (genreId === "TRAVEL_AND_LOCAL") stats["cat_travel"] = (stats["cat_travel"] || 0) + 1;
+
+      // Coincidencia por prefijo para juegos (GAME_ACTION, GAME_PUZZLE, GAME_RACING, etc.)
+      if (genreId.startsWith("GAME_")) stats["cat_game"] = (stats["cat_game"] || 0) + 1;
 
       // Guardar DB
       const updateData: any = {
@@ -146,9 +149,8 @@ export class GamificationEngine {
         desc.includes("encrypted") ||
         desc.includes("privacy focused") ||
         desc.includes("no data collected") ||
-        genre.includes("TOOLS")
+        genreId === "TOOLS"
       ) {
-        // Opcional: Podrías hacerlo más estricto
         await this.tryUnlock(userId, "privacy_advocate", xpGained);
       }
     }
