@@ -7,6 +7,7 @@ import OpenAI from "openai";
 import { auth } from "@/lib/auth";
 import { CreditService } from "@/lib/credits";
 import { AI_COSTS } from "@/lib/credits/constants";
+import { GamificationEngine } from "@/lib/gamification/engine";
 import { prisma } from "@/lib/prisma";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -298,6 +299,42 @@ export async function analyzeAppAction(appId: string) {
       },
       { maxWait: 5000, timeout: 25000 }
     );
+
+    // Datos para el motor de gamificación
+    const lastUpdated = new Date(info.lastUpdatedOn || info.updated || new Date());
+    const daysSinceUpdate = Math.floor(
+      (new Date().getTime() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    const genreId = info.genreId || info.genre || "UNKNOWN";
+    const rating = info.score || 0;
+    const installs = parseInt((info.installs || "0").replace(/[^0-9]/g, ""));
+
+    let daysSinceRelease = 9999;
+    if (info.released) {
+      daysSinceRelease = Math.floor(
+        (new Date().getTime() - new Date(info.released).getTime()) / (1000 * 60 * 60 * 24)
+      );
+    }
+
+    // Concatenar pain points para búsqueda de keywords (Bug Hunter, Privacy Advocate)
+    const painPointsText =
+      aiResponse.pain_points?.map((p: any) => p.title + " " + p.description).join(" ") || "";
+
+    GamificationEngine.processEvent({
+      userId,
+      type: "ANALYSIS_COMPLETED",
+      data: {
+        opportunityScore: aiResponse.business_opportunity.score,
+        daysSinceUpdate,
+        genreId,
+        rating,
+        installs,
+        daysSinceRelease,
+        painPointsText,
+        description: info.description || "",
+      },
+    }).catch((err) => console.error("Gamification error", err));
 
     return { success: true, analysisId: savedAnalysis.id, insights: savedAnalysis.insights };
   } catch (error) {

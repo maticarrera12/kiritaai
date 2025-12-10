@@ -20,7 +20,6 @@ export function useGenerateAnalysis(appId: string) {
     },
     onMutate: () => {},
     onSuccess: (data) => {
-      toast.success("Analysis ready!");
       queryClient.setQueryData(["analysis", appId], data.insights);
     },
     onError: (error) => {

@@ -18,6 +18,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 
+import { trackInteraction } from "@/actions/gamification";
 import { cn } from "@/lib/utils";
 
 const TAB_IDS = ["overview", "strategy", "problems"] as const;
@@ -276,6 +277,9 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
       link.download = `kirita-analysis-full-${cleanName}.png`;
       link.href = combinedImage;
       link.click();
+
+      // Track para gamification (visual_critic achievement)
+      trackInteraction("DOWNLOAD_SCREENSHOT");
 
       toast.success(t("toast.success"), { id: toastId });
     } catch {

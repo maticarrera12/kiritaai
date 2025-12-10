@@ -46,14 +46,11 @@ export function AppFloatingActions({
       return;
     }
 
-    const toastId = toast.loading("KiritaAI is analyzing 200+ reviews...");
-
     mutation.mutate(undefined, {
       onSuccess: (result) => {
         setAnalysisData(result.insights);
         setCurrentAnalysisId(result.analysisId);
         setShowModal(true);
-        toast.success("Analysis ready!", { id: toastId });
       },
       onError: (_error) => {
         // Error handled by hook
@@ -168,7 +165,7 @@ export function AppFloatingActions({
                 className="flex items-center gap-2 md:gap-3 shrink-0"
               >
                 <MagicWand01Icon size={22} />
-                <span className="text-sm hidden md:block md:text-base">Generate Analysis</span>
+                <span className="text-sm hidden md:block md:text-base">Analyze</span>
               </motion.div>
             )}
           </AnimatePresence>

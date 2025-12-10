@@ -3,9 +3,12 @@ import "../globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { headers } from "next/headers";
 import { Toaster } from "sonner";
 
 import { AppProviders } from "../../../app-providers";
+import { AchievementListener } from "@/components/gamification/achievement-listener";
+import { auth } from "@/lib/auth";
 import { loadMessages } from "@/lib/load-messages";
 import MessagesProvider from "@/providers/message-provider";
 
@@ -30,6 +33,9 @@ const instrumentSerif = Instrument_Serif({
 export default async function LocaleLayout({ children, params }: any) {
   const { locale } = await params;
   const messages = await loadMessages(locale);
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   return (
     <html lang={locale}>
@@ -45,6 +51,7 @@ export default async function LocaleLayout({ children, params }: any) {
           <AppProviders>
             {children}
             <Toaster position="top-right" richColors />
+            {session?.user?.id && <AchievementListener userId={session.user.id} />}
             <Analytics />
             <SpeedInsights />
           </AppProviders>

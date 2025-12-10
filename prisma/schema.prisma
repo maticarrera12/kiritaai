@@ -136,6 +136,8 @@ model User {
   analyses      Analysis[]
   chatMessages  ChatMessage[]
   favorites     Favorite[]
+  userGamification UserGamification?
+  userAchievements UserAchievement[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -191,7 +193,39 @@ model Verification {
 }
 
 // ============================================
-// TRACKING DE USO (NUEVO)
+// GAMIFICATION
+// ============================================
+model UserGamification {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  xp        Int      @default(0)
+  level     Int      @default(1)
+  
+  totalAnalyses     Int @default(0)
+  highestScoreFound Int @default(0)
+
+  streakDays      Int @default(0)
+  lastStreakUpdate DateTime @default(now())
+
+  stats Json? @default("{}")
+
+  updatedAt DateTime @updatedAt
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  achievementId String   // ej: "gold_miner"
+  unlockedAt    DateTime @default(now())
+
+  @@unique([userId, achievementId]) // No puedes ganar el mismo logro 2 veces
+}
+// ============================================
+// TRACKING DE USO
 // ============================================
 
 model UserUsage {

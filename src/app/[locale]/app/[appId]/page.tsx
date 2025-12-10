@@ -13,6 +13,7 @@ import { getTranslations } from "next-intl/server";
 import { AppFloatingActions } from "../_components/app-floatings-actions";
 import ReviewsList from "../_components/reviews-list";
 import { FavoriteButton } from "./_components/favorite-button";
+import { ScreenshotGallery } from "./_components/screenshot-gallery";
 import { getFavoriteStatusAction } from "@/actions/favorites";
 import { Link } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
@@ -220,18 +221,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
           </div>
 
           <div className="relative -mx-2 md:mx-0 w-[calc(100%+1rem)] md:w-full">
-            <div className="flex overflow-x-auto gap-2.5 md:gap-5 pb-4 md:pb-6 px-2 md:px-1 snap-x snap-mandatory custom-scrollbar">
-              {info.screenshots?.map((src: string, idx: number) => (
-                <img
-                  key={idx}
-                  src={src}
-                  alt={t("screenshotAlt", { index: idx + 1 })}
-                  className="h-[350px] md:h-[500px] w-auto rounded-2xl md:rounded-[1.5rem] shadow-md border border-border/50 snap-center object-cover bg-muted"
-                  loading="lazy"
-                  referrerPolicy="no-referrer"
-                />
-              ))}
-            </div>
+            <ScreenshotGallery screenshots={info.screenshots || []} appName={info.title} />
           </div>
         </section>
 

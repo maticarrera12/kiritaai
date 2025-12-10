@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 import { sendMessageAction, getRemainingMessagesAction, getChatHistory } from "@/actions/chat";
+import { trackInteraction } from "@/actions/gamification";
 import { ChatMarkdown } from "@/components/ui/chat-markdown";
 import Logo from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
@@ -93,6 +94,8 @@ export function ChatSidebar({ isOpen, onClose, analysisId, appName }: ChatSideba
       if (result.success && result.response) {
         setMessages((prev) => [...prev, { role: "assistant", content: result.response }]);
         setRemainingMsgs((prev) => (prev ? prev - 1 : 0));
+        // Track para gamification (ai_whisperer achievement)
+        trackInteraction("CHAT_SENT");
       }
     } catch (error) {
       toast.error(t("errors.sendFailed"), { description: error as string });

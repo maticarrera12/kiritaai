@@ -18,12 +18,15 @@ import {
 import { useAdminRoleQuery } from "@/hooks/useAdminRoleQuery";
 import { useLocaleRouting } from "@/hooks/useLocaleRouting";
 import { useSessionQuery } from "@/hooks/useSessionQuery";
+import { useUserGamification } from "@/hooks/useUserGamification";
 import { Link } from "@/i18n/routing";
 import { authClient } from "@/lib/auth-client";
+import { getLevelFromXP } from "@/lib/gamification/levels";
 
 export default function UserMenu() {
   const { data: session } = useSessionQuery();
   const { data: adminData } = useAdminRoleQuery(!!session?.user);
+  const { data: gamification } = useUserGamification(!!session?.user);
   const { locale } = useLocaleRouting();
   const t = useTranslations("userMenu");
   const queryClient = useQueryClient();
@@ -32,6 +35,7 @@ export default function UserMenu() {
   if (!session?.user) return null;
   const isAdmin = adminData?.isAdmin ?? false;
   const userPlan = (session.user as { plan?: string })?.plan || "FREE";
+  const currentRank = getLevelFromXP(gamification?.xp || 0);
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -55,7 +59,11 @@ export default function UserMenu() {
       <DropdownMenuContent className="max-w-64 min-w-56" align="end" sideOffset={8}>
         <DropdownMenuLabel className="flex flex-col gap-0.5">
           <span className="truncate text-sm font-medium">{session.user.name}</span>
-          <span className="truncate text-xs text-muted-foreground">{session.user.email}</span>
+          <span
+            className={`truncate text-xs font-medium ${currentRank.color.split(" ").find((c) => c.startsWith("text-"))}`}
+          >
+            {currentRank.title}
+          </span>
           <span className="truncate text-xs font-semibold text-primary">{userPlan} Plan</span>
         </DropdownMenuLabel>
 
