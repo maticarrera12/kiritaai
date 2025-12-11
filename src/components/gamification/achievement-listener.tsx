@@ -129,7 +129,7 @@ export function AchievementListener({ userId }: { userId: string }) {
         () => (
           <div className="flex items-center gap-3 bg-emerald-950 border border-emerald-500/30 text-white px-5 py-3 rounded-xl shadow-xl animate-in slide-in-from-bottom-5 fade-in duration-300">
             <div className="bg-gradient-to-br from-emerald-400 to-green-600 p-2 rounded-lg text-black">
-              <Search01Icon variant="solid" size={18} />
+              <Search01Icon size={18} />
             </div>
             <div>
               <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
