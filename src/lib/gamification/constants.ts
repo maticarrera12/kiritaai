@@ -35,6 +35,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 50,
     tier: "COMMON",
     icon: Rocket01Icon,
+    target: 1,
+    statKey: "totalAnalyses", // Campo especial en userGamification
   },
   {
     id: "streak_master",
@@ -43,6 +45,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 150,
     tier: "RARE",
     icon: FireIcon,
+    target: 7,
+    statKey: "streakDays", // Campo especial en userGamification
   },
   {
     id: "gold_miner",
@@ -51,6 +55,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 300,
     tier: "LEGENDARY",
     icon: Diamond01Icon,
+    target: 1,
+    statKey: null, // One-time, no trackable progress
   },
   {
     id: "necromancer",
@@ -59,6 +65,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 200,
     tier: "RARE",
     icon: SkullIcon,
+    target: 1,
+    statKey: null, // One-time
   },
   {
     id: "data_hoarder",
@@ -67,6 +75,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 500,
     tier: "MYTHIC",
     icon: Search01Icon,
+    target: 100,
+    statKey: "totalAnalyses",
   },
   {
     id: "ai_whisperer",
@@ -75,6 +85,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 100,
     tier: "COMMON",
     icon: Message01Icon,
+    target: 50,
+    statKey: "chat_msgs",
   },
 
   // --- 2. VOLUME (PROGRESSION) ---
@@ -85,6 +97,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 100,
     tier: "COMMON",
     icon: Search01Icon,
+    target: 10,
+    statKey: "totalAnalyses",
   },
   {
     id: "research_expert",
@@ -93,6 +107,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 250,
     tier: "RARE",
     icon: ChartBreakoutSquareIcon,
+    target: 50,
+    statKey: "totalAnalyses",
   },
   {
     id: "prompt_engineer",
@@ -101,6 +117,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 300,
     tier: "RARE",
     icon: Brain02Icon,
+    target: 200,
+    statKey: "chat_msgs",
   },
 
   // --- 3. QUALITY HUNTERS (SCORES) ---
@@ -111,6 +129,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 200,
     tier: "RARE",
     icon: Medal06Icon,
+    target: 5,
+    statKey: "score_80_plus",
   },
   {
     id: "elite_hunter",
@@ -119,6 +139,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 400,
     tier: "LEGENDARY",
     icon: StarIcon,
+    target: 3,
+    statKey: "score_90_plus",
   },
   {
     id: "unicorn_spotter",
@@ -127,6 +149,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 1000,
     tier: "MYTHIC",
     icon: ZapIcon,
+    target: 1,
+    statKey: "score_98_plus",
   },
 
   // --- 4. CATEGORIES (EXPLORATION) ---
@@ -137,6 +161,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 150,
     tier: "RARE",
     icon: Coins01Icon,
+    target: 3,
+    statKey: "cat_finance",
   },
   {
     id: "productivity_guru",
@@ -145,6 +171,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 150,
     tier: "RARE",
     icon: Briefcase01Icon,
+    target: 5,
+    statKey: "cat_productivity",
   },
   {
     id: "gamer",
@@ -153,6 +181,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 100,
     tier: "COMMON",
     icon: GameController03Icon,
+    target: 5,
+    statKey: "cat_game",
   },
   {
     id: "biohacker",
@@ -161,6 +191,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 150,
     tier: "RARE",
     icon: HealthIcon,
+    target: 3,
+    statKey: "cat_health",
   },
   {
     id: "socialite",
@@ -169,6 +201,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 150,
     tier: "COMMON",
     icon: Megaphone01Icon,
+    target: 3,
+    statKey: "cat_social",
   },
   {
     id: "globetrotter",
@@ -177,6 +211,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 150,
     tier: "COMMON",
     icon: Globe02Icon,
+    target: 3,
+    statKey: "cat_travel",
   },
 
   // --- 5. TECHNICAL FINDS (SPECIFIC SCENARIOS) ---
@@ -187,6 +223,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 500,
     tier: "LEGENDARY",
     icon: UserGroupIcon,
+    target: 1,
+    statKey: null, // One-time
   },
   {
     id: "niche_finder",
@@ -195,6 +233,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 200,
     tier: "RARE",
     icon: MicroscopeIcon,
+    target: 1,
+    statKey: null, // One-time
   },
   {
     id: "fresh_blood",
@@ -203,6 +243,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 200,
     tier: "RARE",
     icon: Clock01Icon,
+    target: 1,
+    statKey: null, // One-time
   },
   {
     id: "bug_hunter",
@@ -211,6 +253,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 150,
     tier: "COMMON",
     icon: Bug01Icon,
+    target: 1,
+    statKey: null, // One-time
   },
   {
     id: "privacy_advocate",
@@ -219,6 +263,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 150,
     tier: "COMMON",
     icon: Shield01Icon,
+    target: 1,
+    statKey: null, // One-time
   },
   {
     id: "visual_critic",
@@ -227,6 +273,8 @@ export const ACHIEVEMENTS_LIST = [
     xp: 50,
     tier: "COMMON",
     icon: Camera01Icon,
+    target: 1,
+    statKey: null, // One-time
   },
 ] as const;
 
