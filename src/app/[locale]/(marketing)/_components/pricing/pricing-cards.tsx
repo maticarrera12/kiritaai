@@ -46,11 +46,16 @@ export function PricingCards() {
   const { data: session, isPending } = authClient.useSession();
   const userPlan = (session?.user as { plan?: string })?.plan || null;
 
+  // Environment check: En development solo mostrar FREE
+  const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === "production";
+
   if (!mounted || isPending) {
     return <PricingSkeleton />;
   }
 
   const activePlans = Object.entries(PLANS).filter(([key, plan]) => {
+    // En development, solo mostrar FREE
+    if (!isProduction && key !== "FREE") return false;
     // Mostrar FREE y planes que tengan ID de Lemon Squeezy configurado
     if (key === "FREE") return true;
     return plan.lemonSqueezy?.[interval];
@@ -133,87 +138,97 @@ export function PricingCards() {
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">{t("subtitle")}</p>
 
-          {/* Toggle Mensual / Anual */}
-          <div className="flex justify-center my-8">
-            <div className="relative bg-muted/50 p-1.5 rounded-full inline-flex items-center shadow-inner border border-black/5 dark:border-white/5">
-              <button
-                onClick={() => setInterval("monthly")}
-                className={cn(
-                  "relative px-8 py-2.5 rounded-full text-sm font-semibold transition-colors z-10",
-                  interval === "monthly"
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {interval === "monthly" && (
-                  <motion.div
-                    layoutId="pricing-toggle"
-                    className="absolute inset-0 bg-white dark:bg-neutral-800 rounded-full shadow-sm border border-black/5 dark:border-white/10"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <span className="relative z-10">{t("interval.monthly")}</span>
-              </button>
+          {/* Toggle Mensual / Anual (Solo en Production) */}
+          {isProduction && (
+            <div className="flex justify-center my-8">
+              <div className="relative bg-muted/50 p-1.5 rounded-full inline-flex items-center shadow-inner border border-black/5 dark:border-white/5">
+                <button
+                  onClick={() => setInterval("monthly")}
+                  className={cn(
+                    "relative px-8 py-2.5 rounded-full text-sm font-semibold transition-colors z-10",
+                    interval === "monthly"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {interval === "monthly" && (
+                    <motion.div
+                      layoutId="pricing-toggle"
+                      className="absolute inset-0 bg-white dark:bg-neutral-800 rounded-full shadow-sm border border-black/5 dark:border-white/10"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10">{t("interval.monthly")}</span>
+                </button>
 
-              <button
-                onClick={() => setInterval("annual")}
-                className={cn(
-                  "relative px-8 py-2.5 rounded-full text-sm font-semibold transition-colors z-10 flex items-center gap-2",
-                  interval === "annual"
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {interval === "annual" && (
-                  <motion.div
-                    layoutId="pricing-toggle"
-                    className="absolute inset-0 bg-white dark:bg-neutral-800 rounded-full shadow-sm border border-black/5 dark:border-white/10"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <span className="relative z-10 flex items-center gap-2">
-                  {t("interval.annual")}
-                  <span className="px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-bold uppercase tracking-wider">
-                    {t("interval.savePercent")}
+                <button
+                  onClick={() => setInterval("annual")}
+                  className={cn(
+                    "relative px-8 py-2.5 rounded-full text-sm font-semibold transition-colors z-10 flex items-center gap-2",
+                    interval === "annual"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {interval === "annual" && (
+                    <motion.div
+                      layoutId="pricing-toggle"
+                      className="absolute inset-0 bg-white dark:bg-neutral-800 rounded-full shadow-sm border border-black/5 dark:border-white/10"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-2">
+                    {t("interval.annual")}
+                    <span className="px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-bold uppercase tracking-wider">
+                      {t("interval.savePercent")}
+                    </span>
                   </span>
-                </span>
-              </button>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Grid de Planes */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mt-12">
+        <div
+          className={cn(
+            "gap-8 max-w-6xl mx-auto mt-12",
+            activePlans.length === 1 ? "flex justify-center" : "grid grid-cols-1 lg:grid-cols-3"
+          )}
+        >
           {activePlans.map(([key, plan]) => (
-            <PlanCard
-              key={key}
-              planKey={key}
-              plan={plan}
-              interval={interval}
-              isPopular={key === "PRO_INDIE"}
-              t={t}
-              onChoosePlan={() => handleChoosePlan(key)}
-              currentUserPlan={userPlan}
-              isLoading={isCheckingOut === plan.id}
-            />
+            <div key={key} className={cn(activePlans.length === 1 && "w-full max-w-sm")}>
+              <PlanCard
+                planKey={key}
+                plan={plan}
+                interval={interval}
+                isPopular={key === "PRO_INDIE"}
+                t={t}
+                onChoosePlan={() => handleChoosePlan(key)}
+                currentUserPlan={userPlan}
+                isLoading={isCheckingOut === plan.id}
+              />
+            </div>
           ))}
         </div>
 
-        {/* Sección de Créditos Extra (Opcional) */}
-        <div className="mt-20 max-w-4xl mx-auto">
-          <h3 className="text-2xl font-bold text-center mb-8">Need more AI power?</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {Object.entries(CREDIT_PACKS).map(([key, pack]) => (
-              <CreditPackCard
-                key={key}
-                pack={pack}
-                t={t}
-                onBuyCredits={() => handleBuyCredits(key)}
-                isLoading={isCheckingOut === `pack-${pack.id}`}
-              />
-            ))}
+        {/* Sección de Créditos Extra (Solo en Production) */}
+        {isProduction && (
+          <div className="mt-20 max-w-4xl mx-auto">
+            <h3 className="text-2xl font-bold text-center mb-8">Need more AI power?</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Object.entries(CREDIT_PACKS).map(([key, pack]) => (
+                <CreditPackCard
+                  key={key}
+                  pack={pack}
+                  t={t}
+                  onBuyCredits={() => handleBuyCredits(key)}
+                  isLoading={isCheckingOut === `pack-${pack.id}`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

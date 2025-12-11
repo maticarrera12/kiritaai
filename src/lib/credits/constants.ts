@@ -10,13 +10,7 @@ export const PLANS = {
       aiCredits: 1,
       maxChatMessages: 10,
     },
-    features: [
-      "5 daily searches",
-      "View basic app cards",
-      "1 AI analysis",
-      "10 Chat messages",
-      "No data export",
-    ],
+    features: ["5 daily searches", "1 AI analysis", "10 Chat messages", "No data export"],
     lemonSqueezy: { monthly: null, annual: null },
   },
 
@@ -39,7 +33,6 @@ export const PLANS = {
       "30 AI analyses per month",
       "500 Chat messages",
       "Opportunity detection",
-      "Unlimited history",
       "CSV/Excel Export",
     ],
     lemonSqueezy: {
@@ -67,7 +60,6 @@ export const PLANS = {
       "100 AI analyses per month",
       "2,000 Chat messages",
       "Priority support",
-      "White-label reports",
     ],
     lemonSqueezy: {
       monthly: process.env.NEXT_PUBLIC_LS_VARIANT_ID_BUSINESS_MONTHLY || "",
@@ -108,19 +100,16 @@ export const PLAN_FEATURES = {
   FREE: {
     canExportData: false,
     hasAiAccess: false,
-    hasApiAccess: false,
     supportLevel: "community",
   },
   PRO_INDIE: {
     canExportData: true,
     hasAiAccess: true,
-    hasApiAccess: false,
     supportLevel: "standard",
   },
   POWER_BUSINESS: {
     canExportData: true,
     hasAiAccess: true,
-    hasApiAccess: true,
     supportLevel: "priority",
   },
 } as const;
