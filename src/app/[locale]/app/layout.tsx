@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 
 import AppMainSidebar from "./_components/app-main-sidebar";
+import AppRightSidebar from "./_components/app-right-sidebar";
 import { SidebarProvider } from "@/app/contexts/sidebar-context";
 import Header from "@/components/header/header";
 import { redirect } from "@/i18n/routing";
@@ -22,6 +23,7 @@ const layout = async ({ children, params }: any) => {
           <Header />
           <div className="mx-auto w-full p-6 md:p-10 flex-1 flex flex-col">{children}</div>
         </main>
+        <AppRightSidebar />
       </div>
     </SidebarProvider>
   );

@@ -229,3 +229,18 @@ export const ACHIEVEMENTS_LIST = [
     icon: Camera01Icon,
   },
 ] as const;
+
+export const QUEST_SET_BONUSES = {
+  DAILY: {
+    title: "Daily Set Completed",
+    description: "You finished all daily tasks!",
+    xp: 200,
+    icon: "FireIcon",
+  },
+  WEEKLY: {
+    title: "Weekly Set Completed",
+    description: "Outstanding performance this week!",
+    xp: 500,
+    icon: "Trophy01Icon",
+  },
+};

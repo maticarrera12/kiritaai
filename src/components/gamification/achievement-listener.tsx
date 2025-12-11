@@ -37,14 +37,13 @@ export function AchievementListener({ userId }: { userId: string }) {
     // Suscribirse al canal privado del usuario
     const channel = pusherClient.subscribe(`user-${userId}`);
 
-    channel.bind("achievement-unlocked", (data: any) => {
-      // 1. Reproducir sonido (only if howler is loaded)
+    // Handler para Achievement Unlocked
+    const handleAchievement = (data: any) => {
       if (howlerRef.current) {
         const sound = new howlerRef.current.Howl({ src: ["/sounds/achievement.mp3"] });
         sound.play();
       }
 
-      // 2. Renderizar Toast Customizado "Xbox Style"
       const IconComponent = ICON_MAP[data.id] || Rocket01Icon;
 
       toast.custom(
@@ -69,10 +68,10 @@ export function AchievementListener({ userId }: { userId: string }) {
         ),
         { duration: 5000, position: "bottom-center" }
       );
-    });
+    };
 
-    // Listener para Level Up
-    channel.bind("level-up", (data: any) => {
+    // Handler para Level Up
+    const handleLevelUp = (data: any) => {
       if (howlerRef.current) {
         const levelSound = new howlerRef.current.Howl({ src: ["/sounds/levelup.mp3"] });
         levelSound.play();
@@ -91,9 +90,75 @@ export function AchievementListener({ userId }: { userId: string }) {
         ),
         { duration: 6000, position: "top-center" }
       );
-    });
+    };
 
+    // Handler para Set Completed (Daily/Weekly bonus)
+    const handleSetCompleted = (data: any) => {
+      if (howlerRef.current) {
+        const bonusSound = new howlerRef.current.Howl({ src: ["/sounds/bonus.mp3"] });
+        bonusSound.play();
+      }
+
+      toast.custom(
+        () => (
+          <div className="flex flex-col items-center justify-center bg-gradient-to-r from-indigo-900 to-violet-900 border border-indigo-500/50 text-white px-8 py-4 rounded-2xl shadow-2xl animate-in slide-in-from-bottom-10 fade-in duration-500">
+            <div className="bg-white/20 p-2 rounded-full mb-2">
+              <FireIcon className="w-6 h-6 text-orange-400" />
+            </div>
+            <p className="text-xs font-bold text-indigo-300 uppercase tracking-widest">
+              {data.title}
+            </p>
+            <p className="text-sm font-medium opacity-90">{data.description}</p>
+            <div className="mt-2 bg-white/10 px-3 py-1 rounded-full text-sm font-bold text-yellow-300 border border-white/5">
+              +{data.xp} XP Bonus
+            </div>
+          </div>
+        ),
+        { duration: 6000, position: "bottom-center" }
+      );
+    };
+
+    // Handler para Quest Completed (individual)
+    const handleQuestCompleted = (data: any) => {
+      if (howlerRef.current) {
+        const questSound = new howlerRef.current.Howl({ src: ["/sounds/quest.mp3"] });
+        questSound.play();
+      }
+
+      toast.custom(
+        () => (
+          <div className="flex items-center gap-3 bg-emerald-950 border border-emerald-500/30 text-white px-5 py-3 rounded-xl shadow-xl animate-in slide-in-from-bottom-5 fade-in duration-300">
+            <div className="bg-gradient-to-br from-emerald-400 to-green-600 p-2 rounded-lg text-black">
+              <Search01Icon variant="solid" size={18} />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                Quest Complete
+              </p>
+              <p className="text-sm font-semibold">{data.title}</p>
+            </div>
+            <div className="flex items-baseline gap-0.5 ml-2">
+              <span className="text-sm font-bold text-emerald-400">+{data.xp}</span>
+              <span className="text-[10px] text-emerald-600">XP</span>
+            </div>
+          </div>
+        ),
+        { duration: 4000, position: "bottom-center" }
+      );
+    };
+
+    // Bind all event handlers
+    channel.bind("achievement-unlocked", handleAchievement);
+    channel.bind("level-up", handleLevelUp);
+    channel.bind("set-completed", handleSetCompleted);
+    channel.bind("quest-completed", handleQuestCompleted);
+
+    // Cleanup: Unbind all handlers before unsubscribing
     return () => {
+      channel.unbind("achievement-unlocked", handleAchievement);
+      channel.unbind("level-up", handleLevelUp);
+      channel.unbind("set-completed", handleSetCompleted);
+      channel.unbind("quest-completed", handleQuestCompleted);
       pusherClient.unsubscribe(`user-${userId}`);
     };
   }, [userId]);

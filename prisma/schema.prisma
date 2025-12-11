@@ -81,6 +81,13 @@ enum PlanInterval {
   YEARLY
 }
 
+enum QuestStatus {
+  ACTIVE
+  COMPLETED
+  CLAIMED
+  EXPIRED
+}
+
 // ============================================
 // BETTER AUTH MODELS (User & Session)
 // ============================================
@@ -138,6 +145,7 @@ model User {
   favorites     Favorite[]
   userGamification UserGamification?
   userAchievements UserAchievement[]
+  quests UserQuest[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -223,6 +231,33 @@ model UserAchievement {
   unlockedAt    DateTime @default(now())
 
   @@unique([userId, achievementId]) // No puedes ganar el mismo logro 2 veces
+}
+
+model UserQuest {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Identificadores
+  questId     String   // ID de la plantilla (ej: "category_explorer")
+  type        String   // "DAILY" o "WEEKLY"
+  
+  // --- CAMPOS NECESARIOS QUE TE FALTAN ---
+  title       String   // ej: "Finance Specialist"
+  description String   
+  criteria    Json     // ej: { "genre": "FINANCE", "action": "ANALYSIS" }
+  status      QuestStatus @default(ACTIVE) 
+  // ---------------------------------------
+
+  // Progreso
+  progress    Int      @default(0)
+  target      Int      
+  xpReward    Int      
+  
+  expiresAt   DateTime 
+  createdAt   DateTime @default(now())
+
+  @@index([userId, status])
 }
 // ============================================
 // TRACKING DE USO
