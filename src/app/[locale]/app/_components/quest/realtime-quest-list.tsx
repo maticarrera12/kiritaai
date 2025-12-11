@@ -59,9 +59,9 @@ export function RealtimeQuestList({ initialQuests, userId }: RealtimeQuestListPr
 
     channel.bind("quest-progress", handleProgress);
 
+    // Solo unbind, NO unsubscribe (el canal es compartido con AchievementListener)
     return () => {
       channel.unbind("quest-progress", handleProgress);
-      pusherClient.unsubscribe(`user-${userId}`);
     };
   }, [userId]);
 

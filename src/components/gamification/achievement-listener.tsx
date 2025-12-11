@@ -126,13 +126,12 @@ export function AchievementListener({ userId }: { userId: string }) {
     channel.bind("set-completed", handleSetCompleted);
     channel.bind("quest-completed", handleQuestCompleted);
 
-    // Cleanup: Unbind all handlers before unsubscribing
+    // Cleanup: Solo unbind handlers (NO unsubscribe, el canal es compartido)
     return () => {
       channel.unbind("achievement-unlocked", handleAchievement);
       channel.unbind("level-up", handleLevelUp);
       channel.unbind("set-completed", handleSetCompleted);
       channel.unbind("quest-completed", handleQuestCompleted);
-      pusherClient.unsubscribe(`user-${userId}`);
     };
   }, [userId]);
 

@@ -207,8 +207,26 @@ export class GamificationEngine {
         let matches = true;
         const eData = (event as any).data;
 
-        if (criteria.genre && !eData.genreId.toUpperCase().includes(criteria.genre))
-          matches = false;
+        // Genre matching más flexible: "Trivia" debe matchear con "GAME_TRIVIA"
+        if (criteria.genre) {
+          // Normalizar: quitar espacios, guiones, underscores, &, AND
+          const normalize = (s: string) =>
+            s
+              .toUpperCase()
+              .replace(/[_\s\-&]/g, "")
+              .replace("AND", "");
+          const appGenre = normalize(eData.genreId || "");
+          const questGenre = normalize(criteria.genre);
+          // Comparar el nombre base sin "GAME" prefix
+          const appGenreBase = appGenre.replace("GAME", "");
+          const questGenreBase = questGenre.replace("GAME", "");
+          // Match si cualquiera incluye al otro
+          const genreMatches =
+            appGenre.includes(questGenreBase) ||
+            questGenre.includes(appGenreBase) ||
+            appGenreBase === questGenreBase;
+          if (!genreMatches) matches = false;
+        }
         if (criteria.minScore && eData.opportunityScore < criteria.minScore) matches = false;
         if (criteria.minInstalls && eData.installs < criteria.minInstalls) matches = false;
 
