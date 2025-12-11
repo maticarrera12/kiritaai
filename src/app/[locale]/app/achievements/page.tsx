@@ -138,6 +138,11 @@ export default async function AchievementsPage() {
             }
           }
 
+          // Si el logro está desbloqueado, mostrar progreso como completado (target/target)
+          // Esto evita mostrar "12/1" para first_blood cuando ya está desbloqueado
+          const displayProgress = isUnlocked
+            ? achievement.target
+            : Math.min(currentProgress, achievement.target);
           const progressPercent = isUnlocked
             ? 100
             : Math.min(100, Math.round((currentProgress / achievement.target) * 100));
@@ -189,17 +194,20 @@ export default async function AchievementsPage() {
                 <p className="text-muted-foreground text-xs mb-2">{achievement.description}</p>
 
                 {/* Progress en tooltip */}
-                {achievement.statKey && !isUnlocked && (
+                {achievement.statKey && (
                   <div className="mb-2">
                     <div className="flex justify-between text-[10px] mb-1">
                       <span className="text-muted-foreground">Progress</span>
                       <span className="font-medium">
-                        {currentProgress}/{achievement.target}
+                        {displayProgress}/{achievement.target}
                       </span>
                     </div>
                     <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-primary rounded-full transition-all"
+                        className={cn(
+                          "h-full rounded-full transition-all",
+                          isUnlocked ? "bg-green-500" : "bg-primary"
+                        )}
                         style={{ width: `${progressPercent}%` }}
                       />
                     </div>

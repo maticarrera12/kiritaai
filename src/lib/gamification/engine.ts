@@ -92,6 +92,12 @@ export class GamificationEngine {
       // C. ACTUALIZAR STATS (Contadores para logros)
       const totalAnalyses = profile.totalAnalyses + 1;
 
+      // IMPORTANTE: Verificar logros ANTES de actualizar para evitar race conditions
+      const wasFirstAnalysis = profile.totalAnalyses === 0;
+      const willBeTenth = totalAnalyses === 10;
+      const willBeFiftieth = totalAnalyses === 50;
+      const willBeHundredth = totalAnalyses === 100;
+
       // Scores
       if (data.opportunityScore >= 80) stats["score_80_plus"] = (stats["score_80_plus"] || 0) + 1;
       if (data.opportunityScore >= 90) stats["score_90_plus"] = (stats["score_90_plus"] || 0) + 1;
@@ -116,18 +122,19 @@ export class GamificationEngine {
         ...(isStreakUpdated && { streakDays: newStreak, lastStreakUpdate: now }),
       };
 
-      const updatedProfile = await prisma.userGamification.update({
+      await prisma.userGamification.update({
         where: { userId },
         data: updateData,
       });
 
       // D. CHEQUEO DE LOGROS (The 24 List)
+      // Verificamos usando los valores ANTES del incremento para evitar race conditions
 
       // Volumen
-      if (updatedProfile.totalAnalyses === 1) await this.tryUnlock(userId, "first_blood");
-      if (totalAnalyses === 10) await this.tryUnlock(userId, "research_rookie");
-      if (totalAnalyses === 50) await this.tryUnlock(userId, "research_expert");
-      if (totalAnalyses === 100) await this.tryUnlock(userId, "data_hoarder");
+      if (wasFirstAnalysis) await this.tryUnlock(userId, "first_blood");
+      if (willBeTenth) await this.tryUnlock(userId, "research_rookie");
+      if (willBeFiftieth) await this.tryUnlock(userId, "research_expert");
+      if (willBeHundredth) await this.tryUnlock(userId, "data_hoarder");
 
       // Racha
       if (newStreak >= 7) await this.tryUnlock(userId, "streak_master");
@@ -347,10 +354,21 @@ export class GamificationEngine {
 
     if (existing) return;
 
-    // Crear registro
-    await prisma.userAchievement.create({
-      data: { userId, achievementId },
-    });
+    // Usar create con manejo de errores para evitar race conditions
+    // Si dos llamadas simultáneas intentan crear el mismo logro, solo una tendrá éxito
+    try {
+      await prisma.userAchievement.create({
+        data: { userId, achievementId },
+      });
+    } catch (error: any) {
+      // Si falla por constraint único (duplicado), simplemente retornar
+      // Esto puede pasar si múltiples eventos procesan el logro simultáneamente
+      if (error.code === "P2002" || error.message?.includes("Unique constraint")) {
+        return;
+      }
+      // Si es otro error, relanzarlo
+      throw error;
+    }
 
     // Dar XP del logro inmediatamente
     await prisma.userGamification.update({
