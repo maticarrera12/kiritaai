@@ -415,11 +415,12 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                       </div>
                       <div className="flex-1 space-y-2">
                         <h3 className="text-xl md:text-2xl font-bold text-foreground">
-                          {score >= 75
-                            ? t("overview.goldMine")
-                            : score >= 50
-                              ? t("overview.moderate")
-                              : t("overview.saturated")}
+                          {data.report_title ||
+                            (score >= 75
+                              ? t("overview.goldMine")
+                              : score >= 50
+                                ? t("overview.moderate")
+                                : t("overview.saturated"))}
                         </h3>
                         <p className="text-muted-foreground text-sm leading-relaxed">
                           {data.summary}

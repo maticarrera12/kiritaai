@@ -8,7 +8,7 @@ import {
   Message01Icon,
   FireIcon,
 } from "hugeicons-react";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 import { pusherClient } from "@/lib/pusher";
@@ -24,26 +24,14 @@ const ICON_MAP: Record<string, any> = {
 };
 
 export function AchievementListener({ userId }: { userId: string }) {
-  const howlerRef = useRef<typeof import("howler") | null>(null);
-
   useEffect(() => {
     if (!userId) return;
-
-    // Dynamically import howler to avoid SSR issues
-    import("howler").then((module) => {
-      howlerRef.current = module;
-    });
 
     // Suscribirse al canal privado del usuario
     const channel = pusherClient.subscribe(`user-${userId}`);
 
     // Handler para Achievement Unlocked
     const handleAchievement = (data: any) => {
-      if (howlerRef.current) {
-        const sound = new howlerRef.current.Howl({ src: ["/sounds/achievement.mp3"] });
-        sound.play();
-      }
-
       const IconComponent = ICON_MAP[data.id] || Rocket01Icon;
 
       toast.custom(
@@ -72,11 +60,6 @@ export function AchievementListener({ userId }: { userId: string }) {
 
     // Handler para Level Up
     const handleLevelUp = (data: any) => {
-      if (howlerRef.current) {
-        const levelSound = new howlerRef.current.Howl({ src: ["/sounds/levelup.mp3"] });
-        levelSound.play();
-      }
-
       toast.custom(
         () => (
           <div className="flex flex-col items-center justify-center bg-neutral-900 border-2 border-purple-500 text-white px-8 py-6 rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300">
@@ -94,11 +77,6 @@ export function AchievementListener({ userId }: { userId: string }) {
 
     // Handler para Set Completed (Daily/Weekly bonus)
     const handleSetCompleted = (data: any) => {
-      if (howlerRef.current) {
-        const bonusSound = new howlerRef.current.Howl({ src: ["/sounds/bonus.mp3"] });
-        bonusSound.play();
-      }
-
       toast.custom(
         () => (
           <div className="flex flex-col items-center justify-center bg-gradient-to-r from-indigo-900 to-violet-900 border border-indigo-500/50 text-white px-8 py-4 rounded-2xl shadow-2xl animate-in slide-in-from-bottom-10 fade-in duration-500">
@@ -120,11 +98,6 @@ export function AchievementListener({ userId }: { userId: string }) {
 
     // Handler para Quest Completed (individual)
     const handleQuestCompleted = (data: any) => {
-      if (howlerRef.current) {
-        const questSound = new howlerRef.current.Howl({ src: ["/sounds/quest.mp3"] });
-        questSound.play();
-      }
-
       toast.custom(
         () => (
           <div className="flex items-center gap-3 bg-emerald-950 border border-emerald-500/30 text-white px-5 py-3 rounded-xl shadow-xl animate-in slide-in-from-bottom-5 fade-in duration-300">

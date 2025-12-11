@@ -32,7 +32,7 @@ export default async function AppRightSidebar() {
   });
 
   return (
-    <aside className="hidden xl:flex w-80 flex-col gap-8 border-l border-border bg-card/50 p-6 h-screen sticky top-0 overflow-y-auto">
+    <aside className="hidden xl:flex w-80 flex-col gap-8 bg-card/50 p-6 h-screen sticky top-0 overflow-y-auto">
       {/* Header Estático */}
       <div className="flex items-center gap-3 pb-4 border-b border-border/50">
         <div className="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/20 flex items-center justify-center text-yellow-600">

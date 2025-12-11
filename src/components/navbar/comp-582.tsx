@@ -199,13 +199,13 @@ export default function Navbar() {
                 <LanguageSwitcher />
               </div>
 
-              {/* <Button
+              <Button
                 onClick={() => push("/waitlist")}
                 variant="outline"
                 className="text-sm cursor-pointer rounded-full bg-transparent border-2 text-foreground hover:bg-muted hidden sm:flex"
               >
                 Waitlist
-              </Button> */}
+              </Button>
 
               {!isLoading &&
                 (session?.user ? (
@@ -260,6 +260,16 @@ export default function Navbar() {
                   })}
                 </nav>
 
+                <Button
+                  className="w-full rounded-full mt-4"
+                  onClick={() => {
+                    push("/waitlist");
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  Join Waitlist
+                </Button>
+
                 <motion.div
                   variants={itemVariants}
                   className="mt-auto pt-6 border-t border-border/50 space-y-4"
@@ -272,16 +282,6 @@ export default function Navbar() {
                     <span className="text-sm font-medium text-muted-foreground">Language</span>
                     <LanguageSwitcher />
                   </div>
-
-                  {/* <Button
-                    className="w-full rounded-full mt-4"
-                    onClick={() => {
-                      push("/waitlist");
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    Join Waitlist
-                  </Button> */}
                 </motion.div>
               </div>
             </motion.aside>
