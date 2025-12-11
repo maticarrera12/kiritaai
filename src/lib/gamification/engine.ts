@@ -29,7 +29,7 @@ type GamificationEvent =
   | {
       type: "INTERACTION";
       userId: string;
-      data: { action: "VIEW_SCREENSHOTS" };
+      data: { action: "VIEW_SCREENSHOTS" | "DOWNLOAD_SCREENSHOT" };
     };
 
 // Helper para calcular días consecutivos
@@ -185,7 +185,8 @@ export class GamificationEngine {
     // CASO 3: UI INTERACTION
     // ====================================================
     else if (type === "INTERACTION") {
-      if (event.data.action === "VIEW_SCREENSHOTS") {
+      // Tanto ver screenshots como descargar el reporte cuentan para "Visual Critic"
+      if (event.data.action === "VIEW_SCREENSHOTS" || event.data.action === "DOWNLOAD_SCREENSHOT") {
         await this.tryUnlock(userId, "visual_critic");
       }
     }
