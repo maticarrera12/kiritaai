@@ -9,7 +9,8 @@ import { auth } from "@/lib/auth";
 
 const layout = async ({ children, params }: any) => {
   const { locale } = await params;
-  const session = await auth.api.getSession({ headers: await headers() });
+  const headersList = await headers();
+  const session = await auth.api.getSession({ headers: headersList });
 
   if (!session?.user) {
     redirect({ href: "/signin", locale });

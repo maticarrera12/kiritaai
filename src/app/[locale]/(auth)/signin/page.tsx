@@ -54,7 +54,6 @@ export default function SignInPage() {
 
       if (result && result.user) {
         queryClient.invalidateQueries({ queryKey: ["session"] });
-        toast.success(t("success"));
         push(searchParams?.get("callbackUrl") || "/");
       } else {
         setError(t("error"));

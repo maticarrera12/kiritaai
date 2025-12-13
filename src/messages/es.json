@@ -30,7 +30,7 @@
     "signup": {
       "title": "Crear Cuenta",
       "subtitle": "Regístrate para comenzar con better-auth",
-      "name": "Nombre Completo",
+      "name": "Username",
       "email": "Correo electrónico",
       "password": "Contraseña",
       "submit": "Registrarse",
@@ -39,7 +39,8 @@
       "orContinueWith": "O continúa con",
       "success": "¡Cuenta creada exitosamente!",
       "error": "Error al crear la cuenta. Por favor, intenta de nuevo.",
-      "unexpectedError": "Error de autenticación"
+      "unexpectedError": "Error de autenticación",
+      "usernameTaken": "Este username ya está en uso. Por favor, elige otro."
     },
     "forgotPassword": {
       "title": "Olvidé mi Contraseña",
@@ -213,7 +214,7 @@
       "personalInfo": {
         "title": "Información Personal",
         "description": "Actualiza tus datos personales e información de contacto",
-        "fullName": "Nombre Completo",
+        "fullName": "Username",
         "namePlaceholder": "Ingresa tu nombre",
         "email": "Correo Electrónico",
         "emailPlaceholder": "Ingresa tu correo",
@@ -222,7 +223,8 @@
           "updateFailed": "Error al actualizar el perfil",
           "emailVerificationFailed": "Error al enviar la verificación de correo",
           "emailVerificationSent": "Verificación de correo enviada al nuevo correo",
-          "updateSuccess": "Perfil actualizado exitosamente"
+          "updateSuccess": "Perfil actualizado exitosamente",
+          "usernameTaken": "Este username ya está en uso. Por favor, elige otro."
         }
       },
       "subscriptionPlan": {
@@ -417,6 +419,7 @@
       "myAnalysis": "Mis Analisis",
       "favorites": "Favoritos",
       "achievements": "Logros",
+      "profile": "Perfil",
       "settings": "Configuración",
       "logout": "Cerrar Sesión"
     }

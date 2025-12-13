@@ -7,8 +7,16 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { updateProfile } from "@/actions/auth-actions";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { ProfileUpdateInput, profileUpdateSchema } from "@/lib/schemas";
 
@@ -62,38 +70,45 @@ export const PersonalInfoForm = forwardRef<PersonalInfoFormHandle, PersonalInfoF
     const handleUpdateProfile = async (data: ProfileUpdateInput) => {
       if (!form.formState.isDirty) return;
 
-      const requests = [
-        authClient.updateUser({
-          name: data.name,
-        }),
-      ];
+      const nameChanged = data.name !== user.name;
+      const emailChanged = data.email !== user.email;
 
-      if (data.email !== user.email) {
-        requests.push(
-          authClient.changeEmail({
-            newEmail: data.email,
-            callbackURL: "/verify-email-success",
-          })
-        );
+      // Actualizar el nombre usando la acción del servidor que valida unicidad
+      if (nameChanged) {
+        const updateResult = await updateProfile(data.name);
+
+        if (updateResult.error) {
+          const errorMessage = updateResult.error.message || t("messages.updateFailed");
+
+          // Si el error es sobre username en uso, mostrarlo en el campo
+          if (
+            errorMessage.toLowerCase().includes("username") ||
+            errorMessage.toLowerCase().includes("already taken")
+          ) {
+            form.setError("name", {
+              type: "manual",
+              message: t("messages.usernameTaken"),
+            });
+          } else {
+            toast.error(errorMessage);
+          }
+          return;
+        }
       }
 
-      const responses = await Promise.all(requests);
-      const updateResult = responses[0];
-      const emailResult = responses[1] ?? { error: null };
+      // Si cambió el email, usar changeEmail
+      if (emailChanged) {
+        const emailResult = await authClient.changeEmail({
+          newEmail: data.email,
+          callbackURL: "/verify-email-success",
+        });
 
-      if (updateResult.error) {
-        toast.error(updateResult.error.message || t("messages.updateFailed"));
-        return;
-      }
-
-      if (emailResult.error) {
-        toast.error(emailResult.error.message || t("messages.emailVerificationFailed"));
-        return;
-      }
-
-      if (data.email !== user.email) {
+        if (emailResult.error) {
+          toast.error(emailResult.error.message || t("messages.emailVerificationFailed"));
+          return;
+        }
         toast.success(t("messages.emailVerificationSent"));
-      } else {
+      } else if (nameChanged) {
         toast.success(t("messages.updateSuccess"));
       }
 
@@ -118,23 +133,38 @@ export const PersonalInfoForm = forwardRef<PersonalInfoFormHandle, PersonalInfoF
           <p className="text-sm text-muted-foreground">{t("description")}</p>
         </header>
 
-        <form className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="name">{t("fullName")}</Label>
-              <Input id="name" placeholder={t("namePlaceholder")} {...form.register("name")} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">{t("email")}</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder={t("emailPlaceholder")}
-                {...form.register("email")}
+        <Form {...form}>
+          <form className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("fullName")}</FormLabel>
+                    <FormControl>
+                      <Input placeholder={t("namePlaceholder")} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("email")}</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder={t("emailPlaceholder")} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
-        </form>
+          </form>
+        </Form>
       </section>
     );
   }

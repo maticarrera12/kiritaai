@@ -104,7 +104,7 @@ export default async function AppDetailPage({ params }: { params: Promise<{ appI
           <div className="flex items-center gap-3 overflow-hidden">
             <Link
               href="/app"
-              className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors text-foreground/80 hover:text-foreground shrink-0"
+              className="p-2 ml-2 hover:bg-muted rounded-full transition-colors text-foreground/80 hover:text-foreground shrink-0"
             >
               <ArrowLeft02Icon size={22} className="md:w-6 md:h-6" />
             </Link>

@@ -109,7 +109,7 @@ export default function SearchPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("placeholder")}
-              className="w-full h-16 pl-14 pr-36 text-lg font-medium bg-white dark:bg-white/5 border border-border/60 dark:border-white/10 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground/50"
+              className="w-full h-16 pl-14 pr-36 text-lg font-medium bg-card border border-border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground/50"
             />
 
             <div className="absolute right-2 top-2 bottom-2">
@@ -157,7 +157,7 @@ export default function SearchPage() {
                   setQuery(app.name);
                   handleSearch(app.name); // Disparar búsqueda al clickear tag
                 }}
-                className="group flex items-center gap-1.5 px-4 py-2 rounded-full bg-muted/30 border border-transparent hover:border-border hover:bg-white dark:hover:bg-white/5 hover:shadow-sm transition-all duration-200"
+                className="group flex items-center gap-1.5 px-4 py-2 rounded-full bg-muted/30 border border-transparent hover:border-border hover:bg-card hover:shadow-sm transition-all duration-200"
               >
                 <IconComponent className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
                 <span className="text-sm text-foreground/80 group-hover:text-foreground">

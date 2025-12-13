@@ -6,14 +6,17 @@ import {
   FavouriteIcon,
   Medal01Icon,
   Search02Icon,
+  UserIcon,
 } from "hugeicons-react";
 import { useTranslations } from "next-intl";
 
 import { CreditBalance } from "@/components/credits/credits-balance";
 import AppSidebar, { SidebarSection } from "@/components/ui/app-sidebar";
+import { useSessionQuery } from "@/hooks/useSessionQuery";
 
 export default function AppMainSidebar() {
   const t = useTranslations("app");
+  const { data: session } = useSessionQuery();
 
   const sidebarSections = [
     {
@@ -38,6 +41,11 @@ export default function AppMainSidebar() {
           name: t("menu.achievements"),
           href: "/app/achievements",
           icon: Medal01Icon,
+        },
+        {
+          name: t("menu.profile"),
+          href: `/app/u/${session?.user.name}`,
+          icon: UserIcon,
         },
       ],
     },

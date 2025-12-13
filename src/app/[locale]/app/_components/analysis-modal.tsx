@@ -9,10 +9,14 @@ import {
   Rocket01Icon,
   Camera01Icon,
   Loading03Icon,
+  Xls02Icon,
   ChartBarLineIcon,
   Layers01Icon,
   UserGroupIcon,
   Megaphone01Icon,
+  DoNotTouch02Icon,
+  CheckmarkCircle02Icon,
+  AlertCircleIcon,
 } from "hugeicons-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useRef } from "react";
@@ -35,6 +39,8 @@ interface AnalysisModalProps {
   appName?: string;
   appIcon?: string;
 }
+
+// --- SUB-COMPONENTS ---
 
 function AnimatedNumber({ value, color }: { value: number; color: string }) {
   const count = useMotionValue(0);
@@ -86,6 +92,8 @@ function SwotCard({
   );
 }
 
+// --- MAIN COMPONENT ---
+
 export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: AnalysisModalProps) {
   const t = useTranslations("analysisModal");
   const modalContentRef = useRef<HTMLDivElement>(null);
@@ -106,14 +114,35 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
 
   if (!data) return null;
 
-  const { business_opportunity, swot, user_personas, marketing_hooks, mvp_roadmap } = data;
+  // Destructuring de la nueva data profunda
+  const {
+    business_opportunity,
+    swot,
+    user_personas,
+    marketing_hooks,
+    mvp_roadmap,
+    risk_assessment,
+  } = data;
+
   const rawScore = business_opportunity?.score || 0;
   const score = Math.min(Math.max(rawScore, 0), 100);
 
+  // Lógica de colores y estados
   let scoreColor = "#dc2626";
-  if (score >= 75) scoreColor = "#16a34a";
-  else if (score >= 50) scoreColor = "#ca8a04";
+  let statusIcon = DoNotTouch02Icon;
+  let statusText = "STOP";
 
+  if (score >= 80) {
+    scoreColor = "#16a34a"; // Verde
+    statusIcon = CheckmarkCircle02Icon;
+    statusText = "GO";
+  } else if (score >= 50) {
+    scoreColor = "#ca8a04"; // Amarillo
+    statusIcon = AlertCircleIcon;
+    statusText = "CAUTION";
+  }
+
+  // Lógica de Screenshot (Optimizada con Proxy)
   const captureTab = async (node: HTMLDivElement): Promise<string> => {
     const isDark = document.documentElement.classList.contains("dark");
     const bgColor = isDark ? "#171717" : "#ffffff";
@@ -135,20 +164,22 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
     clone.style.left = "0";
     clone.style.zIndex = "-9999";
 
+    // Expandir scrollbars
     const allElements = clone.querySelectorAll("*");
     allElements.forEach((el: any) => {
       if (!el.style) return;
       const classNameStr =
         typeof el.className === "string" ? el.className : el.className?.baseVal || "";
-      const hasOverflow = classNameStr.includes("overflow") || el.style.overflow === "auto";
-      if (hasOverflow) {
+      if (classNameStr.includes("overflow") || el.style.overflow === "auto" || el.style.maxHeight) {
         el.style.overflow = "visible";
         el.style.height = "auto";
+        el.style.maxHeight = "none";
       }
     });
 
     document.body.appendChild(clone);
 
+    // Proxy de imágenes
     const images = clone.querySelectorAll("img");
     const imagePromises = Array.from(images).map((img) => {
       img.removeAttribute("srcset");
@@ -196,18 +227,17 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       if (!ctx) {
-        reject(new Error("Could not get canvas context"));
+        reject(new Error("No canvas"));
         return;
       }
 
-      const images: globalThis.HTMLImageElement[] = [];
+      const images: HTMLImageElement[] = [];
       let loaded = 0;
       let totalHeight = 0;
       let maxWidth = 0;
 
       imageUrls.forEach((url) => {
-        const img = new globalThis.Image();
-        img.crossOrigin = "anonymous";
+        const img = new Image();
         img.onload = () => {
           loaded++;
           maxWidth = Math.max(maxWidth, img.width);
@@ -215,28 +245,11 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
           if (loaded === imageUrls.length) {
             canvas.width = maxWidth;
             canvas.height = totalHeight;
-
             let y = 0;
             images.forEach((image) => {
               ctx.drawImage(image, 0, y);
               y += image.height;
             });
-
-            resolve(canvas.toDataURL("image/png"));
-          }
-        };
-        img.onerror = () => {
-          loaded++;
-          if (loaded === imageUrls.length) {
-            canvas.width = maxWidth;
-            canvas.height = totalHeight;
-
-            let y = 0;
-            images.forEach((image) => {
-              ctx.drawImage(image, 0, y);
-              y += image.height;
-            });
-
             resolve(canvas.toDataURL("image/png"));
           }
         };
@@ -248,39 +261,32 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
 
   const handleScreenshot = async () => {
     if (!modalContentRef.current) return;
-
     setIsCapturing(true);
     const toastId = toast.loading(t("toast.capturing"));
 
     try {
       const node = modalContentRef.current;
-      const tabs = ["overview", "strategy", "problems"];
+      const tabs = TAB_IDS;
       const originalTab = activeTab;
-
       const tabImages: string[] = [];
 
       for (const tab of tabs) {
         setActiveTab(tab);
-        await new Promise((resolve) => setTimeout(resolve, 400));
-
+        await new Promise((resolve) => setTimeout(resolve, 400)); // Esperar render
         const tabImage = await captureTab(node);
         tabImages.push(tabImage);
       }
 
-      setActiveTab(originalTab);
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
+      setActiveTab(originalTab); // Restaurar
       const combinedImage = await combineImages(tabImages);
 
       const cleanName = (appName || "report").replace(/[^a-z0-9]/gi, "-").toLowerCase();
       const link = document.createElement("a");
-      link.download = `kirita-analysis-full-${cleanName}.png`;
+      link.download = `kirita-report-${cleanName}.png`;
       link.href = combinedImage;
       link.click();
 
-      // Track para gamification (visual_critic achievement)
       trackInteraction("DOWNLOAD_SCREENSHOT");
-
       toast.success(t("toast.success"), { id: toastId });
     } catch {
       toast.error(t("toast.error"), { id: toastId });
@@ -293,6 +299,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
     <AnimatePresence>
       {isOpen && (
         <>
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -300,6 +307,8 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
             onClick={onClose}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
           />
+
+          {/* Modal Container */}
           <motion.div
             initial={{ opacity: 0, y: "100%" }}
             animate={{ opacity: 1, y: 0 }}
@@ -311,6 +320,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
               ref={modalContentRef}
               className="bg-white dark:bg-neutral-900 w-full md:max-w-6xl h-[95vh] md:h-[90vh] rounded-t-[2rem] md:rounded-[2rem] shadow-2xl overflow-hidden flex flex-col pointer-events-auto border-t md:border border-white/10 max-w-full"
             >
+              {/* --- HEADER --- */}
               <div className="flex flex-col border-b border-border/50 bg-muted/30 shrink-0">
                 <div className="flex justify-between items-center p-4 md:p-6 pb-2 gap-2">
                   <div className="flex items-center gap-2 md:gap-3 overflow-hidden min-w-0">
@@ -350,9 +360,16 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                         <Camera01Icon className="w-5 h-5 md:w-6 md:h-6" />
                       )}
                     </button>
+                    <button
+                      onClick={onClose}
+                      className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors touch-manipulation"
+                    >
+                      <Xls02Icon className="w-5 h-5 md:w-6 md:h-6" />
+                    </button>
                   </div>
                 </div>
 
+                {/* TABS */}
                 <div className="flex px-4 md:px-6 gap-4 md:gap-8 overflow-x-auto no-scrollbar mask-gradient-right">
                   {TAB_IDS.map((tabId) => {
                     const TabIcon = TAB_ICONS[tabId];
@@ -378,9 +395,27 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                 </div>
               </div>
 
+              {/* --- CONTENT AREA --- */}
               <div className="overflow-y-auto p-4 md:p-8 space-y-8 custom-scrollbar bg-white dark:bg-neutral-900 flex-1 min-h-0">
+                {/* 1. OVERVIEW TAB */}
                 {activeTab === "overview" && (
-                  <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    {/* RISK ALERT (Nuevo) */}
+                    {risk_assessment?.level === "EXTREME" || risk_assessment?.level === "HIGH" ? (
+                      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-xl flex items-start gap-3">
+                        <DoNotTouch02Icon className="text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="text-sm font-bold text-red-800 dark:text-red-200">
+                            High Risk Alert
+                          </h4>
+                          <p className="text-xs text-red-600 dark:text-red-300/80 mt-1">
+                            {risk_assessment.reason}
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {/* SCORE & VERDICT */}
                     <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start text-center md:text-left bg-muted/10 p-6 rounded-2xl border border-border/40">
                       <div className="relative w-32 h-32 shrink-0">
                         <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
@@ -413,28 +448,42 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                           </span>
                         </div>
                       </div>
+
                       <div className="flex-1 space-y-2">
-                        <h3 className="text-xl md:text-2xl font-bold text-foreground">
-                          {data.report_title ||
-                            (score >= 75
-                              ? t("overview.goldMine")
-                              : score >= 50
-                                ? t("overview.moderate")
-                                : t("overview.saturated"))}
-                        </h3>
+                        <div className="flex items-center gap-2 justify-center md:justify-start">
+                          <h3 className="text-xl md:text-2xl font-bold text-foreground">
+                            {data.report_title || (score >= 75 ? "Gold Mine" : "Cautious")}
+                          </h3>
+                          {/* GO/NO-GO Badge */}
+                          <span
+                            className={cn(
+                              "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase border",
+                              statusText === "GO"
+                                ? "bg-green-100 text-green-700 border-green-200"
+                                : statusText === "STOP"
+                                  ? "bg-red-100 text-red-700 border-red-200"
+                                  : "bg-yellow-100 text-yellow-700 border-yellow-200"
+                            )}
+                          >
+                            {statusText}
+                          </span>
+                        </div>
+
                         <p className="text-muted-foreground text-sm leading-relaxed">
                           {data.summary}
                         </p>
-                        <div className="pt-2">
-                          <p className="font-medium text-foreground italic text-sm border-l-2 border-primary/50 pl-3">
-                            "{business_opportunity?.verdict}"
-                          </p>
+
+                        <div className="pt-2 flex flex-wrap gap-2 justify-center md:justify-start">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                            Gap: {business_opportunity?.market_gap || "None"}
+                          </span>
                         </div>
                       </div>
                     </div>
 
+                    {/* SWOT MATRIX */}
                     <div>
-                      <h4 className="text-sm font-bold mb-3 text-muted-foreground uppercase tracking-wider">
+                      <h4 className="text-xs font-bold mb-3 text-muted-foreground uppercase tracking-wider">
                         {t("overview.swotTitle")}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -467,8 +516,10 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                   </div>
                 )}
 
+                {/* 2. STRATEGY TAB */}
                 {activeTab === "strategy" && (
-                  <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    {/* MONETIZATION */}
                     <div className="bg-yellow-50 dark:bg-yellow-900/10 border-2 border-yellow-400 rounded-xl p-5 relative overflow-hidden">
                       <div className="relative flex gap-3 items-start">
                         <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2.5 rounded-full shrink-0 text-yellow-700 dark:text-yellow-400">
@@ -485,6 +536,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                       </div>
                     </div>
 
+                    {/* PERSONAS & HOOKS */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <h4 className="font-bold mb-3 flex items-center gap-2 text-sm">
@@ -523,6 +575,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                       </div>
                     </div>
 
+                    {/* MVP ROADMAP */}
                     <div>
                       <h4 className="font-bold mb-4 flex items-center gap-2 text-sm">
                         <Rocket01Icon size={16} /> {t("strategy.roadmap")}
@@ -553,84 +606,50 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                   </div>
                 )}
 
+                {/* 3. PROBLEMS TAB */}
                 {activeTab === "problems" && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    {/* PAIN POINTS GRID */}
                     <div>
                       <h4 className="text-sm font-bold mb-4 flex items-center gap-2 text-red-500 uppercase tracking-wide">
                         <Alert02Icon size={16} /> {t("problems.painPoints")}
                       </h4>
-                      <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {data.pain_points?.map((pain: any, i: number) => (
                           <div
                             key={i}
-                            className={`p-5 rounded-2xl border-l-[6px] shadow-sm bg-background border border-border/50 relative overflow-hidden group hover:border-border/80 transition-all ${
+                            className={`p-4 rounded-xl border-l-[6px] shadow-sm bg-background border border-border/50 ${
                               pain.severity === "CRITICAL"
                                 ? "border-l-red-500"
                                 : "border-l-orange-400"
                             }`}
                           >
-                            <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-3">
-                              <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                  <h5 className="font-bold text-base text-foreground">
-                                    {pain.title}
-                                  </h5>
-                                  <span
-                                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                                      pain.severity === "CRITICAL"
-                                        ? "bg-red-100 text-red-700"
-                                        : "bg-orange-100 text-orange-700"
-                                    }`}
-                                  >
-                                    {pain.severity}
-                                  </span>
-                                </div>
-                                <p className="text-sm text-muted-foreground leading-relaxed">
-                                  {pain.description}
-                                </p>
-                              </div>
-
-                              <div className="flex flex-col items-end shrink-0">
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase mb-1">
-                                  {t("problems.frequency")}
-                                </span>
-                                <div className="flex gap-1">
-                                  {[1, 2, 3].map((bar) => (
-                                    <div
-                                      key={bar}
-                                      className={`w-1.5 h-4 rounded-full ${
-                                        (pain.frequency === "HIGH" && bar <= 3) ||
-                                        (pain.frequency === "MEDIUM" && bar <= 2) ||
-                                        (pain.frequency === "LOW" && bar <= 1)
-                                          ? pain.severity === "CRITICAL"
-                                            ? "bg-red-500"
-                                            : "bg-orange-400"
-                                          : "bg-muted"
-                                      }`}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
+                            <div className="flex justify-between items-start mb-2">
+                              <h5 className="font-bold text-sm text-foreground">{pain.title}</h5>
+                              <span
+                                className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                                  pain.severity === "CRITICAL"
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-orange-100 text-orange-700"
+                                }`}
+                              >
+                                {pain.severity}
+                              </span>
                             </div>
-
+                            <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                              {pain.description}
+                            </p>
                             {pain.quote && (
-                              <div className="mt-3 pt-3 border-t border-border/40">
-                                <p className="text-xs md:text-sm text-foreground/70 italic flex gap-2">
-                                  <span className="text-muted-foreground/40 text-xl leading-none">
-                                    "
-                                  </span>
-                                  {pain.quote}
-                                  <span className="text-muted-foreground/40 text-xl leading-none">
-                                    "
-                                  </span>
-                                </p>
-                              </div>
+                              <p className="text-xs italic text-foreground/60 border-l-2 border-border pl-2">
+                                "{pain.quote}"
+                              </p>
                             )}
                           </div>
                         ))}
                       </div>
                     </div>
 
+                    {/* FEATURE REQUESTS */}
                     <div className="pt-6 border-t border-border/40">
                       <h4 className="text-sm font-bold mb-4 flex items-center gap-2 text-fuchsia-500 uppercase tracking-wide">
                         <CheckListIcon size={16} /> {t("problems.featureRequests")}
@@ -639,7 +658,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                         {data.feature_requests?.map((feat: any, i: number) => (
                           <div
                             key={i}
-                            className="flex gap-3 p-4 bg-muted/20 border border-border/40 rounded-xl hover:bg-muted/30 transition-colors"
+                            className="flex gap-3 p-4 bg-muted/20 border border-border/40 rounded-xl"
                           >
                             <div className="mt-0.5 bg-fuchsia-100 dark:bg-fuchsia-900/30 p-1.5 rounded-lg text-fuchsia-600 shrink-0 h-fit">
                               <CheckListIcon size={16} />
@@ -650,7 +669,7 @@ export function AnalysisModal({ isOpen, onClose, data, appName, appIcon }: Analy
                                 {feat.priority === "HIGH" && (
                                   <span
                                     className="w-2 h-2 rounded-full bg-fuchsia-500 animate-pulse"
-                                    title={t("problems.highPriority")}
+                                    title="High Priority"
                                   />
                                 )}
                               </div>

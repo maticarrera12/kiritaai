@@ -26,7 +26,7 @@
     "signup": {
       "title": "Create Account",
       "subtitle": "Sign up to get started with better-auth",
-      "name": "Full Name",
+      "name": "Username",
       "email": "Email",
       "password": "Password",
       "submit": "Sign Up",
@@ -35,7 +35,8 @@
       "orContinueWith": "Or continue with",
       "success": "Account created successfully!",
       "error": "Failed to create account. Please try again.",
-      "unexpectedError": "Authentication error"
+      "unexpectedError": "Authentication error",
+      "usernameTaken": "This username is already taken. Please choose another one."
     },
     "forgotPassword": {
       "title": "Forgot Password",
@@ -209,7 +210,7 @@
       "personalInfo": {
         "title": "Personal Information",
         "description": "Update your personal details and contact information",
-        "fullName": "Full Name",
+        "fullName": "Username",
         "namePlaceholder": "Enter your name",
         "email": "Email",
         "emailPlaceholder": "Enter your email",
@@ -218,7 +219,8 @@
           "updateFailed": "Failed to update profile",
           "emailVerificationFailed": "Failed to send email verification",
           "emailVerificationSent": "Email verification sent to new email",
-          "updateSuccess": "Profile updated successfully"
+          "updateSuccess": "Profile updated successfully",
+          "usernameTaken": "This username is already taken. Please choose another one."
         }
       },
       "subscriptionPlan": {
@@ -414,6 +416,7 @@
       "myAnalysis": "My Analysis",
       "favorites": "Favorites",
       "achievements": "Achievements",
+      "profile": "Profile",
       "settings": "Settings",
       "logout": "Log Out"
     }

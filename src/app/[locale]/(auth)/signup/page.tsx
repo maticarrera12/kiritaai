@@ -46,12 +46,26 @@ export default function SignUpPage() {
 
   const handleSignUp = async (data: SignUpInput) => {
     setError("");
+    form.clearErrors();
 
     try {
       const result = await signUp(data.email, data.password, data.name);
 
       if (!result.user) {
-        setError(t("error"));
+        const errorMessage = result.error?.message || t("error");
+
+        // Si el error es sobre username en uso, mostrarlo en el campo
+        if (
+          errorMessage.toLowerCase().includes("username") ||
+          errorMessage.toLowerCase().includes("already taken")
+        ) {
+          form.setError("name", {
+            type: "manual",
+            message: t("usernameTaken"),
+          });
+        } else {
+          setError(errorMessage);
+        }
       } else {
         queryClient.invalidateQueries({ queryKey: ["session"] });
         // Redirect to verification page on success

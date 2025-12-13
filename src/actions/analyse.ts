@@ -257,80 +257,87 @@ export async function analyzeAppAction(appId: string) {
   const reviewsText = getSmartReviewsContext(reviews);
 
   const prompt = `
-    You are a ruthless Venture Capitalist and Product Strategist advising an entrepreneur.
-    The goal is to build a NEW COMPETITOR app to steal the market share of the app below.
-    
-    TARGET APP DATA:
-    - Name: ${info.title}
-    - Developer: ${info.developer || "Unknown"}
-    - Stats: ${info.installs} installs, ${info.score}/5 rating.
-    - Last Update: ${info.updated}
-    - Technical Analysis Score: ${techAnalysis.score}/100 
-    - Technical Factors: ${techAnalysis.factors}
+  You are a **Ruthless Investment Committee Member** at a top Venture Capital firm.
+  Your job is NOT to be nice. Your job is to **save the entrepreneur from bankruptcy**.
+  
+  You are evaluating a pitch to build a direct competitor to the app below.
+  Analyze the data and tell me if this is a "Gold Mine" or a "Suicide Mission".
 
-    USER REVIEWS (Your Weapon):
-    ${reviewsText}
+  TARGET APP INTELLIGENCE:
+  - Name: ${info.title}
+  - Developer: ${info.developer || "Unknown"}
+  - Market Penetration: ${info.installs} installs.
+  - User Satisfaction: ${info.score}/5 rating.
+  - Freshness: Last updated on ${info.updated}.
+  - Technical Opportunity Score (Base): ${techAnalysis.score}/100 
+  - Technical Flags: ${techAnalysis.factors}
 
-    SCORING GUIDELINES (balance all factors holistically):
-    - High score (70-100) = Great opportunity (abandoned apps, frustrated users, clear gaps)
-    - Medium score (40-69) = Possible opportunity with challenges
-    - Low score (0-39) = Very difficult to compete (strong brand, satisfied users, well-maintained)
-    
-    Consider ALL these factors when calculating your score:
-    - Downloads: More downloads = harder to compete, but also = bigger market if users are unhappy
-    - Rating: Higher rating = satisfied users = harder to steal them
-    - Brand: Big tech (Google, Meta, Microsoft, etc.) have loyal users and unlimited resources
-    - Updates: Abandoned apps = opportunity, active development = they'll adapt and fight back
-    - Complaints: Many specific complaints in reviews = opportunity to solve real problems
-    - Balance: A 100M+ app with 4.5+ rating is VERY hard to beat even with some complaints
-    
-    The Technical Analysis Score above already factors in downloads, rating, brand, and updates.
-    Use it as a strong baseline and adjust based on your qualitative analysis of reviews.
+  VOICE OF THE CUSTOMER (Reviews):
+  ${reviewsText}
 
-    OUTPUT JSON:
-    {
-      "report_title": "Creative 2-4 word title that captures the opportunity (e.g. 'Gold Mine', 'Hidden Gem', 'Risky Bet', 'Untouchable Giant', 'Sleeping Volcano', 'Low Hanging Fruit', 'Red Ocean', 'David vs Goliath', 'Market Graveyard', 'Fortress', etc.)",
-      "summary": "Brutal summary of why this app is vulnerable OR why it's nearly impossible to compete.",
-      "sentiment": { "positive": %, "neutral": %, "negative": % },
-      "business_opportunity": {
-        "score": (0-100, be realistic balancing all factors above),
-        "verdict": "Strategy to enter the market OR honest assessment if competition is unrealistic.",
-        "monetization_analysis": "How to price the NEW app to steal users.",
-        "market_gap": "The exact niche the current app is ignoring."
-      },
-      "swot": {
-        "strengths": ["..."],
-        "weaknesses": ["..."],
-        "opportunities": ["..."],
-        "threats": ["..."]
-      },
-      "user_personas": [
-        { 
-          "title": "Creative Name (e.g. 'The Frustrated Power User')", 
-          "pain": "Why they are leaving", 
-          "goal": "What they want" 
-        }
-      ],
-      "marketing_hooks": ["..."],
-      "mvp_roadmap": [
-        { 
-          "phase": "Creative Phase Name (e.g. 'The Wedge', 'Viral Loop')", 
-          "features": ["Feature A", "Feature B"] 
-        }
-      ],
-      "pain_points": [
-        { "title": "Title", "description": "Desc", "frequency": "HIGH/MEDIUM", "severity": "CRITICAL/HIGH", "quote": "User quote" }
-      ],
-      "feature_requests": [
-        { "title": "Title", "description": "Desc", "priority": "HIGH", "sentiment": "demand" }
-      ]
-    }
-    
-    INSTRUCTIONS FOR DYNAMIC ARRAYS:
-    1. 'user_personas': Identify between 2 to 4 distinct personas based on the reviews. Do NOT force a fixed number.
-    2. 'mvp_roadmap': Create a roadmap with 2 to 5 phases. Use strategic names for phases, not just 'Phase 1'.
-  `;
+  ---------------------------------------------------------
+  THE REALITY CHECK (Strict Rules):
+  ---------------------------------------------------------
+  1. **THE INCUMBENT RULE:** If this is a massive network-effect app (WhatsApp, TikTok, Instagram, Discord) or a Utility Monopoly (Google Maps, Uber), the Score MUST be < 20. The advice is "Don't compete".
+  2. **THE PERFECTION RULE:** If Rating is > 4.6 AND Installs > 1M, the user is happy. There is no gap. Score < 30.
+  3. **THE GRAVEYARD RULE:** If the app hasn't been updated in 2+ years but has millions of installs, this is a massive opportunity. Score > 85.
+  4. **THE TRASH FIRE RULE:** If Rating is < 3.5 and Installs are high, users are desperate for an alternative. Score > 80.
 
+  Analyze the reviews deeply. Are they complaining about core features (Good opportunity) or just nitpicking minor things (Bad opportunity)?
+
+  OUTPUT JSON:
+  {
+    "report_title": "2-4 word brutally honest title (e.g. 'Money Pit', 'Suicide Mission', 'Saturated Hell', 'Free Real Estate', 'Gold Mine', 'Niche Paradise')",
+    
+    "summary": "Direct, no-fluff executive summary. If it's a bad idea, say 'Do not build this'. If it's good, say 'Build this now'.",
+    
+    "sentiment": { "positive": %, "neutral": %, "negative": % },
+    
+    "business_opportunity": {
+      "score": (0-100. Be harsh. 50 is NOT average, 50 is 'bad investment'. Only give 80+ for guaranteed wins),
+      "go_no_go": "GO" | "CAUTION" | "STOP", 
+      "risk_level": "LOW" | "MEDIUM" | "HIGH" | "EXTREME",
+      "verdict": "One sentence final decision.",
+      "monetization_analysis": "Critique their pricing. If the market won't pay, say it.",
+      "market_gap": "The exact weakness to exploit. If none exists, write 'None'."
+    },
+    
+    "swot": {
+      "strengths": ["What is the incumbent doing perfectly?"],
+      "weaknesses": ["Where are they bleeding users?"],
+      "opportunities": ["External trends or specific feature gaps."],
+      "threats": ["Network effects, ad budget, loyal fanboys."]
+    },
+    
+    "user_personas": [
+      { 
+        "title": "Archetype Name", 
+        "pain": "The specific suffering they feel", 
+        "goal": "What they are trying to achieve" 
+      }
+    ],
+    
+    "marketing_hooks": [
+      "3 aggressive ad headlines that attack the competitor's weaknesses directly."
+    ],
+    
+    "mvp_roadmap": [
+      { 
+        "phase": "Phase Name (e.g. 'The Wedge')", 
+        "features": ["Feature A", "Feature B"] 
+      } 
+      // NOTE: If risk is EXTREME, the roadmap should be: Phase 1: "Find a different idea".
+    ],
+    
+    "pain_points": [
+      { "title": "Title", "description": "Desc", "frequency": "HIGH/MEDIUM", "severity": "CRITICAL/HIGH", "quote": "Real quote if possible" }
+    ],
+    
+    "feature_requests": [
+      { "title": "Title", "description": "Desc", "priority": "HIGH", "sentiment": "demand" }
+    ]
+  }
+`;
   let aiResponse;
   try {
     const completion = await openai.chat.completions.create({

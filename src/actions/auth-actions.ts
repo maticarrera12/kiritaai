@@ -2,13 +2,26 @@
 import { headers } from "next/headers";
 
 import { auth, assignAdminRole } from "../lib/auth";
-import { signInSchema, signUpSchema } from "../lib/schemas";
+import { prisma } from "../lib/prisma";
+import { profileUpdateSchema, signInSchema, signUpSchema } from "../lib/schemas";
 
 export const signUp = async (email: string, password: string, name: string) => {
   const validated = signUpSchema.safeParse({ email, password, name });
   if (!validated.success) {
     return {
       error: { message: validated.error.issues[0].message },
+      user: null,
+    };
+  }
+
+  // Verificar si el username ya está en uso
+  const existingUser = await prisma.user.findUnique({
+    where: { name: validated.data.name },
+  });
+
+  if (existingUser) {
+    return {
+      error: { message: "This username is already taken. Please choose another one." },
       user: null,
     };
   }
@@ -88,4 +101,57 @@ export const signOut = async () => {
   });
 
   return result;
+};
+
+export const updateProfile = async (name: string) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    return {
+      error: { message: "Unauthorized" },
+      user: null,
+    };
+  }
+
+  // Validar el nombre (el email se valida pero no se actualiza aquí)
+  const validated = profileUpdateSchema.safeParse({ name, email: session.user.email });
+  if (!validated.success) {
+    return {
+      error: { message: validated.error.issues[0].message },
+      user: null,
+    };
+  }
+
+  // Verificar si el username ya está en uso por otro usuario
+  if (validated.data.name !== session.user.name) {
+    const existingUser = await prisma.user.findUnique({
+      where: { name: validated.data.name },
+    });
+
+    if (existingUser && existingUser.id !== session.user.id) {
+      return {
+        error: { message: "This username is already taken. Please choose another one." },
+        user: null,
+      };
+    }
+  }
+
+  // Actualizar el usuario usando better-auth
+  const result = await auth.api.updateUser({
+    body: {
+      name: validated.data.name,
+    },
+    headers: await headers(),
+  });
+
+  if (!result.user || ("error" in result && result.error)) {
+    return {
+      error: { message: result.error?.message || "Failed to update profile" },
+      user: null,
+    };
+  }
+
+  return { error: null, user: result.user };
 };
